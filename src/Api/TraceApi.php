@@ -16,6 +16,10 @@ class TraceApi extends BaseApi
 {
     /**
      * Get trace by ID
+     *
+     * @param string $traceId Trace ID
+     * @return Trace
+     * @throws MLflowException
      */
     public function getTrace(string $traceId): Trace
     {
@@ -23,7 +27,12 @@ class TraceApi extends BaseApi
             'trace_id' => $traceId,
         ]);
 
-        return Trace::fromArray($response['trace'] ?? $response);
+        $traceData = $response['trace'] ?? $response;
+        if (!is_array($traceData)) {
+            throw new MLflowException('Invalid trace data in response');
+        }
+
+        return Trace::fromArray($traceData);
     }
 
     /**
@@ -70,15 +79,18 @@ class TraceApi extends BaseApi
         $response = $this->post('mlflow/traces/search', $params);
 
         $traces = [];
-        if (isset($response['traces'])) {
+        if (isset($response['traces']) && is_array($response['traces'])) {
             foreach ($response['traces'] as $traceData) {
-                $traces[] = Trace::fromArray($traceData);
+                if (is_array($traceData)) {
+                    $traces[] = Trace::fromArray($traceData);
+                }
             }
         }
 
+        $nextPageToken = $response['next_page_token'] ?? null;
         return [
             'traces' => $traces,
-            'next_page_token' => $response['next_page_token'] ?? null,
+            'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
         ];
     }
 
@@ -86,6 +98,10 @@ class TraceApi extends BaseApi
      * Log a complete trace (end the trace)
      *
      * Note: In MLflow Python, this is called at the END of a trace
+     *
+     * @param Trace $trace Trace to log
+     * @return TraceInfo
+     * @throws MLflowException
      */
     public function logTrace(Trace $trace): TraceInfo
     {
@@ -93,13 +109,21 @@ class TraceApi extends BaseApi
             'trace' => $trace->toArray(),
         ]);
 
-        return TraceInfo::fromArray($response['trace_info'] ?? $response);
+        $traceInfoData = $response['trace_info'] ?? $response;
+        if (!is_array($traceInfoData)) {
+            throw new MLflowException('Invalid trace_info data in response');
+        }
+
+        return TraceInfo::fromArray($traceInfoData);
     }
 
     /**
      * Delete traces
      *
-     * @param string[] $traceIds
+     * @param array<string> $traceIds Trace IDs to delete
+     * @param string $experimentId Experiment ID
+     * @param int $maxTraces Maximum number of traces to delete
+     * @return int Number of traces deleted
      */
     public function deleteTraces(
         array $traceIds,
@@ -112,7 +136,8 @@ class TraceApi extends BaseApi
             'max_traces' => $maxTraces,
         ]);
 
-        return $response['traces_deleted'] ?? 0;
+        $deleted = $response['traces_deleted'] ?? 0;
+        return is_int($deleted) ? $deleted : 0;
     }
 
     /**

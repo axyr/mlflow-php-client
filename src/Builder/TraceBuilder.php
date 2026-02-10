@@ -48,6 +48,15 @@ class TraceBuilder
         return $this;
     }
 
+    /**
+     * Start a new span
+     *
+     * @param string $name Span name
+     * @param string $spanType Span type
+     * @param array<string, mixed>|null $inputs Span inputs
+     * @param array<string, mixed>|null $attributes Span attributes
+     * @return SpanBuilder
+     */
     public function startSpan(
         string $name,
         string $spanType = SpanType::UNKNOWN,

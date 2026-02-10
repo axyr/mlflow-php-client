@@ -36,14 +36,16 @@ class ArtifactApi extends BaseApi
         $files = [];
         if (isset($response['files']) && is_array($response['files'])) {
             foreach ($response['files'] as $fileData) {
-                if (is_array($fileData)) {
+                if (is_array($fileData) && isset($fileData['path'])) {
+                    /** @var array{path: string, is_dir?: bool, file_size?: int|null} $fileData */
                     $files[] = FileInfo::fromArray($fileData);
                 }
             }
         }
 
+        $rootUri = $response['root_uri'] ?? null;
         return [
-            'root_uri' => $response['root_uri'] ?? null,
+            'root_uri' => is_string($rootUri) ? $rootUri : null,
             'files' => $files,
         ];
     }
@@ -74,7 +76,7 @@ class ArtifactApi extends BaseApi
         $runInfo = $this->getRunInfo($runId);
         $artifactUri = $runInfo['artifact_uri'] ?? null;
 
-        if (!$artifactUri) {
+        if (!is_string($artifactUri) || $artifactUri === '') {
             throw new MLflowException("Could not get artifact URI for run $runId");
         }
 
@@ -323,7 +325,11 @@ class ArtifactApi extends BaseApi
     private function getRunInfo(string $runId): array
     {
         $response = $this->get('mlflow/runs/get', ['run_id' => $runId]);
-        $info = $response['run']['info'] ?? [];
+        $run = $response['run'] ?? null;
+        if (!is_array($run)) {
+            return [];
+        }
+        $info = $run['info'] ?? [];
         return is_array($info) ? $info : [];
     }
 }

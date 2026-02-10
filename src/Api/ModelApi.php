@@ -11,6 +11,11 @@ class ModelApi extends BaseApi
 {
     /**
      * Create a registered model
+     *
+     * @param string $name Model name
+     * @param string|null $description Model description
+     * @param array<string, string> $tags Model tags
+     * @return array<string, mixed> Response data
      */
     public function createRegisteredModel(string $name, ?string $description = null, array $tags = []): array
     {
@@ -29,6 +34,9 @@ class ModelApi extends BaseApi
 
     /**
      * Get a registered model
+     *
+     * @param string $name Model name
+     * @return array<string, mixed> Response data
      */
     public function getRegisteredModel(string $name): array
     {
@@ -59,6 +67,10 @@ class ModelApi extends BaseApi
 
     /**
      * List registered models
+     *
+     * @param int|null $maxResults Maximum number of results
+     * @param string|null $pageToken Pagination token
+     * @return array<string, mixed> Response data
      */
     public function listRegisteredModels(?int $maxResults = null, ?string $pageToken = null): array
     {
@@ -77,6 +89,11 @@ class ModelApi extends BaseApi
 
     /**
      * Create a model version
+     *
+     * @param string $name Model name
+     * @param string $source Model source path
+     * @param string|null $runId Run ID
+     * @return array<string, mixed> Response data
      */
     public function createModelVersion(string $name, string $source, ?string $runId = null): array
     {
@@ -94,6 +111,10 @@ class ModelApi extends BaseApi
 
     /**
      * Get a model version
+     *
+     * @param string $name Model name
+     * @param string $version Model version
+     * @return array<string, mixed> Response data
      */
     public function getModelVersion(string $name, string $version): array
     {
@@ -122,6 +143,9 @@ class ModelApi extends BaseApi
 
     /**
      * Format tags for API request
+     *
+     * @param array<string, string> $tags Associative array of tags
+     * @return array<int, array{key: string, value: string}> Formatted tags
      */
     private function formatTags(array $tags): array
     {

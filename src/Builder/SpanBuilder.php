@@ -30,6 +30,13 @@ class SpanBuilder
 
     private SpanStatusCode $status = SpanStatusCode::UNSET;
 
+    /**
+     * @param TraceBuilder $traceBuilder Parent trace builder
+     * @param string $name Span name
+     * @param string $spanType Span type
+     * @param array<string, mixed>|null $inputs Span inputs
+     * @param array<string, mixed>|null $attributes Span attributes
+     */
     public function __construct(
         TraceBuilder $traceBuilder,
         string $name,
@@ -76,6 +83,11 @@ class SpanBuilder
         return $this;
     }
 
+    /**
+     * @param string $name Event name
+     * @param array<string, mixed> $attributes Event attributes
+     * @return self
+     */
     public function withEvent(string $name, array $attributes = []): self
     {
         $this->events[] = new SpanEvent(

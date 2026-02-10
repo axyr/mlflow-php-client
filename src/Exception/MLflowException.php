@@ -11,6 +11,7 @@ use Exception;
  */
 class MLflowException extends Exception
 {
+    /** @var array<string, mixed>|null */
     protected ?array $context = null;
 
     /**
@@ -18,14 +19,14 @@ class MLflowException extends Exception
      *
      * @param string $message The exception message
      * @param int $code The exception code
-     * @param array|null $context Additional context information
-     * @param Exception|null $previous The previous exception
+     * @param array<string, mixed>|null $context Additional context information
+     * @param \Throwable|null $previous The previous exception
      */
     public function __construct(
         string $message = '',
         int $code = 0,
         ?array $context = null,
-        ?Exception $previous = null
+        ?\Throwable $previous = null
     ) {
         parent::__construct($message, $code, $previous);
         $this->context = $context;
@@ -33,6 +34,8 @@ class MLflowException extends Exception
 
     /**
      * Get the exception context
+     *
+     * @return array<string, mixed>|null
      */
     public function getContext(): ?array
     {
@@ -41,12 +44,17 @@ class MLflowException extends Exception
 
     /**
      * Create an exception from an HTTP error
+     *
+     * @param int $statusCode HTTP status code
+     * @param string $message Error message
+     * @param array<string, mixed>|null $body Response body
+     * @return self
      */
     public static function fromHttpError(int $statusCode, string $message, ?array $body = null): self
     {
         $errorMessage = sprintf('HTTP %d: %s', $statusCode, $message);
 
-        if ($body && isset($body['message'])) {
+        if ($body && isset($body['message']) && is_string($body['message'])) {
             $errorMessage = sprintf('HTTP %d: %s', $statusCode, $body['message']);
         }
 

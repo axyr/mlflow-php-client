@@ -49,6 +49,7 @@ class SpanType
     public static function all(): array
     {
         $reflection = new \ReflectionClass(self::class);
-        return array_values($reflection->getConstants());
+        $constants = $reflection->getConstants();
+        return array_values(array_filter($constants, 'is_string'));
     }
 }

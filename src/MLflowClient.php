@@ -36,7 +36,7 @@ class MLflowClient
      * MLflowClient constructor.
      *
      * @param string $trackingUri The MLflow tracking server URI
-     * @param array $config Optional Guzzle client configuration
+     * @param array<string, mixed> $config Optional Guzzle client configuration
      * @param LoggerInterface|null $logger PSR-3 compatible logger
      */
     public function __construct(

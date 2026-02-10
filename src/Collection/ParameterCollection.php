@@ -69,7 +69,8 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
 
     public function getValue(string $key): ?string
     {
-        return $this->params[$key]?->value;
+        $param = $this->get($key);
+        return $param?->value;
     }
 
     public function has(string $key): bool

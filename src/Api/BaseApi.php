@@ -93,8 +93,12 @@ abstract class BaseApi
             // Convert 'json' option to proper request format with body
             if (isset($options['json'])) {
                 $options['body'] = json_encode($options['json']);
+                $existingHeaders = $options['headers'] ?? [];
+                if (!is_array($existingHeaders)) {
+                    $existingHeaders = [];
+                }
                 $options['headers'] = array_merge(
-                    $options['headers'] ?? [],
+                    $existingHeaders,
                     ['Content-Type' => 'application/json']
                 );
                 unset($options['json']);
@@ -156,9 +160,10 @@ abstract class BaseApi
      * Handle request exceptions
      *
      * @param RequestException $e
+     * @return never
      * @throws MLflowException
      */
-    private function handleRequestException(RequestException $e): void
+    private function handleRequestException(RequestException $e): never
     {
         $response = $e->getResponse();
 
@@ -177,7 +182,10 @@ abstract class BaseApi
         try {
             $contents = $response->getBody()->getContents();
             if (!empty($contents)) {
-                $body = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+                $decoded = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
+                if (is_array($decoded)) {
+                    $body = $decoded;
+                }
             }
         } catch (\Exception $parseException) {
             $this->logger->warning('Failed to parse error response', [
