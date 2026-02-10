@@ -11,6 +11,8 @@ use MLflow\Api\RunApi;
 use MLflow\Api\ModelRegistryApi;
 use MLflow\Api\MetricApi;
 use MLflow\Api\ArtifactApi;
+use MLflow\Api\TraceApi;
+use MLflow\Builder\TraceBuilder;
 use MLflow\Exception\MLflowException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -28,6 +30,7 @@ class MLflowClient
     private ?ModelRegistryApi $modelRegistryApi = null;
     private ?MetricApi $metricApi = null;
     private ?ArtifactApi $artifactApi = null;
+    private ?TraceApi $traceApi = null;
 
     /**
      * MLflowClient constructor.
@@ -141,6 +144,7 @@ class MLflowClient
         $this->modelRegistryApi = null;
         $this->metricApi = null;
         $this->artifactApi = null;
+        $this->traceApi = null;
     }
 
     /**
@@ -149,5 +153,24 @@ class MLflowClient
     public function setLogger(LoggerInterface $logger): void
     {
         $this->logger = $logger;
+    }
+
+    /**
+     * Get the Trace API instance
+     */
+    public function traces(): TraceApi
+    {
+        if ($this->traceApi === null) {
+            $this->traceApi = new TraceApi($this->httpClient, $this->logger);
+        }
+        return $this->traceApi;
+    }
+
+    /**
+     * Create a trace builder for fluent API
+     */
+    public function createTraceBuilder(string $experimentId, string $name): TraceBuilder
+    {
+        return new TraceBuilder($experimentId, $name);
     }
 }
