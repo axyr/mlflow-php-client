@@ -12,6 +12,9 @@ use MLflow\Api\ModelRegistryApi;
 use MLflow\Api\MetricApi;
 use MLflow\Api\ArtifactApi;
 use MLflow\Api\TraceApi;
+use MLflow\Api\PromptApi;
+use MLflow\Api\WebhookApi;
+use MLflow\Api\DatasetApi;
 use MLflow\Builder\TraceBuilder;
 use MLflow\Exception\MLflowException;
 use Psr\Log\LoggerInterface;
@@ -31,6 +34,9 @@ class MLflowClient
     private ?MetricApi $metricApi = null;
     private ?ArtifactApi $artifactApi = null;
     private ?TraceApi $traceApi = null;
+    private ?PromptApi $promptApi = null;
+    private ?WebhookApi $webhookApi = null;
+    private ?DatasetApi $datasetApi = null;
 
     /**
      * MLflowClient constructor.
@@ -145,6 +151,9 @@ class MLflowClient
         $this->metricApi = null;
         $this->artifactApi = null;
         $this->traceApi = null;
+        $this->promptApi = null;
+        $this->webhookApi = null;
+        $this->datasetApi = null;
     }
 
     /**
@@ -172,5 +181,38 @@ class MLflowClient
     public function createTraceBuilder(string $experimentId, string $name): TraceBuilder
     {
         return new TraceBuilder($experimentId, $name);
+    }
+
+    /**
+     * Get the Prompt API instance
+     */
+    public function prompts(): PromptApi
+    {
+        if ($this->promptApi === null) {
+            $this->promptApi = new PromptApi($this->httpClient, $this->logger);
+        }
+        return $this->promptApi;
+    }
+
+    /**
+     * Get the Webhook API instance
+     */
+    public function webhooks(): WebhookApi
+    {
+        if ($this->webhookApi === null) {
+            $this->webhookApi = new WebhookApi($this->httpClient, $this->logger);
+        }
+        return $this->webhookApi;
+    }
+
+    /**
+     * Get the Dataset API instance
+     */
+    public function datasets(): DatasetApi
+    {
+        if ($this->datasetApi === null) {
+            $this->datasetApi = new DatasetApi($this->httpClient, $this->logger);
+        }
+        return $this->datasetApi;
     }
 }
