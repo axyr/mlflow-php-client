@@ -1,0 +1,97 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MLflow\Model;
+
+/**
+ * Represents an MLflow metric (immutable)
+ */
+readonly class Metric implements \JsonSerializable
+{
+    public function __construct(
+        public string $key,
+        public float $value,
+        public int $timestamp,
+        public int $step = 0,
+    ) {
+    }
+
+    /**
+     * Create Metric from an array
+     *
+     * @param array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $data
+     */
+    public static function fromArray(array $data): self
+    {
+        return new self(
+            key: $data['key'],
+            value: (float) $data['value'],
+            timestamp: (int) $data['timestamp'],
+            step: (int) ($data['step'] ?? 0),
+        );
+    }
+
+    /**
+     * Create a metric with the current timestamp
+     */
+    public static function now(string $key, float $value, int $step = 0): self
+    {
+        return new self(
+            key: $key,
+            value: $value,
+            timestamp: (int) (microtime(true) * 1000),
+            step: $step,
+        );
+    }
+
+    /**
+     * Convert to array
+     *
+     * @return array{key: string, value: float, timestamp: int, step: int}
+     */
+    public function toArray(): array
+    {
+        return [
+            'key' => $this->key,
+            'value' => $this->value,
+            'timestamp' => $this->timestamp,
+            'step' => $this->step,
+        ];
+    }
+
+    /**
+     * JSON serialization
+     *
+     * @return array{key: string, value: float, timestamp: int, step: int}
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * Get timestamp as DateTime
+     */
+    public function getDateTime(): \DateTimeImmutable
+    {
+        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $this->timestamp / 1000))
+            ?: new \DateTimeImmutable();
+    }
+
+    /**
+     * Check if this metric is newer than another
+     */
+    public function isNewerThan(self $other): bool
+    {
+        return $this->timestamp > $other->timestamp;
+    }
+
+    /**
+     * Check if this metric is at a later step than another
+     */
+    public function isLaterStepThan(self $other): bool
+    {
+        return $this->step > $other->step;
+    }
+}
