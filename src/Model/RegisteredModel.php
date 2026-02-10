@@ -35,9 +35,6 @@ class RegisteredModel
         $this->aliases = $aliases;
     }
 
-    /**
-     * Create RegisteredModel from an array
-     */
     public static function fromArray(array $data): self
     {
         $latestVersions = null;
@@ -75,9 +72,6 @@ class RegisteredModel
         );
     }
 
-    /**
-     * Convert to array
-     */
     public function toArray(): array
     {
         $data = [

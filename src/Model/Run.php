@@ -23,9 +23,6 @@ class Run
         $this->inputs = $inputs;
     }
 
-    /**
-     * Create a Run from an array
-     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -35,9 +32,6 @@ class Run
         );
     }
 
-    /**
-     * Convert the run to an array
-     */
     public function toArray(): array
     {
         $data = [

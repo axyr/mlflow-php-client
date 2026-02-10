@@ -18,8 +18,6 @@ readonly class Metric implements \JsonSerializable
     }
 
     /**
-     * Create Metric from an array
-     *
      * @param array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $data
      */
     public static function fromArray(array $data): self
@@ -46,8 +44,6 @@ readonly class Metric implements \JsonSerializable
     }
 
     /**
-     * Convert to array
-     *
      * @return array{key: string, value: float, timestamp: int, step: int}
      */
     public function toArray(): array
@@ -61,8 +57,6 @@ readonly class Metric implements \JsonSerializable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array{key: string, value: float, timestamp: int, step: int}
      */
     public function jsonSerialize(): array
@@ -70,26 +64,17 @@ readonly class Metric implements \JsonSerializable
         return $this->toArray();
     }
 
-    /**
-     * Get timestamp as DateTime
-     */
     public function getDateTime(): \DateTimeImmutable
     {
         return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $this->timestamp / 1000))
             ?: new \DateTimeImmutable();
     }
 
-    /**
-     * Check if this metric is newer than another
-     */
     public function isNewerThan(self $other): bool
     {
         return $this->timestamp > $other->timestamp;
     }
 
-    /**
-     * Check if this metric is at a later step than another
-     */
     public function isLaterStepThan(self $other): bool
     {
         return $this->step > $other->step;

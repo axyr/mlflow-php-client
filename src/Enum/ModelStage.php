@@ -46,9 +46,6 @@ enum ModelStage: string
         };
     }
 
-    /**
-     * Get the display name for the stage
-     */
     public function getDisplayName(): string
     {
         return match ($this) {

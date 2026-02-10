@@ -16,8 +16,6 @@ readonly class ModelAlias implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Create ModelAlias from an array
-     *
      * @param array{alias: string, version: string} $data
      */
     public static function fromArray(array $data): self
@@ -29,8 +27,6 @@ readonly class ModelAlias implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Convert to array
-     *
      * @return array{alias: string, version: string}
      */
     public function toArray(): array
@@ -42,8 +38,6 @@ readonly class ModelAlias implements \JsonSerializable, \Stringable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array{alias: string, version: string}
      */
     public function jsonSerialize(): array
@@ -51,17 +45,11 @@ readonly class ModelAlias implements \JsonSerializable, \Stringable
         return $this->toArray();
     }
 
-    /**
-     * String representation
-     */
     public function __toString(): string
     {
         return "{$this->alias}@v{$this->version}";
     }
 
-    /**
-     * Check equality with another ModelAlias
-     */
     public function equals(self $other): bool
     {
         return $this->alias === $other->alias && $this->version === $other->version;

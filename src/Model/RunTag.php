@@ -16,8 +16,6 @@ readonly class RunTag implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Create RunTag from an array
-     *
      * @param array{key: string, value: string} $data
      */
     public static function fromArray(array $data): self
@@ -29,8 +27,6 @@ readonly class RunTag implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Convert to array
-     *
      * @return array{key: string, value: string}
      */
     public function toArray(): array
@@ -42,8 +38,6 @@ readonly class RunTag implements \JsonSerializable, \Stringable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array{key: string, value: string}
      */
     public function jsonSerialize(): array
@@ -51,25 +45,16 @@ readonly class RunTag implements \JsonSerializable, \Stringable
         return $this->toArray();
     }
 
-    /**
-     * String representation
-     */
     public function __toString(): string
     {
         return "{$this->key}:{$this->value}";
     }
 
-    /**
-     * Check equality with another RunTag
-     */
     public function equals(self $other): bool
     {
         return $this->key === $other->key && $this->value === $other->value;
     }
 
-    /**
-     * Check if this is a system tag (starts with mlflow.)
-     */
     public function isSystemTag(): bool
     {
         return str_starts_with($this->key, 'mlflow.');

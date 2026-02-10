@@ -20,9 +20,6 @@ class RunData
         $this->tags = $tags;
     }
 
-    /**
-     * Create RunData from an array
-     */
     public static function fromArray(array $data): self
     {
         $metrics = [];
@@ -49,9 +46,6 @@ class RunData
         return new self($metrics, $params, $tags);
     }
 
-    /**
-     * Convert to array
-     */
     public function toArray(): array
     {
         return [
@@ -88,9 +82,6 @@ class RunData
         return $this->tags;
     }
 
-    /**
-     * Get metric by key
-     */
     public function getMetric(string $key): ?Metric
     {
         foreach ($this->metrics as $metric) {
@@ -101,9 +92,6 @@ class RunData
         return null;
     }
 
-    /**
-     * Get param by key
-     */
     public function getParam(string $key): ?Param
     {
         foreach ($this->params as $param) {
@@ -114,9 +102,6 @@ class RunData
         return null;
     }
 
-    /**
-     * Get tag by key
-     */
     public function getTag(string $key): ?RunTag
     {
         foreach ($this->tags as $tag) {

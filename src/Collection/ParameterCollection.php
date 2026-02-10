@@ -57,49 +57,32 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
         return $collection;
     }
 
-    /**
-     * Add a parameter to the collection
-     */
     public function add(Param $param): void
     {
         $this->params[$param->key] = $param;
     }
 
-    /**
-     * Get a parameter by key
-     */
     public function get(string $key): ?Param
     {
         return $this->params[$key] ?? null;
     }
 
-    /**
-     * Get parameter value by key
-     */
     public function getValue(string $key): ?string
     {
         return $this->params[$key]?->value;
     }
 
-    /**
-     * Check if a parameter exists
-     */
     public function has(string $key): bool
     {
         return isset($this->params[$key]);
     }
 
-    /**
-     * Remove a parameter
-     */
     public function remove(string $key): void
     {
         unset($this->params[$key]);
     }
 
     /**
-     * Get all parameters
-     *
      * @return array<string, Param>
      */
     public function all(): array
@@ -123,8 +106,6 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     }
 
     /**
-     * Convert to array of param arrays
-     *
      * @return array<array{key: string, value: string}>
      */
     public function toArray(): array
@@ -186,8 +167,6 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     }
 
     /**
-     * Get parameter keys
-     *
      * @return array<string>
      */
     public function keys(): array
@@ -196,8 +175,6 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     }
 
     /**
-     * Get parameter values
-     *
      * @return array<string>
      */
     public function values(): array
@@ -205,25 +182,17 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
         return array_map(fn(Param $p) => $p->value, $this->params);
     }
 
-    /**
-     * Count parameters
-     */
     public function count(): int
     {
         return count($this->params);
     }
 
-    /**
-     * Check if collection is empty
-     */
     public function isEmpty(): bool
     {
         return empty($this->params);
     }
 
     /**
-     * Get iterator
-     *
      * @return \ArrayIterator<string, Param>
      */
     public function getIterator(): \ArrayIterator
@@ -232,8 +201,6 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     }
 
     /**
-     * JSON serialization
-     *
      * @return array<array{key: string, value: string}>
      */
     public function jsonSerialize(): array
@@ -271,9 +238,6 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
         $this->remove((string) $offset);
     }
 
-    /**
-     * Check if two collections have the same parameters
-     */
     public function equals(self $other): bool
     {
         if ($this->count() !== $other->count()) {

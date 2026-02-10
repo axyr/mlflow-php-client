@@ -41,17 +41,12 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
         return $collection;
     }
 
-    /**
-     * Add a metric to the collection
-     */
     public function add(Metric $metric): void
     {
         $this->metrics[] = $metric;
     }
 
     /**
-     * Get all metrics
-     *
      * @return array<Metric>
      */
     public function all(): array
@@ -60,8 +55,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     }
 
     /**
-     * Get metrics for a specific key
-     *
      * @return self
      */
     public function getByKey(string $key): self
@@ -70,8 +63,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     }
 
     /**
-     * Get metrics for a specific step
-     *
      * @return self
      */
     public function getByStep(int $step): self
@@ -197,9 +188,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
         ];
     }
 
-    /**
-     * Get average value for a specific key
-     */
     public function getAverage(string $key): ?float
     {
         $metrics = $this->getByKey($key)->all();
@@ -213,8 +201,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     }
 
     /**
-     * Convert to array
-     *
      * @return array<array{key: string, value: float, timestamp: int, step: int}>
      */
     public function toArray(): array
@@ -222,41 +208,27 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
         return array_map(fn(Metric $m) => $m->toArray(), $this->metrics);
     }
 
-    /**
-     * Count metrics
-     */
     public function count(): int
     {
         return count($this->metrics);
     }
 
-    /**
-     * Check if collection is empty
-     */
     public function isEmpty(): bool
     {
         return empty($this->metrics);
     }
 
-    /**
-     * Get first metric
-     */
     public function first(): ?Metric
     {
         return $this->metrics[0] ?? null;
     }
 
-    /**
-     * Get last metric
-     */
     public function last(): ?Metric
     {
         return empty($this->metrics) ? null : $this->metrics[array_key_last($this->metrics)];
     }
 
     /**
-     * Get iterator
-     *
      * @return \ArrayIterator<int, Metric>
      */
     public function getIterator(): \ArrayIterator
@@ -265,8 +237,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     }
 
     /**
-     * JSON serialization
-     *
      * @return array<array{key: string, value: float, timestamp: int, step: int}>
      */
     public function jsonSerialize(): array

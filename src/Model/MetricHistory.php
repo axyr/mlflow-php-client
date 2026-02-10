@@ -23,9 +23,6 @@ class MetricHistory
         $this->history = $history;
     }
 
-    /**
-     * Create MetricHistory from an array
-     */
     public static function fromArray(array $data): self
     {
         $history = [];
@@ -39,9 +36,6 @@ class MetricHistory
         );
     }
 
-    /**
-     * Convert to array
-     */
     public function toArray(): array
     {
         return [
@@ -64,9 +58,6 @@ class MetricHistory
         return $this->history;
     }
 
-    /**
-     * Get the latest metric value
-     */
     public function getLatest(): ?Metric
     {
         if (empty($this->history)) {
@@ -80,9 +71,6 @@ class MetricHistory
         return $sorted[0];
     }
 
-    /**
-     * Get metric at specific step
-     */
     public function getAtStep(int $step): ?Metric
     {
         foreach ($this->history as $metric) {

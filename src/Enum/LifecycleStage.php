@@ -12,25 +12,16 @@ enum LifecycleStage: string
     case ACTIVE = 'active';
     case DELETED = 'deleted';
 
-    /**
-     * Check if the entity is active
-     */
     public function isActive(): bool
     {
         return $this === self::ACTIVE;
     }
 
-    /**
-     * Check if the entity is deleted
-     */
     public function isDeleted(): bool
     {
         return $this === self::DELETED;
     }
 
-    /**
-     * Get the display name for the lifecycle stage
-     */
     public function getDisplayName(): string
     {
         return match ($this) {
@@ -39,17 +30,11 @@ enum LifecycleStage: string
         };
     }
 
-    /**
-     * Get the default lifecycle stage
-     */
     public static function default(): self
     {
         return self::ACTIVE;
     }
 
-    /**
-     * Convert to ViewType enum
-     */
     public function toViewType(): ViewType
     {
         return match ($this) {

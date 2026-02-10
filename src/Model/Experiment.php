@@ -37,9 +37,6 @@ class Experiment
         $this->lastUpdateTime = $lastUpdateTime;
     }
 
-    /**
-     * Create an Experiment from an array
-     */
     public static function fromArray(array $data): self
     {
         $lifecycleStage = null;
@@ -58,9 +55,6 @@ class Experiment
         );
     }
 
-    /**
-     * Convert the experiment to an array
-     */
     public function toArray(): array
     {
         $data = [

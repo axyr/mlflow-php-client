@@ -16,8 +16,6 @@ readonly class Param implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Create Param from an array
-     *
      * @param array{key: string, value: string} $data
      */
     public static function fromArray(array $data): self
@@ -29,8 +27,6 @@ readonly class Param implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Convert to array
-     *
      * @return array{key: string, value: string}
      */
     public function toArray(): array
@@ -42,8 +38,6 @@ readonly class Param implements \JsonSerializable, \Stringable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array{key: string, value: string}
      */
     public function jsonSerialize(): array
@@ -51,17 +45,11 @@ readonly class Param implements \JsonSerializable, \Stringable
         return $this->toArray();
     }
 
-    /**
-     * String representation
-     */
     public function __toString(): string
     {
         return "{$this->key}={$this->value}";
     }
 
-    /**
-     * Check equality with another Param
-     */
     public function equals(self $other): bool
     {
         return $this->key === $other->key && $this->value === $other->value;

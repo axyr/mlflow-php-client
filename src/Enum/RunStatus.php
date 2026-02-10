@@ -26,9 +26,6 @@ enum RunStatus: string
         };
     }
 
-    /**
-     * Check if the run is active
-     */
     public function isActive(): bool
     {
         return match ($this) {
@@ -37,9 +34,6 @@ enum RunStatus: string
         };
     }
 
-    /**
-     * Get the display name for the status
-     */
     public function getDisplayName(): string
     {
         return match ($this) {
@@ -51,9 +45,6 @@ enum RunStatus: string
         };
     }
 
-    /**
-     * Create from a string value, with validation
-     */
     public static function fromString(string $value): self
     {
         return self::from($value);

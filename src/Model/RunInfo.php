@@ -44,9 +44,6 @@ class RunInfo
         $this->lifecycleStage = $lifecycleStage ?? LifecycleStage::ACTIVE;
     }
 
-    /**
-     * Create RunInfo from an array
-     */
     public static function fromArray(array $data): self
     {
         $status = RunStatus::from($data['status']);
@@ -69,9 +66,6 @@ class RunInfo
         );
     }
 
-    /**
-     * Convert to array
-     */
     public function toArray(): array
     {
         $data = [

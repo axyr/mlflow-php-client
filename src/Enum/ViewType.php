@@ -13,9 +13,6 @@ enum ViewType: string
     case DELETED_ONLY = 'DELETED_ONLY';
     case ALL = 'ALL';
 
-    /**
-     * Get the description of the view type
-     */
     public function getDescription(): string
     {
         return match ($this) {
@@ -25,9 +22,6 @@ enum ViewType: string
         };
     }
 
-    /**
-     * Check if this view includes active entities
-     */
     public function includesActive(): bool
     {
         return match ($this) {
@@ -36,9 +30,6 @@ enum ViewType: string
         };
     }
 
-    /**
-     * Check if this view includes deleted entities
-     */
     public function includesDeleted(): bool
     {
         return match ($this) {
@@ -47,9 +38,6 @@ enum ViewType: string
         };
     }
 
-    /**
-     * Get the default view type
-     */
     public static function default(): self
     {
         return self::ACTIVE_ONLY;

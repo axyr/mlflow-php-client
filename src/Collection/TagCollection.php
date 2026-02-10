@@ -67,8 +67,6 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * Add a tag to the collection
-     *
      * @param T $tag
      */
     public function add(ExperimentTag|RunTag|ModelTag $tag): void
@@ -77,8 +75,6 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * Get a tag by key
-     *
      * @return T|null
      */
     public function get(string $key): ExperimentTag|RunTag|ModelTag|null
@@ -86,25 +82,17 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
         return $this->tags[$key] ?? null;
     }
 
-    /**
-     * Check if a tag exists
-     */
     public function has(string $key): bool
     {
         return isset($this->tags[$key]);
     }
 
-    /**
-     * Remove a tag
-     */
     public function remove(string $key): void
     {
         unset($this->tags[$key]);
     }
 
     /**
-     * Get all tags
-     *
      * @return array<string, T>
      */
     public function all(): array
@@ -128,8 +116,6 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * Convert to array of tag arrays
-     *
      * @return array<array{key: string, value: string}>
      */
     public function toArray(): array
@@ -191,25 +177,17 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
         return $merged;
     }
 
-    /**
-     * Count tags
-     */
     public function count(): int
     {
         return count($this->tags);
     }
 
-    /**
-     * Check if collection is empty
-     */
     public function isEmpty(): bool
     {
         return empty($this->tags);
     }
 
     /**
-     * Get iterator
-     *
      * @return \ArrayIterator<string, T>
      */
     public function getIterator(): \ArrayIterator
@@ -218,8 +196,6 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array<array{key: string, value: string}>
      */
     public function jsonSerialize(): array

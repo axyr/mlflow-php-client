@@ -53,9 +53,6 @@ class ModelVersion
         $this->aliases = $aliases;
     }
 
-    /**
-     * Create ModelVersion from an array
-     */
     public static function fromArray(array $data): self
     {
         $tags = null;
@@ -83,9 +80,6 @@ class ModelVersion
         );
     }
 
-    /**
-     * Convert to array
-     */
     public function toArray(): array
     {
         $data = [

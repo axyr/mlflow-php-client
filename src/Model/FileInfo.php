@@ -17,8 +17,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Create FileInfo from an array
-     *
      * @param array{path: string, is_dir?: bool, file_size?: int|null} $data
      */
     public static function fromArray(array $data): self
@@ -31,8 +29,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
     }
 
     /**
-     * Convert to array
-     *
      * @return array{path: string, is_dir: bool, file_size?: int}
      */
     public function toArray(): array
@@ -50,8 +46,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
     }
 
     /**
-     * JSON serialization
-     *
      * @return array{path: string, is_dir: bool, file_size?: int}
      */
     public function jsonSerialize(): array
@@ -59,25 +53,16 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
         return $this->toArray();
     }
 
-    /**
-     * Get the file/directory name
-     */
     public function getName(): string
     {
         return basename($this->path);
     }
 
-    /**
-     * Get the parent directory path
-     */
     public function getParentPath(): string
     {
         return dirname($this->path);
     }
 
-    /**
-     * Get file size in human-readable format
-     */
     public function getHumanReadableSize(): ?string
     {
         if ($this->fileSize === null) {
@@ -96,9 +81,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
         return sprintf('%.2f %s', $bytes, $units[$unitIndex]);
     }
 
-    /**
-     * String representation
-     */
     public function __toString(): string
     {
         $type = $this->isDir ? 'dir' : 'file';
@@ -107,9 +89,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
         return "{$this->path} ({$type}, {$size})";
     }
 
-    /**
-     * Check if this is a file (not a directory)
-     */
     public function isFile(): bool
     {
         return !$this->isDir;
