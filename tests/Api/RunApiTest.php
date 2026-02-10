@@ -10,6 +10,7 @@ use MLflow\Enum\ViewType;
 use MLflow\Model\Run;
 use MLflow\Exception\MLflowException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -17,6 +18,7 @@ use Psr\Http\Message\ResponseInterface;
 class RunApiTest extends TestCase
 {
     private RunApi $api;
+    /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
     protected function setUp(): void
@@ -51,8 +53,9 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/create',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['experiment_id'] === 'exp123'
                         && isset($json['start_time'])
                         && isset($json['tags']);
@@ -99,7 +102,7 @@ class RunApiTest extends TestCase
             ->with(
                 'GET',
                 'mlflow/runs/get',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     return $options['query']['run_id'] === 'run123';
                 })
             )
@@ -147,12 +150,13 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/search',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['experiment_ids'] === ['exp1']
-                        && $json['filter'] === 'metrics.accuracy > 0.9'
-                        && $json['run_view_type'] === 'ACTIVE_ONLY'
-                        && $json['max_results'] === 100;
+                        && isset($json['filter']) && $json['filter'] === 'metrics.accuracy > 0.9'
+                        && isset($json['run_view_type']) && $json['run_view_type'] === 'ACTIVE_ONLY'
+                        && isset($json['max_results']) && $json['max_results'] === 100;
                 })
             )
             ->willReturn($this->createJsonResponse($expectedResponse));
@@ -178,12 +182,13 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/update',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['run_id'] === 'run123'
-                        && $json['status'] === 'FINISHED'
-                        && $json['end_time'] === 1234567900
-                        && $json['run_name'] === 'updated-name';
+                        && isset($json['status']) && $json['status'] === 'FINISHED'
+                        && isset($json['end_time']) && $json['end_time'] === 1234567900
+                        && isset($json['run_name']) && $json['run_name'] === 'updated-name';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -200,13 +205,14 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/log-metric',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['run_id'] === 'run123'
-                        && $json['key'] === 'accuracy'
-                        && $json['value'] === 0.95
+                        && isset($json['key']) && $json['key'] === 'accuracy'
+                        && isset($json['value']) && $json['value'] === 0.95
                         && isset($json['timestamp'])
-                        && $json['step'] === 10;
+                        && isset($json['step']) && $json['step'] === 10;
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -223,11 +229,12 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/log-parameter',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['run_id'] === 'run123'
-                        && $json['key'] === 'learning_rate'
-                        && $json['value'] === '0.01';
+                        && isset($json['key']) && $json['key'] === 'learning_rate'
+                        && isset($json['value']) && $json['value'] === '0.01';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -259,12 +266,13 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/log-batch',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['run_id'] === 'run123'
-                        && count($json['metrics']) === 2
-                        && count($json['params']) === 2
-                        && count($json['tags']) === 2;
+                        && is_array($json['metrics']) && count($json['metrics']) === 2
+                        && is_array($json['params']) && count($json['params']) === 2
+                        && is_array($json['tags']) && count($json['tags']) === 2;
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -282,11 +290,13 @@ class RunApiTest extends TestCase
             ->willReturnCallback(function ($method, $endpoint, $options) {
                 if ($endpoint === 'mlflow/runs/set-tag') {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     $this->assertEquals('run123', $json['run_id']);
                     $this->assertEquals('tag_key', $json['key']);
                     $this->assertEquals('tag_value', $json['value']);
                 } elseif ($endpoint === 'mlflow/runs/delete-tag') {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     $this->assertEquals('run123', $json['run_id']);
                     $this->assertEquals('tag_key', $json['key']);
                 }
@@ -306,6 +316,7 @@ class RunApiTest extends TestCase
             ->method('request')
             ->willReturnCallback(function ($method, $endpoint, $options) {
                 $json = json_decode($options['body'], true);
+                assert(is_array($json));
                 $this->assertEquals('run123', $json['run_id']);
 
                 if ($endpoint === 'mlflow/runs/delete') {
@@ -337,11 +348,13 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/log-model',
-                $this->callback(function ($options) use ($flavors) {
+                $this->callback(function (array $options) use ($flavors): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['run_id'] === 'run123'
-                        && $json['artifact_path'] === 'model'
-                        && $json['flavors'] === $flavors;
+                    return is_array($json)
+                        && isset($json['run_id'], $json['artifact_path'], $json['flavors'])
+                        && isset($json['run_id']) && $json['run_id'] === 'run123'
+                        && isset($json['artifact_path']) && $json['artifact_path'] === 'model'
+                        && isset($json['flavors']) && $json['flavors'] === $flavors;
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -354,9 +367,11 @@ class RunApiTest extends TestCase
     {
         $datasets = [
             [
-                'name' => 'training_data',
-                'digest' => 'abc123',
-                'source_type' => 'local',
+                'dataset' => [
+                    'name' => 'training_data',
+                    'digest' => 'abc123',
+                    'source_type' => 'local',
+                ],
             ],
         ];
 
@@ -366,9 +381,11 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/log-inputs',
-                $this->callback(function ($options) use ($datasets) {
+                $this->callback(function (array $options) use ($datasets): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['run_id'] === 'run123'
+                    assert(is_array($json));
+                    return isset($json['run_id'], $json['datasets'])
+                        && $json['run_id'] === 'run123'
                         && $json['datasets'] === $datasets;
                 })
             )
@@ -386,10 +403,11 @@ class RunApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/runs/update',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['run_id'] === 'run123'
-                        && $json['status'] === RunStatus::FINISHED->value
+                        && isset($json['status']) && $json['status'] === RunStatus::FINISHED->value
                         && isset($json['end_time']);
                 })
             )
@@ -399,12 +417,19 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function createJsonResponse(array $data, int $statusCode = 200): ResponseInterface
     {
+        $json = json_encode($data);
+        if ($json === false) {
+            throw new \RuntimeException('Failed to encode JSON');
+        }
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],
-            json_encode($data)
+            $json
         );
     }
 }

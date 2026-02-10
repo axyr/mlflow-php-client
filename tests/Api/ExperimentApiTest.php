@@ -8,6 +8,7 @@ use MLflow\Api\ExperimentApi;
 use MLflow\Model\Experiment;
 use MLflow\Exception\MLflowException;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\ResponseInterface;
@@ -15,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class ExperimentApiTest extends TestCase
 {
     private ExperimentApi $api;
+    /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
     protected function setUp(): void
@@ -35,9 +37,11 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/create',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['name'] === 'test-experiment'
+                    return is_array($json)
+                        && isset($json['name'])
+                        && isset($json['name']) && $json['name'] === 'test-experiment'
                         && isset($json['artifact_location'])
                         && isset($json['tags']);
                 })
@@ -72,7 +76,7 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'GET',
                 'mlflow/experiments/get',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     return $options['query']['experiment_id'] === '123';
                 })
             )
@@ -102,7 +106,7 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'GET',
                 'mlflow/experiments/get-by-name',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     return $options['query']['experiment_name'] === 'test-experiment';
                 })
             )
@@ -136,11 +140,12 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/search',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['filter'] === "attribute.name = 'test'"
-                        && $json['max_results'] === 10
-                        && $json['view_type'] === 'ACTIVE_ONLY';
+                        && isset($json['max_results']) && $json['max_results'] === 10
+                        && isset($json['view_type']) && $json['view_type'] === 'ACTIVE_ONLY';
                 })
             )
             ->willReturn($this->createJsonResponse($expectedResponse));
@@ -166,10 +171,9 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/update',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['experiment_id'] === '123'
-                        && $json['new_name'] === 'new-name';
+                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['new_name']) && $json['new_name'] === 'new-name';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -186,8 +190,9 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/delete',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['experiment_id'] === '123';
                 })
             )
@@ -205,8 +210,9 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/restore',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+                    assert(is_array($json));
                     return $json['experiment_id'] === '123';
                 })
             )
@@ -224,11 +230,10 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/set-experiment-tag',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['experiment_id'] === '123'
-                        && $json['key'] === 'tag_key'
-                        && $json['value'] === 'tag_value';
+                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['key']) && $json['key'] === 'tag_key'
+                        && isset($json['value']) && $json['value'] === 'tag_value';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -245,10 +250,9 @@ class ExperimentApiTest extends TestCase
             ->with(
                 'POST',
                 'mlflow/experiments/delete-experiment-tag',
-                $this->callback(function ($options) {
+                $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return $json['experiment_id'] === '123'
-                        && $json['key'] === 'tag_key';
+                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['key']) && $json['key'] === 'tag_key';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -270,12 +274,19 @@ class ExperimentApiTest extends TestCase
         $this->api->getById('123');
     }
 
+    /**
+     * @param array<string, mixed> $data
+     */
     private function createJsonResponse(array $data, int $statusCode = 200): ResponseInterface
     {
+        $json = json_encode($data);
+        if ($json === false) {
+            throw new \RuntimeException('Failed to encode JSON');
+        }
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],
-            json_encode($data)
+            $json
         );
     }
 }
