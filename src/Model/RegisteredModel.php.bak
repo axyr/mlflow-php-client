@@ -35,10 +35,6 @@ class RegisteredModel
         $this->aliases = $aliases;
     }
 
-    /**
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
         $latestVersions = null;
@@ -76,9 +72,6 @@ class RegisteredModel
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(): array
     {
         $data = [

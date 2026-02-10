@@ -98,10 +98,6 @@ class TraceInfo
         return $this->traceId;
     }
 
-    /**
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
         // Parse trace location
@@ -129,9 +125,6 @@ class TraceInfo
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(): array
     {
         $data = [

@@ -134,10 +134,6 @@ class Span
         return $durationNs / 1_000_000;
     }
 
-    /**
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
         $events = [];

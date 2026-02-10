@@ -15,10 +15,20 @@ class Experiment
     private string $name;
     private ?string $artifactLocation;
     private ?LifecycleStage $lifecycleStage;
+    /** @var array<string, mixed>|null */
     private ?array $tags;
     private ?int $creationTime;
     private ?int $lastUpdateTime;
 
+    /**
+     * @param string $experimentId
+     * @param string $name
+     * @param string|null $artifactLocation
+     * @param LifecycleStage|null $lifecycleStage
+     * @param array<string, mixed>|null $tags
+     * @param int|null $creationTime
+     * @param int|null $lastUpdateTime
+     */
     public function __construct(
         string $experimentId,
         string $name,
@@ -37,6 +47,10 @@ class Experiment
         $this->lastUpdateTime = $lastUpdateTime;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return self
+     */
     public static function fromArray(array $data): self
     {
         $lifecycleStage = null;
@@ -55,6 +69,9 @@ class Experiment
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         $data = [
@@ -106,6 +123,9 @@ class Experiment
         return $this->lifecycleStage;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
     public function getTags(): ?array
     {
         return $this->tags;

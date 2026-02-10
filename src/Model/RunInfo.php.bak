@@ -44,10 +44,6 @@ class RunInfo
         $this->lifecycleStage = $lifecycleStage ?? LifecycleStage::ACTIVE;
     }
 
-    /**
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
         $status = RunStatus::from($data['status']);
@@ -70,9 +66,6 @@ class RunInfo
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(): array
     {
         $data = [

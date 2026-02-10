@@ -22,10 +22,6 @@ class Trace
         return $this->data;
     }
 
-    /**
-     * @param array<string, mixed> $data
-     * @return self
-     */
     public static function fromArray(array $data): self
     {
         return new self(
@@ -34,9 +30,6 @@ class Trace
         );
     }
 
-    /**
-     * @return array<string, mixed>
-     */
     public function toArray(): array
     {
         return [

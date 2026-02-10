@@ -23,6 +23,10 @@ class MetricHistory
         $this->history = $history;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return self
+     */
     public static function fromArray(array $data): self
     {
         $history = [];
@@ -36,6 +40,9 @@ class MetricHistory
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
@@ -66,7 +73,7 @@ class MetricHistory
 
         // Sort by timestamp descending
         $sorted = $this->history;
-        usort($sorted, fn($a, $b) => $b->getTimestamp() <=> $a->getTimestamp());
+        usort($sorted, fn($a, $b) => $b->timestamp <=> $a->timestamp);
 
         return $sorted[0];
     }
@@ -74,7 +81,7 @@ class MetricHistory
     public function getAtStep(int $step): ?Metric
     {
         foreach ($this->history as $metric) {
-            if ($metric->getStep() === $step) {
+            if ($metric->step === $step) {
                 return $metric;
             }
         }

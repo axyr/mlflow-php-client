@@ -16,6 +16,9 @@ class MlflowExperimentLocation extends TraceLocation
         return $this->experimentId;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toArray(): array
     {
         return [
@@ -24,6 +27,10 @@ class MlflowExperimentLocation extends TraceLocation
         ];
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return self
+     */
     public static function fromArray(array $data): self
     {
         return new self(

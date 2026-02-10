@@ -9,10 +9,18 @@ namespace MLflow\Model;
  */
 class RunData
 {
+    /** @var array<Metric> */
     private array $metrics;
+    /** @var array<Param> */
     private array $params;
+    /** @var array<RunTag> */
     private array $tags;
 
+    /**
+     * @param array<Metric> $metrics
+     * @param array<Param> $params
+     * @param array<RunTag> $tags
+     */
     public function __construct(array $metrics = [], array $params = [], array $tags = [])
     {
         $this->metrics = $metrics;
@@ -20,6 +28,10 @@ class RunData
         $this->tags = $tags;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return self
+     */
     public static function fromArray(array $data): self
     {
         $metrics = [];
@@ -46,6 +58,9 @@ class RunData
         return new self($metrics, $params, $tags);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [
