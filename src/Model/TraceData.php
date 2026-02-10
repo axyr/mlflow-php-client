@@ -52,9 +52,11 @@ class TraceData
     public static function fromArray(array $data): self
     {
         $spans = [];
-        if (isset($data['spans'])) {
+        if (isset($data['spans']) && is_array($data['spans'])) {
             foreach ($data['spans'] as $spanData) {
-                $spans[] = Span::fromArray($spanData);
+                if (is_array($spanData)) {
+                    $spans[] = Span::fromArray($spanData);
+                }
             }
         }
 

@@ -33,8 +33,10 @@ class MlflowExperimentLocation extends TraceLocation
      */
     public static function fromArray(array $data): self
     {
+        $experimentId = $data['experiment_id'] ?? '';
+
         return new self(
-            experimentId: (string) ($data['experiment_id'] ?? '')
+            experimentId: is_string($experimentId) ? $experimentId : ''
         );
     }
 }

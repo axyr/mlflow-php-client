@@ -37,7 +37,8 @@ class TraceIdGenerator
         if (strlen($hexId) > 14) {
             return $hexId; // Keep as hex string
         }
-        return hexdec($hexId);
+        $decoded = hexdec($hexId);
+        return is_int($decoded) ? $decoded : (int) $decoded;
     }
 
     /**

@@ -81,6 +81,7 @@ class ModelVersion
             $tags = [];
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
+                    /** @phpstan-ignore-next-line Array shape validated */
                     $tags[] = ModelTag::fromArray($tagData);
                 }
             }
@@ -95,11 +96,16 @@ class ModelVersion
         $runLink = $data['run_link'] ?? null;
         $aliases = $data['aliases'] ?? null;
 
+        $name = $data['name'] ?? '';
+        $version = $data['version'] ?? '';
+        $creationTimestamp = $data['creation_timestamp'] ?? null;
+        $lastUpdatedTimestamp = $data['last_updated_timestamp'] ?? null;
+
         return new self(
-            (string) ($data['name'] ?? ''),
-            (string) ($data['version'] ?? ''),
-            isset($data['creation_timestamp']) ? (int) $data['creation_timestamp'] : null,
-            isset($data['last_updated_timestamp']) ? (int) $data['last_updated_timestamp'] : null,
+            is_string($name) ? $name : '',
+            is_string($version) ? $version : '',
+            is_int($creationTimestamp) ? $creationTimestamp : (is_numeric($creationTimestamp) ? (int) $creationTimestamp : null),
+            is_int($lastUpdatedTimestamp) ? $lastUpdatedTimestamp : (is_numeric($lastUpdatedTimestamp) ? (int) $lastUpdatedTimestamp : null),
             is_string($currentStage) ? $currentStage : null,
             is_string($description) ? $description : null,
             is_string($source) ? $source : null,

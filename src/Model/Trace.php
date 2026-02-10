@@ -28,9 +28,12 @@ class Trace
      */
     public static function fromArray(array $data): self
     {
+        $info = $data['info'] ?? $data;
+        $dataArray = $data['data'] ?? $data;
+
         return new self(
-            info: TraceInfo::fromArray($data['info'] ?? $data),
-            data: TraceData::fromArray($data['data'] ?? $data)
+            info: TraceInfo::fromArray(is_array($info) ? $info : []),
+            data: TraceData::fromArray(is_array($dataArray) ? $dataArray : [])
         );
     }
 

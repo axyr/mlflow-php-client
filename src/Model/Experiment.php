@@ -68,14 +68,19 @@ class Experiment
             $tags = null;
         }
 
+        $experimentId = $data['experiment_id'] ?? '';
+        $name = $data['name'] ?? '';
+        $creationTime = $data['creation_time'] ?? null;
+        $lastUpdateTime = $data['last_update_time'] ?? null;
+
         return new self(
-            (string) ($data['experiment_id'] ?? ''),
-            (string) ($data['name'] ?? ''),
+            is_string($experimentId) ? $experimentId : '',
+            is_string($name) ? $name : '',
             $artifactLocation,
             $lifecycleStage,
             $tags,
-            isset($data['creation_time']) ? (int) $data['creation_time'] : null,
-            isset($data['last_update_time']) ? (int) $data['last_update_time'] : null
+            is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
+            is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null)
         );
     }
 

@@ -34,13 +34,16 @@ class MetricHistory
         if (is_array($metrics)) {
             foreach ($metrics as $metricData) {
                 if (is_array($metricData)) {
+                    /** @phpstan-ignore-next-line Array shape validated at runtime */
                     $history[] = Metric::fromArray($metricData);
                 }
             }
         }
 
+        $key = $data['key'] ?? '';
+
         return new self(
-            (string) ($data['key'] ?? ''),
+            is_string($key) ? $key : '',
             $history
         );
     }

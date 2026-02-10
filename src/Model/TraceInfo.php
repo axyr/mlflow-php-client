@@ -106,26 +106,40 @@ class TraceInfo
     {
         // Parse trace location
         $locationData = $data['trace_location'] ?? $data['location'] ?? [];
-        $locationType = $locationData['type'] ?? 'MLFLOW_EXPERIMENT';
+        if (!is_array($locationData)) {
+            $locationData = [];
+        }
+        $locationType = is_string($locationData['type'] ?? null) ? $locationData['type'] : 'MLFLOW_EXPERIMENT';
 
         if ($locationType === 'MLFLOW_EXPERIMENT') {
             $location = MlflowExperimentLocation::fromArray($locationData);
         } else {
             // Default to experiment location if type unknown
-            $location = new MlflowExperimentLocation($locationData['experiment_id'] ?? '0');
+            $experimentId = $locationData['experiment_id'] ?? '0';
+            $location = new MlflowExperimentLocation(is_string($experimentId) ? $experimentId : '0');
         }
 
+        $traceId = $data['trace_id'] ?? $data['request_id'] ?? ''; // Support deprecated request_id
+        $requestTime = $data['request_time'] ?? 0;
+        $stateValue = $data['state'] ?? $data['status'] ?? 'OK'; // Support deprecated status
+        $requestPreview = $data['request_preview'] ?? null;
+        $responsePreview = $data['response_preview'] ?? null;
+        $clientRequestId = $data['client_request_id'] ?? null;
+        $executionDuration = $data['execution_duration'] ?? null;
+        $traceMetadata = $data['trace_metadata'] ?? [];
+        $tags = $data['tags'] ?? [];
+
         return new self(
-            traceId: $data['trace_id'] ?? $data['request_id'], // Support deprecated request_id
+            traceId: is_string($traceId) ? $traceId : '',
             traceLocation: $location,
-            requestTime: (int) $data['request_time'],
-            state: TraceState::from($data['state'] ?? $data['status'] ?? 'OK'), // Support deprecated status
-            requestPreview: $data['request_preview'] ?? null,
-            responsePreview: $data['response_preview'] ?? null,
-            clientRequestId: $data['client_request_id'] ?? null,
-            executionDuration: isset($data['execution_duration']) ? (int) $data['execution_duration'] : null,
-            traceMetadata: $data['trace_metadata'] ?? [],
-            tags: $data['tags'] ?? []
+            requestTime: is_int($requestTime) ? $requestTime : (is_numeric($requestTime) ? (int) $requestTime : 0),
+            state: (is_string($stateValue) || is_int($stateValue)) ? TraceState::from($stateValue) : TraceState::OK,
+            requestPreview: is_string($requestPreview) ? $requestPreview : null,
+            responsePreview: is_string($responsePreview) ? $responsePreview : null,
+            clientRequestId: is_string($clientRequestId) ? $clientRequestId : null,
+            executionDuration: is_int($executionDuration) ? $executionDuration : (is_numeric($executionDuration) ? (int) $executionDuration : null),
+            traceMetadata: is_array($traceMetadata) ? $traceMetadata : [],
+            tags: is_array($tags) ? $tags : []
         );
     }
 

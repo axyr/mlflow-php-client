@@ -53,13 +53,20 @@ class SpanEvent
      */
     public static function fromArray(array $data): self
     {
+        $name = $data['name'] ?? '';
+        $timestampNs = $data['timestamp_ns'] ?? 0;
+        $attributes = $data['attributes'] ?? [];
+
         return new self(
-            name: $data['name'],
-            timestampNs: (int) $data['timestamp_ns'],
-            attributes: $data['attributes'] ?? []
+            name: is_string($name) ? $name : '',
+            timestampNs: is_int($timestampNs) ? $timestampNs : (is_numeric($timestampNs) ? (int) $timestampNs : 0),
+            attributes: is_array($attributes) ? $attributes : []
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         return [

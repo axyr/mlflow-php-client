@@ -38,6 +38,7 @@ class RunData
         if (isset($data['metrics']) && is_array($data['metrics'])) {
             foreach ($data['metrics'] as $metricData) {
                 if (is_array($metricData)) {
+                    /** @phpstan-ignore-next-line Array shape validated */
                     $metrics[] = Metric::fromArray($metricData);
                 }
             }
@@ -47,6 +48,7 @@ class RunData
         if (isset($data['params']) && is_array($data['params'])) {
             foreach ($data['params'] as $paramData) {
                 if (is_array($paramData)) {
+                    /** @phpstan-ignore-next-line Array shape validated */
                     $params[] = Param::fromArray($paramData);
                 }
             }
@@ -56,6 +58,7 @@ class RunData
         if (isset($data['tags']) && is_array($data['tags'])) {
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
+                    /** @phpstan-ignore-next-line Array shape validated */
                     $tags[] = RunTag::fromArray($tagData);
                 }
             }

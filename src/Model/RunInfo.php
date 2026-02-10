@@ -68,13 +68,15 @@ class RunInfo
         $artifactUri = $data['artifact_uri'] ?? null;
         $userId = $data['user_id'] ?? null;
         $runName = $data['run_name'] ?? null;
+        $startTime = $data['start_time'] ?? 0;
+        $endTime = $data['end_time'] ?? null;
 
         return new self(
-            is_string($runId) ? $runId : (string) $runId,
-            is_string($experimentId) ? $experimentId : (string) $experimentId,
+            is_string($runId) ? $runId : '',
+            is_string($experimentId) ? $experimentId : '',
             $status,
-            (int) ($data['start_time'] ?? 0),
-            isset($data['end_time']) ? (int) $data['end_time'] : null,
+            is_int($startTime) ? $startTime : (is_numeric($startTime) ? (int) $startTime : 0),
+            is_int($endTime) ? $endTime : (is_numeric($endTime) ? (int) $endTime : null),
             is_string($artifactUri) ? $artifactUri : null,
             is_string($userId) ? $userId : null,
             is_string($runName) ? $runName : null,

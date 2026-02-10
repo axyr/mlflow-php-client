@@ -155,25 +155,31 @@ class Span
         $parentId = $data['parent_id'] ?? null;
         $statusValue = $data['status'] ?? 'UNSET';
         $spanType = $data['span_type'] ?? 'UNKNOWN';
+        $startTimeNs = $data['start_time_ns'] ?? 0;
+        $endTimeNs = $data['end_time_ns'] ?? null;
+        $attributes = $data['attributes'] ?? [];
 
         return new self(
-            traceId: is_string($traceId) ? $traceId : (string) $traceId,
-            spanId: is_string($spanId) ? $spanId : (string) $spanId,
-            name: is_string($name) ? $name : (string) $name,
-            startTimeNs: (int) ($data['start_time_ns'] ?? 0),
-            endTimeNs: isset($data['end_time_ns']) ? (int) $data['end_time_ns'] : null,
+            traceId: is_string($traceId) ? $traceId : '',
+            spanId: is_string($spanId) ? $spanId : '',
+            name: is_string($name) ? $name : '',
+            startTimeNs: is_int($startTimeNs) ? $startTimeNs : (is_numeric($startTimeNs) ? (int) $startTimeNs : 0),
+            endTimeNs: is_int($endTimeNs) ? $endTimeNs : (is_numeric($endTimeNs) ? (int) $endTimeNs : null),
             parentId: is_string($parentId) ? $parentId : null,
             status: (is_string($statusValue) || is_int($statusValue))
                 ? SpanStatusCode::from($statusValue)
                 : SpanStatusCode::UNSET,
-            spanType: is_string($spanType) ? $spanType : (string) $spanType,
+            spanType: is_string($spanType) ? $spanType : '',
             inputs: $data['inputs'] ?? null,
             outputs: $data['outputs'] ?? null,
-            attributes: $data['attributes'] ?? [],
+            attributes: is_array($attributes) ? $attributes : [],
             events: $events
         );
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toArray(): array
     {
         $data = [
