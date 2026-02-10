@@ -19,10 +19,27 @@ class ModelVersion
     private ?string $runId;
     private ?string $status;
     private ?string $statusMessage;
+    /** @var array<ModelTag>|null */
     private ?array $tags;
     private ?string $runLink;
+    /** @var array<string>|null */
     private ?array $aliases;
 
+    /**
+     * @param string $name
+     * @param string $version
+     * @param int|null $creationTimestamp
+     * @param int|null $lastUpdatedTimestamp
+     * @param string|null $currentStage
+     * @param string|null $description
+     * @param string|null $source
+     * @param string|null $runId
+     * @param string|null $status
+     * @param string|null $statusMessage
+     * @param array<ModelTag>|null $tags
+     * @param string|null $runLink
+     * @param array<string>|null $aliases
+     */
     public function __construct(
         string $name,
         string $version,
@@ -205,6 +222,9 @@ class ModelVersion
         return $this->runLink;
     }
 
+    /**
+     * @return array<string>|null
+     */
     public function getAliases(): ?array
     {
         return $this->aliases;

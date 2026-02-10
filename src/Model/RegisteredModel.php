@@ -13,10 +13,22 @@ class RegisteredModel
     private ?string $description;
     private ?int $creationTimestamp;
     private ?int $lastUpdatedTimestamp;
+    /** @var array<ModelVersion>|null */
     private ?array $latestVersions;
+    /** @var array<ModelTag>|null */
     private ?array $tags;
+    /** @var array<string>|null */
     private ?array $aliases;
 
+    /**
+     * @param string $name
+     * @param string|null $description
+     * @param int|null $creationTimestamp
+     * @param int|null $lastUpdatedTimestamp
+     * @param array<ModelVersion>|null $latestVersions
+     * @param array<ModelTag>|null $tags
+     * @param array<string>|null $aliases
+     */
     public function __construct(
         string $name,
         ?string $description = null,
