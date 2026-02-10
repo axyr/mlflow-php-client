@@ -34,7 +34,7 @@ class MlflowExperimentLocation extends TraceLocation
     public static function fromArray(array $data): self
     {
         return new self(
-            experimentId: $data['experiment_id']
+            experimentId: (string) ($data['experiment_id'] ?? '')
         );
     }
 }

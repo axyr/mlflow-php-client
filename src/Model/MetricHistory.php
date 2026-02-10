@@ -30,12 +30,17 @@ class MetricHistory
     public static function fromArray(array $data): self
     {
         $history = [];
-        foreach ($data['metrics'] ?? [] as $metricData) {
-            $history[] = Metric::fromArray($metricData);
+        $metrics = $data['metrics'] ?? [];
+        if (is_array($metrics)) {
+            foreach ($metrics as $metricData) {
+                if (is_array($metricData)) {
+                    $history[] = Metric::fromArray($metricData);
+                }
+            }
         }
 
         return new self(
-            $data['key'],
+            (string) ($data['key'] ?? ''),
             $history
         );
     }

@@ -77,27 +77,38 @@ class ModelVersion
     public static function fromArray(array $data): self
     {
         $tags = null;
-        if (isset($data['tags'])) {
+        if (isset($data['tags']) && is_array($data['tags'])) {
             $tags = [];
             foreach ($data['tags'] as $tagData) {
-                $tags[] = ModelTag::fromArray($tagData);
+                if (is_array($tagData)) {
+                    $tags[] = ModelTag::fromArray($tagData);
+                }
             }
         }
 
+        $currentStage = $data['current_stage'] ?? null;
+        $description = $data['description'] ?? null;
+        $source = $data['source'] ?? null;
+        $runId = $data['run_id'] ?? null;
+        $status = $data['status'] ?? null;
+        $statusMessage = $data['status_message'] ?? null;
+        $runLink = $data['run_link'] ?? null;
+        $aliases = $data['aliases'] ?? null;
+
         return new self(
-            $data['name'],
-            $data['version'],
+            (string) ($data['name'] ?? ''),
+            (string) ($data['version'] ?? ''),
             isset($data['creation_timestamp']) ? (int) $data['creation_timestamp'] : null,
             isset($data['last_updated_timestamp']) ? (int) $data['last_updated_timestamp'] : null,
-            $data['current_stage'] ?? null,
-            $data['description'] ?? null,
-            $data['source'] ?? null,
-            $data['run_id'] ?? null,
-            $data['status'] ?? null,
-            $data['status_message'] ?? null,
+            is_string($currentStage) ? $currentStage : null,
+            is_string($description) ? $description : null,
+            is_string($source) ? $source : null,
+            is_string($runId) ? $runId : null,
+            is_string($status) ? $status : null,
+            is_string($statusMessage) ? $statusMessage : null,
             $tags,
-            $data['run_link'] ?? null,
-            $data['aliases'] ?? null
+            is_string($runLink) ? $runLink : null,
+            is_array($aliases) ? $aliases : null
         );
     }
 

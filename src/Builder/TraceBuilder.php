@@ -18,6 +18,7 @@ class TraceBuilder
 {
     private string $traceId;
     private string $experimentId;
+    /** @phpstan-ignore-next-line (Reserved for future use) */
     private string $name;
     private int $startTimeNs;
 
@@ -27,6 +28,7 @@ class TraceBuilder
     /** @var array<string, string> */
     private array $tags = [];
 
+    /** @phpstan-ignore-next-line (Reserved for future use) */
     private ?string $rootSpanId = null;
 
     public function __construct(string $experimentId, string $name)

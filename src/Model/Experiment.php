@@ -54,16 +54,26 @@ class Experiment
     public static function fromArray(array $data): self
     {
         $lifecycleStage = null;
-        if (isset($data['lifecycle_stage'])) {
+        if (isset($data['lifecycle_stage']) && is_string($data['lifecycle_stage'])) {
             $lifecycleStage = LifecycleStage::from($data['lifecycle_stage']);
         }
 
+        $artifactLocation = $data['artifact_location'] ?? null;
+        if ($artifactLocation !== null && !is_string($artifactLocation)) {
+            $artifactLocation = null;
+        }
+
+        $tags = $data['tags'] ?? null;
+        if ($tags !== null && !is_array($tags)) {
+            $tags = null;
+        }
+
         return new self(
-            $data['experiment_id'],
-            $data['name'],
-            $data['artifact_location'] ?? null,
+            (string) ($data['experiment_id'] ?? ''),
+            (string) ($data['name'] ?? ''),
+            $artifactLocation,
             $lifecycleStage,
-            $data['tags'] ?? null,
+            $tags,
             isset($data['creation_time']) ? (int) $data['creation_time'] : null,
             isset($data['last_update_time']) ? (int) $data['last_update_time'] : null
         );

@@ -54,32 +54,40 @@ class RegisteredModel
     public static function fromArray(array $data): self
     {
         $latestVersions = null;
-        if (isset($data['latest_versions'])) {
+        if (isset($data['latest_versions']) && is_array($data['latest_versions'])) {
             $latestVersions = [];
             foreach ($data['latest_versions'] as $versionData) {
-                $latestVersions[] = ModelVersion::fromArray($versionData);
+                if (is_array($versionData)) {
+                    $latestVersions[] = ModelVersion::fromArray($versionData);
+                }
             }
         }
 
         $tags = null;
-        if (isset($data['tags'])) {
+        if (isset($data['tags']) && is_array($data['tags'])) {
             $tags = [];
             foreach ($data['tags'] as $tagData) {
-                $tags[] = ModelTag::fromArray($tagData);
+                if (is_array($tagData)) {
+                    $tags[] = ModelTag::fromArray($tagData);
+                }
             }
         }
 
         $aliases = null;
-        if (isset($data['aliases'])) {
+        if (isset($data['aliases']) && is_array($data['aliases'])) {
             $aliases = [];
             foreach ($data['aliases'] as $aliasData) {
-                $aliases[] = ModelAlias::fromArray($aliasData);
+                if (is_array($aliasData)) {
+                    $aliases[] = ModelAlias::fromArray($aliasData);
+                }
             }
         }
 
+        $description = $data['description'] ?? null;
+
         return new self(
-            $data['name'],
-            $data['description'] ?? null,
+            (string) ($data['name'] ?? ''),
+            is_string($description) ? $description : null,
             isset($data['creation_timestamp']) ? (int) $data['creation_timestamp'] : null,
             isset($data['last_updated_timestamp']) ? (int) $data['last_updated_timestamp'] : null,
             $latestVersions,

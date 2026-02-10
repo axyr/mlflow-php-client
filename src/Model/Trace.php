@@ -47,6 +47,10 @@ class Trace
 
     public function toJson(): string
     {
-        return json_encode($this->toArray(), JSON_PRETTY_PRINT);
+        $json = json_encode($this->toArray(), JSON_PRETTY_PRINT);
+        if ($json === false) {
+            throw new \RuntimeException('Failed to encode trace to JSON: ' . json_last_error_msg());
+        }
+        return $json;
     }
 }

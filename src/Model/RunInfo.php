@@ -20,7 +20,7 @@ class RunInfo
     private ?string $artifactUri;
     private ?string $userId;
     private ?string $runName;
-    private ?LifecycleStage $lifecycleStage;
+    private LifecycleStage $lifecycleStage;
 
     public function __construct(
         string $runId,
@@ -50,22 +50,34 @@ class RunInfo
      */
     public static function fromArray(array $data): self
     {
-        $status = RunStatus::from($data['status']);
+        $statusValue = $data['status'] ?? 'RUNNING';
+        $status = is_string($statusValue) || is_int($statusValue)
+            ? RunStatus::from($statusValue)
+            : RunStatus::RUNNING;
 
         $lifecycleStage = null;
         if (isset($data['lifecycle_stage'])) {
-            $lifecycleStage = LifecycleStage::from($data['lifecycle_stage']);
+            $lsValue = $data['lifecycle_stage'];
+            if (is_string($lsValue) || is_int($lsValue)) {
+                $lifecycleStage = LifecycleStage::from($lsValue);
+            }
         }
 
+        $runId = $data['run_id'] ?? $data['run_uuid'] ?? ''; // Support both old and new field names
+        $experimentId = $data['experiment_id'] ?? '';
+        $artifactUri = $data['artifact_uri'] ?? null;
+        $userId = $data['user_id'] ?? null;
+        $runName = $data['run_name'] ?? null;
+
         return new self(
-            $data['run_id'] ?? $data['run_uuid'], // Support both old and new field names
-            $data['experiment_id'],
+            is_string($runId) ? $runId : (string) $runId,
+            is_string($experimentId) ? $experimentId : (string) $experimentId,
             $status,
-            (int) $data['start_time'],
+            (int) ($data['start_time'] ?? 0),
             isset($data['end_time']) ? (int) $data['end_time'] : null,
-            $data['artifact_uri'] ?? null,
-            $data['user_id'] ?? null,
-            $data['run_name'] ?? null,
+            is_string($artifactUri) ? $artifactUri : null,
+            is_string($userId) ? $userId : null,
+            is_string($runName) ? $runName : null,
             $lifecycleStage
         );
     }
