@@ -24,7 +24,7 @@ class RunApi extends BaseApi
      * @param string $experimentId The experiment ID
      * @param string|null $userId Optional user ID
      * @param string|null $runName Optional run name
-     * @param array $tags Optional tags for the run
+     * @param array<string, string> $tags Optional tags for the run
      * @param int|null $startTime Optional start time (milliseconds since epoch)
      * @return Run The created run
      * @throws MLflowException
@@ -54,7 +54,12 @@ class RunApi extends BaseApi
 
         $response = $this->post('mlflow/runs/create', $data);
 
-        return Run::fromArray($response['run']);
+        $run = $response['run'] ?? null;
+        if (!is_array($run)) {
+            throw new MLflowException('Invalid run data in response');
+        }
+
+        return Run::fromArray($run);
     }
 
     /**
@@ -67,7 +72,13 @@ class RunApi extends BaseApi
     public function getById(string $runId): Run
     {
         $response = $this->get('mlflow/runs/get', ['run_id' => $runId]);
-        return Run::fromArray($response['run']);
+
+        $run = $response['run'] ?? null;
+        if (!is_array($run)) {
+            throw new MLflowException('Invalid run data in response');
+        }
+
+        return Run::fromArray($run);
     }
 
     /**
@@ -114,15 +125,19 @@ class RunApi extends BaseApi
         $response = $this->post('mlflow/runs/search', $data);
 
         $runs = [];
-        if (isset($response['runs'])) {
+        if (isset($response['runs']) && is_array($response['runs'])) {
             foreach ($response['runs'] as $runData) {
-                $runs[] = Run::fromArray($runData);
+                if (is_array($runData)) {
+                    $runs[] = Run::fromArray($runData);
+                }
             }
         }
 
+        $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'runs' => $runs,
-            'next_page_token' => $response['next_page_token'] ?? null,
+            'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
         ];
     }
 
@@ -271,9 +286,9 @@ class RunApi extends BaseApi
      * Log multiple metrics, parameters, and tags in a single request
      *
      * @param string $runId The run ID
-     * @param array $metrics Array of metrics to log
-     * @param array $params Array of parameters to log
-     * @param array $tags Array of tags to set
+     * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics to log
+     * @param array<string, string> $params Array of parameters to log
+     * @param array<string, string> $tags Array of tags to set
      * @return void
      * @throws MLflowException
      */
@@ -305,7 +320,7 @@ class RunApi extends BaseApi
      *
      * @param string $runId The run ID
      * @param string $artifactPath Path within the run's artifact directory
-     * @param string $flavors Model flavors (e.g., {"python_function": {...}})
+     * @param array<string, mixed> $flavors Model flavors (e.g., {"python_function": {...}})
      * @param string|null $modelJson Optional model JSON
      * @param string|null $signatureJson Optional signature JSON
      * @return void
@@ -339,7 +354,7 @@ class RunApi extends BaseApi
      * Log inputs (datasets) for a run
      *
      * @param string $runId The run ID
-     * @param array $datasets Array of dataset inputs
+     * @param array<array{dataset: array<string, mixed>, tags?: array<array{key: string, value: string}>}> $datasets Array of dataset inputs
      * @return void
      * @throws MLflowException
      */
@@ -374,8 +389,8 @@ class RunApi extends BaseApi
     /**
      * Format metrics for batch logging
      *
-     * @param array $metrics Array of metrics
-     * @return array Formatted metrics
+     * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics
+     * @return array<int, array{key: string, value: float|int, timestamp: int, step?: int}> Formatted metrics
      */
     private function formatMetrics(array $metrics): array
     {
@@ -383,9 +398,12 @@ class RunApi extends BaseApi
         $timestamp = (int) (microtime(true) * 1000);
 
         foreach ($metrics as $metric) {
+            if (!is_array($metric)) {
+                continue;
+            }
             $formattedMetric = [
-                'key' => $metric['key'],
-                'value' => $metric['value'],
+                'key' => $metric['key'] ?? '',
+                'value' => $metric['value'] ?? 0,
                 'timestamp' => $metric['timestamp'] ?? $timestamp,
             ];
 
@@ -402,8 +420,8 @@ class RunApi extends BaseApi
     /**
      * Format parameters for batch logging
      *
-     * @param array $params Associative array of parameters
-     * @return array Formatted parameters
+     * @param array<string, string> $params Associative array of parameters
+     * @return array<int, array{key: string, value: string}> Formatted parameters
      */
     private function formatParams(array $params): array
     {
@@ -420,8 +438,8 @@ class RunApi extends BaseApi
     /**
      * Format tags for API request
      *
-     * @param array $tags Associative array of tags
-     * @return array Formatted tags
+     * @param array<string, string> $tags Associative array of tags
+     * @return array<int, array{key: string, value: string}> Formatted tags
      */
     private function formatTags(array $tags): array
     {

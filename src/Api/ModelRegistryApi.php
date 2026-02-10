@@ -23,7 +23,7 @@ class ModelRegistryApi extends BaseApi
      *
      * @param string $name The model name (must be unique)
      * @param string|null $description Optional description
-     * @param array $tags Optional tags
+     * @param array<string, string> $tags Optional tags
      * @return RegisteredModel The created model
      * @throws MLflowException
      */
@@ -44,7 +44,12 @@ class ModelRegistryApi extends BaseApi
 
         $response = $this->post('mlflow/registered-models/create', $data);
 
-        return RegisteredModel::fromArray($response['registered_model']);
+        $model = $response['registered_model'] ?? null;
+        if (!is_array($model)) {
+            throw new MLflowException('Invalid registered_model data in response');
+        }
+
+        return RegisteredModel::fromArray($model);
     }
 
     /**
@@ -57,7 +62,13 @@ class ModelRegistryApi extends BaseApi
     public function getRegisteredModel(string $name): RegisteredModel
     {
         $response = $this->get('mlflow/registered-models/get', ['name' => $name]);
-        return RegisteredModel::fromArray($response['registered_model']);
+
+        $model = $response['registered_model'] ?? null;
+        if (!is_array($model)) {
+            throw new MLflowException('Invalid registered_model data in response');
+        }
+
+        return RegisteredModel::fromArray($model);
     }
 
     /**
@@ -77,7 +88,13 @@ class ModelRegistryApi extends BaseApi
         }
 
         $response = $this->patch('mlflow/registered-models/update', $data);
-        return RegisteredModel::fromArray($response['registered_model']);
+
+        $model = $response['registered_model'] ?? null;
+        if (!is_array($model)) {
+            throw new MLflowException('Invalid registered_model data in response');
+        }
+
+        return RegisteredModel::fromArray($model);
     }
 
     /**
@@ -95,7 +112,12 @@ class ModelRegistryApi extends BaseApi
             'new_name' => $newName,
         ]);
 
-        return RegisteredModel::fromArray($response['registered_model']);
+        $model = $response['registered_model'] ?? null;
+        if (!is_array($model)) {
+            throw new MLflowException('Invalid registered_model data in response');
+        }
+
+        return RegisteredModel::fromArray($model);
     }
 
     /**
@@ -115,9 +137,9 @@ class ModelRegistryApi extends BaseApi
      *
      * @param string|null $filter Filter string (e.g., "name = 'my_model'")
      * @param int|null $maxResults Maximum number of models to return
-     * @param array|null $orderBy List of columns to order by
+     * @param array<string>|null $orderBy List of columns to order by
      * @param string|null $pageToken Pagination token
-     * @return array Array with models and next_page_token
+     * @return array{registered_models: array<RegisteredModel>, next_page_token: string|null} Array with models and next_page_token
      * @throws MLflowException
      */
     public function searchRegisteredModels(
@@ -147,15 +169,19 @@ class ModelRegistryApi extends BaseApi
         $response = $this->post('mlflow/registered-models/search', $data);
 
         $models = [];
-        if (isset($response['registered_models'])) {
+        if (isset($response['registered_models']) && is_array($response['registered_models'])) {
             foreach ($response['registered_models'] as $modelData) {
-                $models[] = RegisteredModel::fromArray($modelData);
+                if (is_array($modelData)) {
+                    $models[] = RegisteredModel::fromArray($modelData);
+                }
             }
         }
 
+        $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'registered_models' => $models,
-            'next_page_token' => $response['next_page_token'] ?? null,
+            'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
         ];
     }
 
@@ -178,9 +204,11 @@ class ModelRegistryApi extends BaseApi
         $response = $this->post('mlflow/registered-models/get-latest-versions', $data);
 
         $versions = [];
-        if (isset($response['model_versions'])) {
+        if (isset($response['model_versions']) && is_array($response['model_versions'])) {
             foreach ($response['model_versions'] as $versionData) {
-                $versions[] = ModelVersion::fromArray($versionData);
+                if (is_array($versionData)) {
+                    $versions[] = ModelVersion::fromArray($versionData);
+                }
             }
         }
 
@@ -270,7 +298,12 @@ class ModelRegistryApi extends BaseApi
             'alias' => $alias,
         ]);
 
-        return ModelVersion::fromArray($response['model_version']);
+        $version = $response['model_version'] ?? null;
+        if (!is_array($version)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($version);
     }
 
     // ========== MODEL VERSION ENDPOINTS ==========
@@ -282,7 +315,7 @@ class ModelRegistryApi extends BaseApi
      * @param string $source The source path where the model artifacts are stored
      * @param string|null $runId Optional run ID that generated this model
      * @param string|null $description Optional description
-     * @param array $tags Optional tags
+     * @param array<string, string> $tags Optional tags
      * @param string|null $runLink Optional link to the run
      * @return ModelVersion The created model version
      * @throws MLflowException
@@ -318,7 +351,12 @@ class ModelRegistryApi extends BaseApi
 
         $response = $this->post('mlflow/model-versions/create', $data);
 
-        return ModelVersion::fromArray($response['model_version']);
+        $version = $response['model_version'] ?? null;
+        if (!is_array($version)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($version);
     }
 
     /**
@@ -336,7 +374,12 @@ class ModelRegistryApi extends BaseApi
             'version' => $version,
         ]);
 
-        return ModelVersion::fromArray($response['model_version']);
+        $versionData = $response['model_version'] ?? null;
+        if (!is_array($versionData)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($versionData);
     }
 
     /**
@@ -364,7 +407,12 @@ class ModelRegistryApi extends BaseApi
 
         $response = $this->patch('mlflow/model-versions/update', $data);
 
-        return ModelVersion::fromArray($response['model_version']);
+        $versionData = $response['model_version'] ?? null;
+        if (!is_array($versionData)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($versionData);
     }
 
     /**
@@ -388,9 +436,9 @@ class ModelRegistryApi extends BaseApi
      *
      * @param string|null $filter Filter string
      * @param int|null $maxResults Maximum number of versions to return
-     * @param array|null $orderBy List of columns to order by
+     * @param array<string>|null $orderBy List of columns to order by
      * @param string|null $pageToken Pagination token
-     * @return array Array with model_versions and next_page_token
+     * @return array{model_versions: array<ModelVersion>, next_page_token: string|null} Array with model_versions and next_page_token
      * @throws MLflowException
      */
     public function searchModelVersions(
@@ -420,15 +468,19 @@ class ModelRegistryApi extends BaseApi
         $response = $this->post('mlflow/model-versions/search', $data);
 
         $versions = [];
-        if (isset($response['model_versions'])) {
+        if (isset($response['model_versions']) && is_array($response['model_versions'])) {
             foreach ($response['model_versions'] as $versionData) {
-                $versions[] = ModelVersion::fromArray($versionData);
+                if (is_array($versionData)) {
+                    $versions[] = ModelVersion::fromArray($versionData);
+                }
             }
         }
 
+        $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'model_versions' => $versions,
-            'next_page_token' => $response['next_page_token'] ?? null,
+            'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
         ];
     }
 
@@ -455,7 +507,12 @@ class ModelRegistryApi extends BaseApi
             'archive_existing_versions' => $archiveExistingVersions,
         ]);
 
-        return ModelVersion::fromArray($response['model_version']);
+        $versionData = $response['model_version'] ?? null;
+        if (!is_array($versionData)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($versionData);
     }
 
     /**
@@ -473,7 +530,8 @@ class ModelRegistryApi extends BaseApi
             'version' => $version,
         ]);
 
-        return $response['artifact_uri'];
+        $uri = $response['artifact_uri'] ?? '';
+        return is_string($uri) ? $uri : '';
     }
 
     /**
@@ -517,8 +575,8 @@ class ModelRegistryApi extends BaseApi
     /**
      * Format tags for API request
      *
-     * @param array $tags Associative array of tags
-     * @return array Formatted tags
+     * @param array<string, string> $tags Associative array of tags
+     * @return array<int, array{key: string, value: string}> Formatted tags
      */
     private function formatTags(array $tags): array
     {

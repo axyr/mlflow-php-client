@@ -19,7 +19,7 @@ class MetricApi extends BaseApi
      *
      * @param string $runId The run ID
      * @param string $metricKey The metric key
-     * @return array Array of metric values with timestamps
+     * @return array<Metric> Array of metric values with timestamps
      * @throws MLflowException
      */
     public function getHistory(string $runId, string $metricKey): array
@@ -30,9 +30,12 @@ class MetricApi extends BaseApi
         ]);
 
         $metrics = [];
-        if (isset($response['metrics'])) {
+        if (isset($response['metrics']) && is_array($response['metrics'])) {
             foreach ($response['metrics'] as $metricData) {
-                $metrics[] = Metric::fromArray($metricData);
+                if (is_array($metricData) && isset($metricData['key'], $metricData['value'], $metricData['timestamp'])) {
+                    /** @var array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $metricData */
+                    $metrics[] = Metric::fromArray($metricData);
+                }
             }
         }
 
@@ -43,8 +46,8 @@ class MetricApi extends BaseApi
      * Get metric history for multiple metrics in bulk
      *
      * @param string $runId The run ID
-     * @param array $metricKeys Array of metric keys
-     * @return array Associative array of metric histories by key
+     * @param array<string> $metricKeys Array of metric keys
+     * @return array<string, array<Metric>> Associative array of metric histories by key
      * @throws MLflowException
      */
     public function getHistoryBulk(string $runId, array $metricKeys): array
@@ -55,13 +58,18 @@ class MetricApi extends BaseApi
         ]);
 
         $histories = [];
-        if (isset($response['metrics'])) {
+        if (isset($response['metrics']) && is_array($response['metrics'])) {
             foreach ($response['metrics'] as $key => $metricHistory) {
                 $metrics = [];
-                foreach ($metricHistory as $metricData) {
-                    $metrics[] = Metric::fromArray($metricData);
+                if (is_array($metricHistory)) {
+                    foreach ($metricHistory as $metricData) {
+                        if (is_array($metricData) && isset($metricData['key'], $metricData['value'], $metricData['timestamp'])) {
+                            /** @var array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $metricData */
+                            $metrics[] = Metric::fromArray($metricData);
+                        }
+                    }
                 }
-                $histories[$key] = $metrics;
+                $histories[(string)$key] = $metrics;
             }
         }
 
@@ -103,7 +111,7 @@ class MetricApi extends BaseApi
      *
      * @deprecated Use RunApi::logBatch() method instead
      * @param string $runId The run ID
-     * @param array $metrics Array of metrics
+     * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics
      * @return void
      * @throws MLflowException
      */
@@ -113,9 +121,12 @@ class MetricApi extends BaseApi
         $timestamp = (int) (microtime(true) * 1000);
 
         foreach ($metrics as $metric) {
+            if (!is_array($metric)) {
+                continue;
+            }
             $formattedMetric = [
-                'key' => $metric['key'],
-                'value' => $metric['value'],
+                'key' => $metric['key'] ?? '',
+                'value' => $metric['value'] ?? 0,
                 'timestamp' => $metric['timestamp'] ?? $timestamp,
             ];
 
@@ -158,7 +169,7 @@ class MetricApi extends BaseApi
      *
      * @deprecated Use RunApi::logBatch() method instead
      * @param string $runId The run ID
-     * @param array $params Associative array of parameters
+     * @param array<string, string> $params Associative array of parameters
      * @return void
      * @throws MLflowException
      */
@@ -205,7 +216,7 @@ class MetricApi extends BaseApi
      *
      * @deprecated Use RunApi::logBatch() method instead
      * @param string $runId The run ID
-     * @param array $tags Associative array of tags
+     * @param array<string, string> $tags Associative array of tags
      * @return void
      * @throws MLflowException
      */

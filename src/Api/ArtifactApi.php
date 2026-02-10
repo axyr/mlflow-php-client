@@ -20,7 +20,7 @@ class ArtifactApi extends BaseApi
      *
      * @param string $runId The run ID
      * @param string|null $path Optional path within the artifact directory
-     * @return array Array of FileInfo objects
+     * @return array{root_uri: string|null, files: FileInfo[]} Array with root_uri and FileInfo objects
      * @throws MLflowException
      */
     public function list(string $runId, ?string $path = null): array
@@ -34,9 +34,11 @@ class ArtifactApi extends BaseApi
         $response = $this->get('mlflow/artifacts/list', $query);
 
         $files = [];
-        if (isset($response['files'])) {
+        if (isset($response['files']) && is_array($response['files'])) {
             foreach ($response['files'] as $fileData) {
-                $files[] = FileInfo::fromArray($fileData);
+                if (is_array($fileData)) {
+                    $files[] = FileInfo::fromArray($fileData);
+                }
             }
         }
 
@@ -103,6 +105,10 @@ class ArtifactApi extends BaseApi
 
         $files = $this->scanDirectory($localDir);
         $basePath = realpath($localDir);
+
+        if ($basePath === false) {
+            throw new MLflowException("Could not resolve path: $localDir");
+        }
 
         foreach ($files as $file) {
             $relativePath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $file);
@@ -171,7 +177,8 @@ class ArtifactApi extends BaseApi
 
         $response = $this->get('mlflow/artifacts/get-artifact', $query);
 
-        return $response['artifact_uri'] ?? '';
+        $uri = $response['artifact_uri'] ?? '';
+        return is_string($uri) ? $uri : '';
     }
 
     /**
@@ -238,7 +245,7 @@ class ArtifactApi extends BaseApi
      * Scan directory recursively for files
      *
      * @param string $dir Directory to scan
-     * @return array Array of file paths
+     * @return string[] Array of file paths
      */
     private function scanDirectory(string $dir): array
     {
@@ -249,7 +256,7 @@ class ArtifactApi extends BaseApi
         );
 
         foreach ($iterator as $item) {
-            if ($item->isFile()) {
+            if ($item instanceof \SplFileInfo && $item->isFile()) {
                 $files[] = $item->getPathname();
             }
         }
@@ -273,10 +280,10 @@ class ArtifactApi extends BaseApi
         string $dstPath,
         ?string $artifactPath
     ): void {
-        $filePath = $fileInfo->getPath();
+        $filePath = $fileInfo->path;
         $localPath = $dstPath . '/' . basename($filePath);
 
-        if ($fileInfo->isDir()) {
+        if ($fileInfo->isDir) {
             // Recursively download directory contents
             $this->download($runId, $filePath, $localPath);
             return;
@@ -310,12 +317,13 @@ class ArtifactApi extends BaseApi
      * Get run info to retrieve artifact URI
      *
      * @param string $runId The run ID
-     * @return array Run information
+     * @return array<string, mixed> Run information
      * @throws MLflowException
      */
     private function getRunInfo(string $runId): array
     {
         $response = $this->get('mlflow/runs/get', ['run_id' => $runId]);
-        return $response['run']['info'] ?? [];
+        $info = $response['run']['info'] ?? [];
+        return is_array($info) ? $info : [];
     }
 }

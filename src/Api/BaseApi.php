@@ -30,8 +30,8 @@ abstract class BaseApi
      * Make a GET request
      *
      * @param string $endpoint The API endpoint
-     * @param array $query Query parameters
-     * @return array The response data
+     * @param array<string, mixed> $query Query parameters
+     * @return array<string, mixed> The response data
      * @throws MLflowException
      */
     protected function get(string $endpoint, array $query = []): array
@@ -43,8 +43,8 @@ abstract class BaseApi
      * Make a POST request
      *
      * @param string $endpoint The API endpoint
-     * @param array $data Request body data
-     * @return array The response data
+     * @param array<string, mixed> $data Request body data
+     * @return array<string, mixed> The response data
      * @throws MLflowException
      */
     protected function post(string $endpoint, array $data = []): array
@@ -56,8 +56,8 @@ abstract class BaseApi
      * Make a PATCH request
      *
      * @param string $endpoint The API endpoint
-     * @param array $data Request body data
-     * @return array The response data
+     * @param array<string, mixed> $data Request body data
+     * @return array<string, mixed> The response data
      * @throws MLflowException
      */
     protected function patch(string $endpoint, array $data = []): array
@@ -69,8 +69,8 @@ abstract class BaseApi
      * Make a DELETE request
      *
      * @param string $endpoint The API endpoint
-     * @param array $data Request body data
-     * @return array The response data
+     * @param array<string, mixed> $data Request body data
+     * @return array<string, mixed> The response data
      * @throws MLflowException
      */
     protected function delete(string $endpoint, array $data = []): array
@@ -83,8 +83,8 @@ abstract class BaseApi
      *
      * @param string $method HTTP method
      * @param string $endpoint The API endpoint
-     * @param array $options Request options
-     * @return array The response data
+     * @param array<string, mixed> $options Request options
+     * @return array<string, mixed> The response data
      * @throws MLflowException
      */
     protected function request(string $method, string $endpoint, array $options = []): array
@@ -132,7 +132,7 @@ abstract class BaseApi
      * Parse the response
      *
      * @param ResponseInterface $response
-     * @return array
+     * @return array<string, mixed>
      * @throws MLflowException
      */
     private function parseResponse(ResponseInterface $response): array

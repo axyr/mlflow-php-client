@@ -20,7 +20,7 @@ class ExperimentApi extends BaseApi
      *
      * @param string $name Experiment name (must be unique)
      * @param string|null $artifactLocation Optional artifact location
-     * @param array $tags Optional tags for the experiment
+     * @param array<string, string> $tags Optional tags for the experiment
      * @return Experiment The created experiment
      * @throws MLflowException
      */
@@ -38,7 +38,12 @@ class ExperimentApi extends BaseApi
 
         $response = $this->post('mlflow/experiments/create', $data);
 
-        return new Experiment($response['experiment_id'], $name);
+        $experimentId = $response['experiment_id'] ?? '';
+        if (!is_string($experimentId)) {
+            throw new MLflowException('Invalid experiment_id in response');
+        }
+
+        return new Experiment($experimentId, $name);
     }
 
     /**
@@ -54,7 +59,12 @@ class ExperimentApi extends BaseApi
             'experiment_id' => $experimentId,
         ]);
 
-        return Experiment::fromArray($response['experiment']);
+        $experiment = $response['experiment'] ?? null;
+        if (!is_array($experiment)) {
+            throw new MLflowException('Invalid experiment data in response');
+        }
+
+        return Experiment::fromArray($experiment);
     }
 
     /**
@@ -70,7 +80,12 @@ class ExperimentApi extends BaseApi
             'experiment_name' => $name,
         ]);
 
-        return Experiment::fromArray($response['experiment']);
+        $experiment = $response['experiment'] ?? null;
+        if (!is_array($experiment)) {
+            throw new MLflowException('Invalid experiment data in response');
+        }
+
+        return Experiment::fromArray($experiment);
     }
 
     /**
@@ -112,15 +127,19 @@ class ExperimentApi extends BaseApi
         $response = $this->post('mlflow/experiments/search', $data);
 
         $experiments = [];
-        if (isset($response['experiments'])) {
+        if (isset($response['experiments']) && is_array($response['experiments'])) {
             foreach ($response['experiments'] as $expData) {
-                $experiments[] = Experiment::fromArray($expData);
+                if (is_array($expData)) {
+                    $experiments[] = Experiment::fromArray($expData);
+                }
             }
         }
 
+        $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'experiments' => $experiments,
-            'next_page_token' => $response['next_page_token'] ?? null,
+            'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
         ];
     }
 
@@ -226,8 +245,8 @@ class ExperimentApi extends BaseApi
     /**
      * Format tags for API request
      *
-     * @param array $tags Associative array of tags
-     * @return array Formatted tags
+     * @param array<string, string> $tags Associative array of tags
+     * @return array<int, array{key: string, value: string}> Formatted tags
      */
     private function formatTags(array $tags): array
     {
