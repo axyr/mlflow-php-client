@@ -35,23 +35,29 @@ class RunData
     public static function fromArray(array $data): self
     {
         $metrics = [];
-        if (isset($data['metrics'])) {
+        if (isset($data['metrics']) && is_array($data['metrics'])) {
             foreach ($data['metrics'] as $metricData) {
-                $metrics[] = Metric::fromArray($metricData);
+                if (is_array($metricData)) {
+                    $metrics[] = Metric::fromArray($metricData);
+                }
             }
         }
 
         $params = [];
-        if (isset($data['params'])) {
+        if (isset($data['params']) && is_array($data['params'])) {
             foreach ($data['params'] as $paramData) {
-                $params[] = Param::fromArray($paramData);
+                if (is_array($paramData)) {
+                    $params[] = Param::fromArray($paramData);
+                }
             }
         }
 
         $tags = [];
-        if (isset($data['tags'])) {
+        if (isset($data['tags']) && is_array($data['tags'])) {
             foreach ($data['tags'] as $tagData) {
-                $tags[] = RunTag::fromArray($tagData);
+                if (is_array($tagData)) {
+                    $tags[] = RunTag::fromArray($tagData);
+                }
             }
         }
 
@@ -100,7 +106,7 @@ class RunData
     public function getMetric(string $key): ?Metric
     {
         foreach ($this->metrics as $metric) {
-            if ($metric->getKey() === $key) {
+            if ($metric->key === $key) {
                 return $metric;
             }
         }
@@ -110,7 +116,7 @@ class RunData
     public function getParam(string $key): ?Param
     {
         foreach ($this->params as $param) {
-            if ($param->getKey() === $key) {
+            if ($param->key === $key) {
                 return $param;
             }
         }
@@ -120,7 +126,7 @@ class RunData
     public function getTag(string $key): ?RunTag
     {
         foreach ($this->tags as $tag) {
-            if ($tag->getKey() === $key) {
+            if ($tag->key === $key) {
                 return $tag;
             }
         }

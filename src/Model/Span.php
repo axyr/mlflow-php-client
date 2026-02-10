@@ -141,21 +141,32 @@ class Span
     public static function fromArray(array $data): self
     {
         $events = [];
-        if (isset($data['events'])) {
+        if (isset($data['events']) && is_array($data['events'])) {
             foreach ($data['events'] as $eventData) {
-                $events[] = SpanEvent::fromArray($eventData);
+                if (is_array($eventData)) {
+                    $events[] = SpanEvent::fromArray($eventData);
+                }
             }
         }
 
+        $traceId = $data['trace_id'] ?? $data['request_id'] ?? ''; // Support deprecated request_id
+        $spanId = $data['span_id'] ?? '';
+        $name = $data['name'] ?? '';
+        $parentId = $data['parent_id'] ?? null;
+        $statusValue = $data['status'] ?? 'UNSET';
+        $spanType = $data['span_type'] ?? 'UNKNOWN';
+
         return new self(
-            traceId: $data['trace_id'] ?? $data['request_id'], // Support deprecated request_id
-            spanId: $data['span_id'],
-            name: $data['name'],
-            startTimeNs: (int) $data['start_time_ns'],
+            traceId: is_string($traceId) ? $traceId : (string) $traceId,
+            spanId: is_string($spanId) ? $spanId : (string) $spanId,
+            name: is_string($name) ? $name : (string) $name,
+            startTimeNs: (int) ($data['start_time_ns'] ?? 0),
             endTimeNs: isset($data['end_time_ns']) ? (int) $data['end_time_ns'] : null,
-            parentId: $data['parent_id'] ?? null,
-            status: SpanStatusCode::from($data['status']),
-            spanType: $data['span_type'],
+            parentId: is_string($parentId) ? $parentId : null,
+            status: (is_string($statusValue) || is_int($statusValue))
+                ? SpanStatusCode::from($statusValue)
+                : SpanStatusCode::UNSET,
+            spanType: is_string($spanType) ? $spanType : (string) $spanType,
             inputs: $data['inputs'] ?? null,
             outputs: $data['outputs'] ?? null,
             attributes: $data['attributes'] ?? [],

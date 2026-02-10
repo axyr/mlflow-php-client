@@ -35,10 +35,24 @@ class Run
      */
     public static function fromArray(array $data): self
     {
+        $info = $data['info'] ?? [];
+        $dataArray = $data['data'] ?? [];
+        $inputs = $data['inputs'] ?? null;
+
+        if (!is_array($info)) {
+            $info = [];
+        }
+        if (!is_array($dataArray)) {
+            $dataArray = [];
+        }
+        if ($inputs !== null && !is_array($inputs)) {
+            $inputs = null;
+        }
+
         return new self(
-            RunInfo::fromArray($data['info']),
-            RunData::fromArray($data['data'] ?? []),
-            $data['inputs'] ?? null
+            RunInfo::fromArray($info),
+            RunData::fromArray($dataArray),
+            $inputs
         );
     }
 

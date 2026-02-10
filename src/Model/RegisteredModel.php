@@ -17,7 +17,7 @@ class RegisteredModel
     private ?array $latestVersions;
     /** @var array<ModelTag>|null */
     private ?array $tags;
-    /** @var array<string>|null */
+    /** @var array<ModelAlias>|null */
     private ?array $aliases;
 
     /**
@@ -27,7 +27,7 @@ class RegisteredModel
      * @param int|null $lastUpdatedTimestamp
      * @param array<ModelVersion>|null $latestVersions
      * @param array<ModelTag>|null $tags
-     * @param array<string>|null $aliases
+     * @param array<ModelAlias>|null $aliases
      */
     public function __construct(
         string $name,
@@ -170,7 +170,7 @@ class RegisteredModel
     }
 
     /**
-     * @return ModelAlias[]|null
+     * @return array<ModelAlias>|null
      */
     public function getAliases(): ?array
     {
