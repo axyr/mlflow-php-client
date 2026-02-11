@@ -13,3 +13,5 @@
 .env.local
 /docs/api/
 /.phpdoc/
+/infection.log
+/.infection/

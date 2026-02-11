@@ -17,6 +17,7 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.93",
+        "infection/infection": "^0.29",
         "phpdocumentor/phpdocumentor": "^3.0",
         "phpstan/phpstan": "^1.0",
         "phpunit/phpunit": "^9.5 || ^10.0",
@@ -37,12 +38,14 @@
         "phpstan": "phpstan analyse",
         "cs-check": "phpcs",
         "cs-fix": "phpcbf",
-        "docs": "phpdoc run"
+        "docs": "phpdoc run",
+        "mutation": "infection"
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "infection/extension-installer": true
         }
     },
     "minimum-stability": "stable",
