@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\RequestException;
 use MLflow\Contract\ApiInterface;
 use MLflow\Exception\MLflowException;
 use MLflow\Exception\NetworkException;
+use MLflow\Util\SecurityHelper;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -106,11 +107,7 @@ abstract class BaseApi implements ApiInterface
                 unset($options['json']);
             }
 
-            $this->logger->debug('Making API request', [
-                'method' => $method,
-                'endpoint' => $endpoint,
-                'options' => $options,
-            ]);
+            $this->logRequest($method, $endpoint, $options);
 
             $response = $this->httpClient->request($method, $endpoint, $options);
 
@@ -215,5 +212,28 @@ abstract class BaseApi implements ApiInterface
         }
 
         return $formatted;
+    }
+
+    /**
+     * Log API request with sensitive data masked
+     *
+     * @param string $method HTTP method
+     * @param string $endpoint API endpoint
+     * @param array<string, mixed> $options Request options
+     */
+    private function logRequest(string $method, string $endpoint, array $options): void
+    {
+        $safeOptions = $options;
+
+        // Mask sensitive headers
+        if (isset($safeOptions['headers']) && is_array($safeOptions['headers'])) {
+            $safeOptions['headers'] = SecurityHelper::maskSensitiveHeaders($safeOptions['headers']);
+        }
+
+        $this->logger->debug('Making API request', [
+            'method' => $method,
+            'endpoint' => $endpoint,
+            'options' => $safeOptions,
+        ]);
     }
 }
