@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Contract\SerializableModelInterface;
 use MLflow\Enum\WebhookStatus;
 
 /**
  * Represents an MLflow Webhook
  */
-readonly class Webhook implements \JsonSerializable
+readonly class Webhook implements SerializableModelInterface
 {
     /**
      * @param string $id Webhook ID

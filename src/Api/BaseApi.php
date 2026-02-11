@@ -7,6 +7,7 @@ namespace MLflow\Api;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
+use MLflow\Contract\ApiInterface;
 use MLflow\Exception\MLflowException;
 use MLflow\Exception\NetworkException;
 use Psr\Http\Message\ResponseInterface;
@@ -16,7 +17,7 @@ use Psr\Log\NullLogger;
 /**
  * Base API class providing common functionality for all API endpoints
  */
-abstract class BaseApi
+abstract class BaseApi implements ApiInterface
 {
     protected ClientInterface $httpClient;
     protected LoggerInterface $logger;

@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Contract\SerializableModelInterface;
+
 /**
  * Represents a tag on an experiment (immutable key-value pair)
  */
-readonly class ExperimentTag implements \JsonSerializable, \Stringable
+readonly class ExperimentTag implements SerializableModelInterface, \Stringable
 {
     public function __construct(
         public string $key,

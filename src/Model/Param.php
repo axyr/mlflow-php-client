@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Contract\SerializableModelInterface;
 use MLflow\Util\ValidationHelper;
 
 /**
  * Represents an MLflow parameter (immutable key-value pair)
  */
-readonly class Param implements \JsonSerializable, \Stringable
+readonly class Param implements SerializableModelInterface, \Stringable
 {
     public function __construct(
         public string $key,

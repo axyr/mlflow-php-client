@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Contract\SerializableModelInterface;
 use MLflow\Util\ValidationHelper;
 
 /**
  * Represents an MLflow metric (immutable)
  */
-readonly class Metric implements \JsonSerializable
+readonly class Metric implements SerializableModelInterface
 {
     public function __construct(
         public string $key,

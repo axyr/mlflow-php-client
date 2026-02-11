@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Contract\SerializableModelInterface;
+
 /**
  * Represents an MLflow run tag (immutable key-value pair)
  */
-readonly class RunTag implements \JsonSerializable, \Stringable
+readonly class RunTag implements SerializableModelInterface, \Stringable
 {
     public function __construct(
         public string $key,
