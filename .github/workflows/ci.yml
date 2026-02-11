@@ -158,7 +158,7 @@ jobs:
       - name: Run integration tests
         env:
           MLFLOW_TRACKING_URI: http://localhost:5000
-        run: vendor/bin/phpunit tests/Integration
+        run: vendor/bin/phpunit tests/Integration --no-coverage
 
       - name: Stop MLflow server
         if: always()

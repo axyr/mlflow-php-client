@@ -17,6 +17,9 @@
 /.idea/
 /.vscode/
 /.claude/
+/.ai/
+/.junie/
+CLAUDE.md
 *.swp
 *.swo
 *~
