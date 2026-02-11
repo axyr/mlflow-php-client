@@ -276,4 +276,63 @@ class PromptApi extends BaseApi
             'alias' => $alias,
         ]);
     }
+
+    /**
+     * Update a prompt
+     *
+     * @param string $name Prompt name
+     * @param string|null $description New description
+     * @param array<string, string>|null $tags New tags
+     * @return void
+     * @throws MLflowException
+     */
+    public function updatePrompt(
+        string $name,
+        ?string $description = null,
+        ?array $tags = null
+    ): void {
+        $params = ['name' => $name];
+
+        if ($description !== null) {
+            $params['description'] = $description;
+        }
+
+        if ($tags !== null) {
+            $params['tags'] = $tags;
+        }
+
+        $this->patch('mlflow/prompts/update', $params);
+    }
+
+    /**
+     * Update a prompt version
+     *
+     * @param string $name Prompt name
+     * @param string|int $version Version number or name
+     * @param string|null $description New description
+     * @param array<string, string>|null $tags New tags
+     * @return void
+     * @throws MLflowException
+     */
+    public function updatePromptVersion(
+        string $name,
+        string|int $version,
+        ?string $description = null,
+        ?array $tags = null
+    ): void {
+        $params = [
+            'name' => $name,
+            'version' => (string) $version,
+        ];
+
+        if ($description !== null) {
+            $params['description'] = $description;
+        }
+
+        if ($tags !== null) {
+            $params['tags'] = $tags;
+        }
+
+        $this->patch('mlflow/prompts/versions/update', $params);
+    }
 }

@@ -418,6 +418,89 @@ class RunApi extends BaseApi
     }
 
     /**
+     * Get parent run (for nested runs)
+     *
+     * @param string $runId Child run ID
+     * @return Run|null Parent run or null if no parent
+     * @throws MLflowException
+     */
+    public function getParentRun(string $runId): ?Run
+    {
+        $run = $this->getById($runId);
+        $tags = $run->getTags();
+
+        // Look for parent run ID in tags
+        foreach ($tags as $tag) {
+            if ($tag->key === 'mlflow.parentRunId' && $tag->value !== '') {
+                return $this->getById($tag->value);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Link a prompt version to a run
+     *
+     * @param string $runId Run ID
+     * @param string $promptName Prompt name
+     * @param string $promptVersion Prompt version
+     * @return void
+     * @throws MLflowException
+     */
+    public function linkPromptVersionToRun(
+        string $runId,
+        string $promptName,
+        string $promptVersion
+    ): void {
+        $this->post('mlflow/runs/link-prompt-version', [
+            'run_id' => $runId,
+            'prompt_name' => $promptName,
+            'prompt_version' => $promptVersion,
+        ]);
+    }
+
+    /**
+     * Link a prompt version to a model
+     *
+     * @param string $modelName Model name
+     * @param string $modelVersion Model version
+     * @param string $promptName Prompt name
+     * @param string $promptVersion Prompt version
+     * @return void
+     * @throws MLflowException
+     */
+    public function linkPromptVersionToModel(
+        string $modelName,
+        string $modelVersion,
+        string $promptName,
+        string $promptVersion
+    ): void {
+        $this->post('mlflow/model-versions/link-prompt-version', [
+            'model_name' => $modelName,
+            'model_version' => $modelVersion,
+            'prompt_name' => $promptName,
+            'prompt_version' => $promptVersion,
+        ]);
+    }
+
+    /**
+     * Link multiple traces to a run
+     *
+     * @param string $runId Run ID
+     * @param array<string> $traceIds Trace IDs to link
+     * @return void
+     * @throws MLflowException
+     */
+    public function linkTracesToRun(string $runId, array $traceIds): void
+    {
+        $this->post('mlflow/runs/link-traces', [
+            'run_id' => $runId,
+            'trace_ids' => $traceIds,
+        ]);
+    }
+
+    /**
      * Format parameters for batch logging
      *
      * @param array<string, string> $params Associative array of parameters

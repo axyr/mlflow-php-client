@@ -573,6 +573,34 @@ class ModelRegistryApi extends BaseApi
     }
 
     /**
+     * Copy a model version to another registered model (Unity Catalog migration)
+     *
+     * @param string $sourceName Source model name
+     * @param string $sourceVersion Source version
+     * @param string $destinationName Destination model name
+     * @return ModelVersion The copied model version
+     * @throws MLflowException
+     */
+    public function copyModelVersion(
+        string $sourceName,
+        string $sourceVersion,
+        string $destinationName
+    ): ModelVersion {
+        $response = $this->post('mlflow/model-versions/copy', [
+            'src_model_name' => $sourceName,
+            'src_model_version' => $sourceVersion,
+            'dst_model_name' => $destinationName,
+        ]);
+
+        $version = $response['model_version'] ?? null;
+        if (!is_array($version)) {
+            throw new MLflowException('Invalid model_version data in response');
+        }
+
+        return ModelVersion::fromArray($version);
+    }
+
+    /**
      * Format tags for API request
      *
      * @param array<string, string> $tags Associative array of tags
