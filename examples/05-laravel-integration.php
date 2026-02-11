@@ -185,6 +185,7 @@ class TrainModelJob implements ShouldQueue
 function trackExperiment(string $name): string
 {
     $experiment = mlflow()->experiments()->create($name);
+
     return $experiment->experimentId;
 }
 

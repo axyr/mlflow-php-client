@@ -13,7 +13,6 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use MLflow\Enum\RunStatus;
 use MLflow\MLflowClient;
 
 $client = new MLflowClient('http://localhost:5555');

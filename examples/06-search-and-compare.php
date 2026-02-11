@@ -14,7 +14,6 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 use MLflow\Enum\RunStatus;
-
 use MLflow\MLflowClient;
 
 $client = new MLflowClient('http://localhost:5555');
@@ -32,7 +31,7 @@ $configs = [
 
 $runIds = [];
 foreach ($configs as $i => $config) {
-    echo "  Creating run " . ($i + 1) . "...\n";
+    echo '  Creating run ' . ($i + 1) . "...\n";
 
     $accuracy = 0.80 + (rand(0, 15) / 100);
     $loss = 0.50 - (rand(0, 20) / 100);
@@ -54,7 +53,7 @@ foreach ($configs as $i => $config) {
     usleep(100000); // 100ms
 }
 
-echo "✅ Created " . count($runIds) . " runs\n\n";
+echo '✅ Created ' . count($runIds) . " runs\n\n";
 
 // Search for all completed runs
 echo "Searching for completed runs...\n";
@@ -63,16 +62,16 @@ $result = $client->runs()->search(
     filter: "attributes.status = 'FINISHED'"
 );
 
-echo "Found " . count($result['runs']) . " completed runs\n\n";
+echo 'Found ' . count($result['runs']) . " completed runs\n\n";
 
 // Search for runs with high accuracy
 echo "Searching for runs with accuracy > 0.85...\n";
 $result = $client->runs()->search(
     experimentIds: [$experiment->experimentId],
-    filter: "metrics.accuracy > 0.85"
+    filter: 'metrics.accuracy > 0.85'
 );
 
-echo "Found " . count($result['runs']) . " high-accuracy runs:\n";
+echo 'Found ' . count($result['runs']) . " high-accuracy runs:\n";
 foreach ($result['runs'] as $run) {
     $latestMetrics = $run->data->metrics->getLatestByKey();
     $accuracy = $latestMetrics['accuracy']->value ?? 0;
@@ -94,11 +93,11 @@ echo "\n";
 echo "Finding best performing run...\n";
 $result = $client->runs()->search(
     experimentIds: [$experiment->experimentId],
-    orderBy: ["metrics.accuracy DESC"],
+    orderBy: ['metrics.accuracy DESC'],
     maxResults: 1
 );
 
-if (!empty($result['runs'])) {
+if (! empty($result['runs'])) {
     $bestRun = $result['runs'][0];
     $latestMetrics = $bestRun->data->metrics->getLatestByKey();
     $accuracy = $latestMetrics['accuracy']->value ?? 0;

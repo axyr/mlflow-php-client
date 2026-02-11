@@ -14,7 +14,6 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 use MLflow\Enum\RunStatus;
-
 use MLflow\MLflowClient;
 
 // Initialize the MLflow client
@@ -22,8 +21,8 @@ $client = new MLflowClient('http://localhost:5555');
 
 // Verify connection
 echo "Connecting to MLflow...\n";
-if (!$client->validateConnection()) {
-    die("❌ Could not connect to MLflow server\n");
+if (! $client->validateConnection()) {
+    exit("❌ Could not connect to MLflow server\n");
 }
 echo "✅ Connected to MLflow\n\n";
 
@@ -69,6 +68,6 @@ echo "Retrieving run details...\n";
 $run = $client->runs()->getById($runId);
 echo "Run ID: {$run->info->runId}\n";
 echo "Status: {$run->info->status->value}\n";
-echo "Start time: " . date('Y-m-d H:i:s', (int)($run->info->startTime / 1000)) . "\n";
+echo 'Start time: ' . date('Y-m-d H:i:s', (int) ($run->info->startTime / 1000)) . "\n";
 
 echo "\n🎉 Example completed successfully!\n";
