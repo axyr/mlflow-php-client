@@ -29,6 +29,26 @@ readonly class RunTag implements SerializableModelInterface, \Stringable
     }
 
     /**
+     * Create a tag with any value type (automatically converted to string)
+     *
+     * @param string $key Tag key
+     * @param mixed $value Tag value (will be converted to string)
+     *
+     * @example
+     * ```php
+     * $tag = RunTag::create('model_type', 'neural_network');
+     * $tag = RunTag::create('version', 1);
+     * ```
+     */
+    public static function create(string $key, mixed $value): self
+    {
+        return new self(
+            key: $key,
+            value: is_string($value) ? $value : (string) json_encode($value),
+        );
+    }
+
+    /**
      * @return array{key: string, value: string}
      */
     public function toArray(): array

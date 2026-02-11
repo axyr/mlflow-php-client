@@ -35,6 +35,11 @@ readonly class Metric implements SerializableModelInterface
 
     /**
      * Create a metric with the current timestamp
+     *
+     * @example
+     * ```php
+     * $metric = Metric::now('accuracy', 0.95, step: 1);
+     * ```
      */
     public static function now(string $key, float $value, int $step = 0): self
     {
@@ -42,6 +47,52 @@ readonly class Metric implements SerializableModelInterface
             key: $key,
             value: $value,
             timestamp: (int) (microtime(true) * 1000),
+            step: $step,
+        );
+    }
+
+    /**
+     * Create a metric with a specific timestamp
+     *
+     * @param string $key Metric key
+     * @param float $value Metric value
+     * @param int $timestamp Timestamp in milliseconds
+     * @param int $step Training step
+     *
+     * @example
+     * ```php
+     * $metric = Metric::atTimestamp('loss', 0.05, 1638360000000, step: 10);
+     * ```
+     */
+    public static function atTimestamp(string $key, float $value, int $timestamp, int $step = 0): self
+    {
+        return new self(
+            key: $key,
+            value: $value,
+            timestamp: $timestamp,
+            step: $step,
+        );
+    }
+
+    /**
+     * Create a metric from seconds-based timestamp
+     *
+     * @param string $key Metric key
+     * @param float $value Metric value
+     * @param int $timestampSeconds Timestamp in seconds (Unix timestamp)
+     * @param int $step Training step
+     *
+     * @example
+     * ```php
+     * $metric = Metric::atTime('accuracy', 0.95, time(), step: 1);
+     * ```
+     */
+    public static function atTime(string $key, float $value, int $timestampSeconds, int $step = 0): self
+    {
+        return new self(
+            key: $key,
+            value: $value,
+            timestamp: $timestampSeconds * 1000,
             step: $step,
         );
     }

@@ -30,6 +30,27 @@ readonly class Param implements SerializableModelInterface, \Stringable
     }
 
     /**
+     * Create a parameter with any value type (automatically converted to string)
+     *
+     * @param string $key Parameter key
+     * @param mixed $value Parameter value (will be converted to string)
+     *
+     * @example
+     * ```php
+     * $param = Param::create('learning_rate', 0.01);
+     * $param = Param::create('epochs', 100);
+     * $param = Param::create('optimizer', 'adam');
+     * ```
+     */
+    public static function create(string $key, mixed $value): self
+    {
+        return new self(
+            key: $key,
+            value: is_string($value) ? $value : (string) json_encode($value),
+        );
+    }
+
+    /**
      * @return array{key: string, value: string}
      */
     public function toArray(): array
