@@ -104,7 +104,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
 
       - name: Check code style
-        run: composer cs-check
+        run: vendor/bin/pint --test
 
   integration:
     name: Integration Tests
