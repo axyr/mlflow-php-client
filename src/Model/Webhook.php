@@ -4,52 +4,37 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Enum\WebhookStatus;
+
 /**
  * Represents an MLflow Webhook
  */
-class Webhook
+readonly class Webhook implements \JsonSerializable
 {
-    private string $id;
-    private string $name;
-    private string $url;
-    /** @var array<string> */
-    private array $events;
-    private ?string $description;
-    private ?string $status;
-    private ?int $creationTime;
-    private ?int $lastUpdateTime;
-
     /**
-     * @param string $id
-     * @param string $name
-     * @param string $url
-     * @param array<string> $events
-     * @param string|null $description
-     * @param string|null $status
-     * @param int|null $creationTime
-     * @param int|null $lastUpdateTime
+     * @param string $id Webhook ID
+     * @param string $name Webhook name
+     * @param string $url Webhook URL
+     * @param array<string> $events List of events that trigger the webhook
+     * @param WebhookStatus $status Webhook status
+     * @param string|null $description Optional description
+     * @param int|null $creationTime Creation timestamp
+     * @param int|null $lastUpdateTime Last update timestamp
      */
     public function __construct(
-        string $id,
-        string $name,
-        string $url,
-        array $events,
-        ?string $description = null,
-        ?string $status = null,
-        ?int $creationTime = null,
-        ?int $lastUpdateTime = null
-    ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->url = $url;
-        $this->events = $events;
-        $this->description = $description;
-        $this->status = $status;
-        $this->creationTime = $creationTime;
-        $this->lastUpdateTime = $lastUpdateTime;
-    }
+        public string $id,
+        public string $name,
+        public string $url,
+        public array $events,
+        public WebhookStatus $status,
+        public ?string $description = null,
+        public ?int $creationTime = null,
+        public ?int $lastUpdateTime = null,
+    ) {}
 
     /**
+     * Create Webhook from array data
+     *
      * @param array<string, mixed> $data
      * @return self
      */
@@ -60,23 +45,26 @@ class Webhook
         $url = $data['url'] ?? '';
         $events = $data['events'] ?? [];
         $description = $data['description'] ?? null;
-        $status = $data['status'] ?? null;
+        $statusStr = $data['status'] ?? 'ACTIVE';
+        $status = WebhookStatus::from(is_string($statusStr) ? $statusStr : 'ACTIVE');
         $creationTime = $data['creation_time'] ?? null;
         $lastUpdateTime = $data['last_update_time'] ?? null;
 
         return new self(
-            is_string($id) ? $id : '',
-            is_string($name) ? $name : '',
-            is_string($url) ? $url : '',
-            is_array($events) ? $events : [],
-            is_string($description) ? $description : null,
-            is_string($status) ? $status : null,
-            is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
-            is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null)
+            id: is_string($id) ? $id : '',
+            name: is_string($name) ? $name : '',
+            url: is_string($url) ? $url : '',
+            events: is_array($events) ? $events : [],
+            status: $status,
+            description: is_string($description) ? $description : null,
+            creationTime: is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
+            lastUpdateTime: is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null),
         );
     }
 
     /**
+     * Convert to array representation
+     *
      * @return array<string, mixed>
      */
     public function toArray(): array
@@ -86,14 +74,11 @@ class Webhook
             'name' => $this->name,
             'url' => $this->url,
             'events' => $this->events,
+            'status' => $this->status->value,
         ];
 
         if ($this->description !== null) {
             $data['description'] = $this->description;
-        }
-
-        if ($this->status !== null) {
-            $data['status'] = $this->status;
         }
 
         if ($this->creationTime !== null) {
@@ -107,22 +92,52 @@ class Webhook
         return $data;
     }
 
+    /**
+     * JSON serialization
+     *
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
+    }
+
+    /**
+     * Check if webhook is active
+     */
+    public function isActive(): bool
+    {
+        return $this->status->isActive();
+    }
+
+    // Deprecated getter methods for backward compatibility
+
+    /**
+     * @deprecated Use public property $id instead
+     */
     public function getId(): string
     {
         return $this->id;
     }
 
+    /**
+     * @deprecated Use public property $name instead
+     */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /**
+     * @deprecated Use public property $url instead
+     */
     public function getUrl(): string
     {
         return $this->url;
     }
 
     /**
+     * @deprecated Use public property $events instead
      * @return array<string>
      */
     public function getEvents(): array
@@ -130,28 +145,35 @@ class Webhook
         return $this->events;
     }
 
+    /**
+     * @deprecated Use public property $description instead
+     */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function getStatus(): ?string
+    /**
+     * @deprecated Use public property $status instead. Note: Returns enum now, not string
+     */
+    public function getStatus(): WebhookStatus
     {
         return $this->status;
     }
 
+    /**
+     * @deprecated Use public property $creationTime instead
+     */
     public function getCreationTime(): ?int
     {
         return $this->creationTime;
     }
 
+    /**
+     * @deprecated Use public property $lastUpdateTime instead
+     */
     public function getLastUpdateTime(): ?int
     {
         return $this->lastUpdateTime;
-    }
-
-    public function isActive(): bool
-    {
-        return $this->status === 'ACTIVE';
     }
 }
