@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace MLflow\Tests\Api;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Psr7\Response;
 use MLflow\Api\RunApi;
 use MLflow\Enum\RunStatus;
 use MLflow\Enum\ViewType;
 use MLflow\Model\Run;
-use MLflow\Exception\MLflowException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class RunApiTest extends TestCase
 {
     private RunApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -27,7 +27,7 @@ class RunApiTest extends TestCase
         $this->api = new RunApi($this->httpClient);
     }
 
-    public function testCreateRun(): void
+    public function test_create_run(): void
     {
         $expectedResponse = [
             'run' => [
@@ -56,6 +56,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['experiment_id'] === 'exp123'
                         && isset($json['start_time'])
                         && isset($json['tags']);
@@ -71,7 +72,7 @@ class RunApiTest extends TestCase
         $this->assertEquals(RunStatus::RUNNING, $run->getStatus());
     }
 
-    public function testGetRunById(): void
+    public function test_get_run_by_id(): void
     {
         $expectedResponse = [
             'run' => [
@@ -118,7 +119,7 @@ class RunApiTest extends TestCase
         $this->assertCount(1, $run->getTags());
     }
 
-    public function testSearchRuns(): void
+    public function test_search_runs(): void
     {
         $expectedResponse = [
             'runs' => [
@@ -153,6 +154,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['experiment_ids'] === ['exp1']
                         && isset($json['filter']) && $json['filter'] === 'metrics.accuracy > 0.9'
                         && isset($json['run_view_type']) && $json['run_view_type'] === 'ACTIVE_ONLY'
@@ -174,7 +176,7 @@ class RunApiTest extends TestCase
         $this->assertInstanceOf(Run::class, $result['runs'][0]);
     }
 
-    public function testUpdateRun(): void
+    public function test_update_run(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -185,6 +187,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['run_id'] === 'run123'
                         && isset($json['status']) && $json['status'] === 'FINISHED'
                         && isset($json['end_time']) && $json['end_time'] === 1234567900
@@ -197,7 +200,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testLogMetric(): void
+    public function test_log_metric(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -208,6 +211,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['run_id'] === 'run123'
                         && isset($json['key']) && $json['key'] === 'accuracy'
                         && isset($json['value']) && $json['value'] === 0.95
@@ -221,7 +225,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testLogParameter(): void
+    public function test_log_parameter(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -232,6 +236,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['run_id'] === 'run123'
                         && isset($json['key']) && $json['key'] === 'learning_rate'
                         && isset($json['value']) && $json['value'] === '0.01';
@@ -243,7 +248,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testLogBatch(): void
+    public function test_log_batch(): void
     {
         $metrics = [
             ['key' => 'accuracy', 'value' => 0.95, 'step' => 1],
@@ -269,6 +274,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['run_id'] === 'run123'
                         && is_array($json['metrics']) && count($json['metrics']) === 2
                         && is_array($json['params']) && count($json['params']) === 2
@@ -281,7 +287,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSetAndDeleteTag(): void
+    public function test_set_and_delete_tag(): void
     {
         // Test set tag
         $this->httpClient
@@ -300,6 +306,7 @@ class RunApiTest extends TestCase
                     $this->assertEquals('run123', $json['run_id']);
                     $this->assertEquals('tag_key', $json['key']);
                 }
+
                 return $this->createJsonResponse([]);
             });
 
@@ -308,7 +315,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testDeleteAndRestoreRun(): void
+    public function test_delete_and_restore_run(): void
     {
         // Test delete
         $this->httpClient
@@ -333,7 +340,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testLogModel(): void
+    public function test_log_model(): void
     {
         $flavors = [
             'python_function' => [
@@ -350,6 +357,7 @@ class RunApiTest extends TestCase
                 'mlflow/runs/log-model',
                 $this->callback(function (array $options) use ($flavors): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && isset($json['run_id'], $json['artifact_path'], $json['flavors'])
                         && isset($json['run_id']) && $json['run_id'] === 'run123'
@@ -363,7 +371,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testLogInputs(): void
+    public function test_log_inputs(): void
     {
         $datasets = [
             [
@@ -384,6 +392,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options) use ($datasets): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return isset($json['run_id'], $json['datasets'])
                         && $json['run_id'] === 'run123'
                         && $json['datasets'] === $datasets;
@@ -395,7 +404,7 @@ class RunApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSetTerminated(): void
+    public function test_set_terminated(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -406,6 +415,7 @@ class RunApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['run_id'] === 'run123'
                         && isset($json['status']) && $json['status'] === RunStatus::FINISHED->value
                         && isset($json['end_time']);
@@ -426,6 +436,7 @@ class RunApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],

@@ -21,20 +21,23 @@ use Psr\Log\NullLogger;
 abstract class BaseApi implements ApiInterface
 {
     protected ClientInterface $httpClient;
+
     protected LoggerInterface $logger;
 
     public function __construct(ClientInterface $httpClient, ?LoggerInterface $logger = null)
     {
         $this->httpClient = $httpClient;
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger ?? new NullLogger;
     }
 
     /**
      * Make a GET request
      *
-     * @param string $endpoint The API endpoint
-     * @param array<string, mixed> $query Query parameters
+     * @param string               $endpoint The API endpoint
+     * @param array<string, mixed> $query    Query parameters
+     *
      * @return array<string, mixed> The response data
+     *
      * @throws MLflowException
      */
     protected function get(string $endpoint, array $query = []): array
@@ -45,9 +48,11 @@ abstract class BaseApi implements ApiInterface
     /**
      * Make a POST request
      *
-     * @param string $endpoint The API endpoint
-     * @param array<string, mixed> $data Request body data
+     * @param string               $endpoint The API endpoint
+     * @param array<string, mixed> $data     Request body data
+     *
      * @return array<string, mixed> The response data
+     *
      * @throws MLflowException
      */
     protected function post(string $endpoint, array $data = []): array
@@ -58,9 +63,11 @@ abstract class BaseApi implements ApiInterface
     /**
      * Make a PATCH request
      *
-     * @param string $endpoint The API endpoint
-     * @param array<string, mixed> $data Request body data
+     * @param string               $endpoint The API endpoint
+     * @param array<string, mixed> $data     Request body data
+     *
      * @return array<string, mixed> The response data
+     *
      * @throws MLflowException
      */
     protected function patch(string $endpoint, array $data = []): array
@@ -71,9 +78,11 @@ abstract class BaseApi implements ApiInterface
     /**
      * Make a DELETE request
      *
-     * @param string $endpoint The API endpoint
-     * @param array<string, mixed> $data Request body data
+     * @param string               $endpoint The API endpoint
+     * @param array<string, mixed> $data     Request body data
+     *
      * @return array<string, mixed> The response data
+     *
      * @throws MLflowException
      */
     protected function delete(string $endpoint, array $data = []): array
@@ -84,10 +93,12 @@ abstract class BaseApi implements ApiInterface
     /**
      * Make an HTTP request
      *
-     * @param string $method HTTP method
-     * @param string $endpoint The API endpoint
-     * @param array<string, mixed> $options Request options
+     * @param string               $method   HTTP method
+     * @param string               $endpoint The API endpoint
+     * @param array<string, mixed> $options  Request options
+     *
      * @return array<string, mixed> The response data
+     *
      * @throws MLflowException
      */
     protected function request(string $method, string $endpoint, array $options = []): array
@@ -97,7 +108,7 @@ abstract class BaseApi implements ApiInterface
             if (isset($options['json'])) {
                 $options['body'] = json_encode($options['json']);
                 $existingHeaders = $options['headers'] ?? [];
-                if (!is_array($existingHeaders)) {
+                if (! is_array($existingHeaders)) {
                     $existingHeaders = [];
                 }
                 $options['headers'] = array_merge(
@@ -134,8 +145,8 @@ abstract class BaseApi implements ApiInterface
     /**
      * Parse the response
      *
-     * @param ResponseInterface $response
      * @return array<string, mixed>
+     *
      * @throws MLflowException
      */
     private function parseResponse(ResponseInterface $response): array
@@ -148,18 +159,17 @@ abstract class BaseApi implements ApiInterface
 
         $data = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             throw new MLflowException('Invalid response format: expected array, got ' . gettype($data));
         }
 
+        /** @var array<string, mixed> $data */
         return $data;
     }
 
     /**
      * Handle request exceptions
      *
-     * @param RequestException $e
-     * @return never
      * @throws MLflowException
      */
     private function handleRequestException(RequestException $e): never
@@ -176,13 +186,15 @@ abstract class BaseApi implements ApiInterface
         }
 
         $statusCode = $response->getStatusCode();
+        /** @var array<string, mixed>|null $body */
         $body = null;
 
         try {
             $contents = $response->getBody()->getContents();
-            if (!empty($contents)) {
+            if (! empty($contents)) {
                 $decoded = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
                 if (is_array($decoded)) {
+                    /** @var array<string, mixed> $decoded */
                     $body = $decoded;
                 }
             }
@@ -199,6 +211,7 @@ abstract class BaseApi implements ApiInterface
      * Format tags for API request
      *
      * @param array<string, string> $tags Associative array of tags
+     *
      * @return array<int, array{key: string, value: string}> Formatted tags
      */
     protected function formatTags(array $tags): array
@@ -217,9 +230,9 @@ abstract class BaseApi implements ApiInterface
     /**
      * Log API request with sensitive data masked
      *
-     * @param string $method HTTP method
-     * @param string $endpoint API endpoint
-     * @param array<string, mixed> $options Request options
+     * @param string               $method   HTTP method
+     * @param string               $endpoint API endpoint
+     * @param array<string, mixed> $options  Request options
      */
     private function logRequest(string $method, string $endpoint, array $options): void
     {
@@ -227,7 +240,9 @@ abstract class BaseApi implements ApiInterface
 
         // Mask sensitive headers
         if (isset($safeOptions['headers']) && is_array($safeOptions['headers'])) {
-            $safeOptions['headers'] = SecurityHelper::maskSensitiveHeaders($safeOptions['headers']);
+            /** @var array<string, mixed> $headers */
+            $headers = $safeOptions['headers'];
+            $safeOptions['headers'] = SecurityHelper::maskSensitiveHeaders($headers);
         }
 
         $this->logger->debug('Making API request', [

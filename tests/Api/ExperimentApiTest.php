@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace MLflow\Tests\Api;
 
-use MLflow\Api\ExperimentApi;
-use MLflow\Model\Experiment;
-use MLflow\Exception\MLflowException;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
+use MLflow\Api\ExperimentApi;
+use MLflow\Exception\MLflowException;
+use MLflow\Model\Experiment;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class ExperimentApiTest extends TestCase
 {
     private ExperimentApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -25,7 +26,7 @@ class ExperimentApiTest extends TestCase
         $this->api = new ExperimentApi($this->httpClient);
     }
 
-    public function testCreateExperiment(): void
+    public function test_create_experiment(): void
     {
         $expectedResponse = [
             'experiment_id' => '123',
@@ -39,6 +40,7 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/create',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && isset($json['name'])
                         && isset($json['name']) && $json['name'] === 'test-experiment'
@@ -59,7 +61,7 @@ class ExperimentApiTest extends TestCase
         $this->assertEquals('test-experiment', $experiment->getName());
     }
 
-    public function testGetExperimentById(): void
+    public function test_get_experiment_by_id(): void
     {
         $expectedResponse = [
             'experiment' => [
@@ -90,7 +92,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue($experiment->isActive());
     }
 
-    public function testGetExperimentByName(): void
+    public function test_get_experiment_by_name(): void
     {
         $expectedResponse = [
             'experiment' => [
@@ -118,7 +120,7 @@ class ExperimentApiTest extends TestCase
         $this->assertEquals('test-experiment', $experiment->getName());
     }
 
-    public function testSearchExperiments(): void
+    public function test_search_experiments(): void
     {
         $expectedResponse = [
             'experiments' => [
@@ -143,6 +145,7 @@ class ExperimentApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['filter'] === "attribute.name = 'test'"
                         && isset($json['max_results']) && $json['max_results'] === 10
                         && isset($json['view_type']) && $json['view_type'] === 'ACTIVE_ONLY';
@@ -163,7 +166,7 @@ class ExperimentApiTest extends TestCase
         $this->assertInstanceOf(Experiment::class, $result['experiments'][0]);
     }
 
-    public function testUpdateExperiment(): void
+    public function test_update_experiment(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -173,6 +176,7 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/update',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && isset($json['experiment_id'])
                         && $json['experiment_id'] === '123'
                         && isset($json['new_name']) && $json['new_name'] === 'new-name';
@@ -184,7 +188,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue(true); // Just verify no exception thrown
     }
 
-    public function testDeleteExperiment(): void
+    public function test_delete_experiment(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -195,6 +199,7 @@ class ExperimentApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['experiment_id'] === '123';
                 })
             )
@@ -204,7 +209,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testRestoreExperiment(): void
+    public function test_restore_experiment(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -215,6 +220,7 @@ class ExperimentApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['experiment_id'] === '123';
                 })
             )
@@ -224,7 +230,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSetExperimentTag(): void
+    public function test_set_experiment_tag(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -234,6 +240,7 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/set-experiment-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && isset($json['experiment_id'])
                         && $json['experiment_id'] === '123' && isset($json['key'])
                         && $json['key'] === 'tag_key' && isset($json['value'])
@@ -246,7 +253,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testDeleteExperimentTag(): void
+    public function test_delete_experiment_tag(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -256,6 +263,7 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/delete-experiment-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && isset($json['experiment_id'])
                         && $json['experiment_id'] === '123'
                         && isset($json['key']) && $json['key'] === 'tag_key';
@@ -267,7 +275,7 @@ class ExperimentApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testExceptionHandling(): void
+    public function test_exception_handling(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -289,6 +297,7 @@ class ExperimentApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],

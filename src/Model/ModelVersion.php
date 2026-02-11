@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Collection\TagCollection;
 use MLflow\Enum\ModelStage;
 use MLflow\Enum\ModelVersionStatus;
-use MLflow\Collection\TagCollection;
 
 /**
  * Represents a model version in MLflow Model Registry
@@ -14,35 +14,36 @@ use MLflow\Collection\TagCollection;
 readonly class ModelVersion
 {
     public string $name;
+
     public string $version;
+
     public ?int $creationTimestamp;
+
     public ?int $lastUpdatedTimestamp;
+
     public ?ModelStage $currentStage;
+
     public ?string $description;
+
     public ?string $source;
+
     public ?string $runId;
+
     public ?ModelVersionStatus $status;
+
     public ?string $statusMessage;
+
     /** @var TagCollection<ModelTag>|null */
     public ?TagCollection $tags;
+
     public ?string $runLink;
+
     /** @var array<string>|null */
     public ?array $aliases;
 
     /**
-     * @param string $name
-     * @param string $version
-     * @param int|null $creationTimestamp
-     * @param int|null $lastUpdatedTimestamp
-     * @param ModelStage|null $currentStage
-     * @param string|null $description
-     * @param string|null $source
-     * @param string|null $runId
-     * @param ModelVersionStatus|null $status
-     * @param string|null $statusMessage
      * @param TagCollection<ModelTag>|null $tags
-     * @param string|null $runLink
-     * @param array<string>|null $aliases
+     * @param array<string>|null           $aliases
      */
     public function __construct(
         string $name,
@@ -76,13 +77,12 @@ readonly class ModelVersion
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
         $tags = null;
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tagCollection = new TagCollection();
+            $tagCollection = new TagCollection;
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
@@ -110,6 +110,11 @@ readonly class ModelVersion
         $statusMessage = $data['status_message'] ?? null;
         $runLink = $data['run_link'] ?? null;
         $aliases = $data['aliases'] ?? null;
+        if (is_array($aliases)) {
+            /** @var array<string> $aliases */
+        } else {
+            $aliases = null;
+        }
 
         $name = $data['name'] ?? '';
         $version = $data['version'] ?? '';
@@ -145,7 +150,7 @@ readonly class ModelVersion
             is_string($statusMessage) ? $statusMessage : null,
             $tags,
             is_string($runLink) ? $runLink : null,
-            is_array($aliases) ? $aliases : null
+            $aliases
         );
     }
 

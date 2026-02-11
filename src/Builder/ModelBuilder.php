@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MLflow\Builder;
 
+use Illuminate\Support\Traits\Macroable;
 use MLflow\Api\ModelRegistryApi;
 use MLflow\Model\RegisteredModel;
 
 /**
  * Fluent builder for creating registered models in MLflow Model Registry
+ *
+ * Supports macros for custom methods.
  *
  * @example
  * ```php
@@ -18,18 +21,26 @@ use MLflow\Model\RegisteredModel;
  *     ->withTag('task', 'classification')
  *     ->create();
  * ```
+ * @example Using macros
+ * ```php
+ * ModelBuilder::macro('forPyTorch', function () {
+ *     return $this->withTag('framework', 'pytorch');
+ * });
+ * ```
  */
 final class ModelBuilder
 {
+    use Macroable;
+
     private ?string $description = null;
+
     /** @var array<string, string> */
     private array $tags = [];
 
     public function __construct(
         private readonly ModelRegistryApi $registryApi,
         private readonly string $name,
-    ) {
-    }
+    ) {}
 
     /**
      * Set the model description

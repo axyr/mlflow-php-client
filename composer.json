@@ -1,8 +1,9 @@
 {
     "name": "martijn/mlflow-php-client",
-    "description": "A PHP client library for MLflow REST API",
+    "description": "A Laravel package for MLflow REST API with complete tracking, model registry, and experiment management",
     "type": "library",
     "license": "MIT",
+    "keywords": ["laravel", "mlflow", "machine-learning", "ml-tracking", "model-registry", "experiment-tracking"],
     "authors": [
         {
             "name": "Martijn",
@@ -12,20 +13,20 @@
     "require": {
         "php": "^8.4",
         "guzzlehttp/guzzle": "^7.0",
-        "psr/log": "^1.0 || ^2.0 || ^3.0",
-        "psr/simple-cache": "^1.0 || ^2.0 || ^3.0"
+        "psr/log": "^1.1|^2.0|^3.0",
+        "psr/simple-cache": "^2.0|^3.0",
+        "illuminate/support": "^12.0",
+        "illuminate/contracts": "^12.0",
+        "illuminate/log": "^12.0",
+        "illuminate/config": "^12.0"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.93",
-        "infection/infection": "^0.29",
-        "phpdocumentor/phpdocumentor": "^3.0",
-        "phpstan/phpstan": "^1.0",
-        "phpunit/phpunit": "^9.5 || ^10.0",
-        "squizlabs/php_codesniffer": "^3.6"
-    },
-    "suggest": {
-        "illuminate/support": "^10.0|^11.0 - Required for Laravel integration (ServiceProvider, Facade, config)",
-        "illuminate/contracts": "^10.0|^11.0 - Required for Laravel integration"
+        "laravel/pint": "^1.18",
+        "phpstan/phpstan": "^2.0",
+        "larastan/larastan": "^3.0",
+        "phpunit/phpunit": "^11.0",
+        "orchestra/testbench": "^10.0",
+        "mockery/mockery": "^1.6"
     },
     "autoload": {
         "psr-4": {
@@ -40,16 +41,18 @@
     "scripts": {
         "test": "phpunit",
         "phpstan": "phpstan analyse",
-        "cs-check": "phpcs",
-        "cs-fix": "phpcbf",
-        "docs": "phpdoc run",
-        "mutation": "infection"
+        "pint": "pint",
+        "pint:test": "pint --test",
+        "quality": [
+            "@pint:test",
+            "@phpstan",
+            "@test"
+        ]
     },
     "config": {
         "sort-packages": true,
         "allow-plugins": {
-            "php-http/discovery": true,
-            "infection/extension-installer": true
+            "php-http/discovery": true
         }
     },
     "extra": {

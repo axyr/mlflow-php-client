@@ -14,13 +14,13 @@ use MLflow\Collection\TagCollection;
 readonly class RunData
 {
     public MetricCollection $metrics;
+
     public ParameterCollection $params;
+
     /** @var TagCollection<RunTag> */
     public TagCollection $tags;
 
     /**
-     * @param MetricCollection $metrics
-     * @param ParameterCollection $params
      * @param TagCollection<RunTag> $tags
      */
     public function __construct(
@@ -28,18 +28,17 @@ readonly class RunData
         ?ParameterCollection $params = null,
         ?TagCollection $tags = null
     ) {
-        $this->metrics = $metrics ?? new MetricCollection();
-        $this->params = $params ?? new ParameterCollection();
-        $this->tags = $tags ?? new TagCollection();
+        $this->metrics = $metrics ?? new MetricCollection;
+        $this->params = $params ?? new ParameterCollection;
+        $this->tags = $tags ?? new TagCollection;
     }
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
-        $metrics = new MetricCollection();
+        $metrics = new MetricCollection;
         if (isset($data['metrics']) && is_array($data['metrics'])) {
             foreach ($data['metrics'] as $metricData) {
                 if (is_array($metricData)) {
@@ -49,7 +48,7 @@ readonly class RunData
             }
         }
 
-        $params = new ParameterCollection();
+        $params = new ParameterCollection;
         if (isset($data['params']) && is_array($data['params'])) {
             foreach ($data['params'] as $paramData) {
                 if (is_array($paramData)) {
@@ -59,7 +58,7 @@ readonly class RunData
             }
         }
 
-        $tags = new TagCollection();
+        $tags = new TagCollection;
         if (isset($data['tags']) && is_array($data['tags'])) {
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
@@ -86,7 +85,9 @@ readonly class RunData
 
     /**
      * Get metrics
+     *
      * @return Metric[]
+     *
      * @deprecated Access $metrics property directly
      */
     public function getMetrics(): array
@@ -96,7 +97,9 @@ readonly class RunData
 
     /**
      * Get params
+     *
      * @return Param[]
+     *
      * @deprecated Access $params property directly
      */
     public function getParams(): array
@@ -106,7 +109,9 @@ readonly class RunData
 
     /**
      * Get tags
+     *
      * @return RunTag[]
+     *
      * @deprecated Access $tags property directly
      */
     public function getTags(): array

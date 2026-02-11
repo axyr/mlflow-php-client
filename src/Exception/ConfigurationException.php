@@ -7,6 +7,4 @@ namespace MLflow\Exception;
 /**
  * Exception thrown for client configuration errors
  */
-class ConfigurationException extends MLflowException
-{
-}
+class ConfigurationException extends MLflowException {}

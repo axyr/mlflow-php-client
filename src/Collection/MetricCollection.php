@@ -12,7 +12,7 @@ use MLflow\Model\Metric;
  * @implements \IteratorAggregate<int, Metric>
  * @implements \ArrayAccess<int, Metric>
  */
-class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializable, \ArrayAccess
+class MetricCollection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable
 {
     /** @var array<Metric> */
     private array $metrics = [];
@@ -34,7 +34,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
      */
     public static function fromArrays(array $data): self
     {
-        $collection = new self();
+        $collection = new self;
         foreach ($data as $metricData) {
             $collection->add(Metric::fromArray($metricData));
         }
@@ -55,20 +55,14 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
         return $this->metrics;
     }
 
-    /**
-     * @return self
-     */
     public function getByKey(string $key): self
     {
-        return $this->filter(fn(Metric $m) => $m->key === $key);
+        return $this->filter(fn (Metric $m) => $m->key === $key);
     }
 
-    /**
-     * @return self
-     */
     public function getByStep(int $step): self
     {
-        return $this->filter(fn(Metric $m) => $m->step === $step);
+        return $this->filter(fn (Metric $m) => $m->step === $step);
     }
 
     /**
@@ -80,7 +74,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     {
         $latest = [];
         foreach ($this->metrics as $metric) {
-            if (!isset($latest[$metric->key]) || $metric->timestamp > $latest[$metric->key]->timestamp) {
+            if (! isset($latest[$metric->key]) || $metric->timestamp > $latest[$metric->key]->timestamp) {
                 $latest[$metric->key] = $metric;
             }
         }
@@ -92,7 +86,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
      * Filter metrics by predicate
      *
      * @param callable(Metric): bool $predicate
-     * @return self
      */
     public function filter(callable $predicate): self
     {
@@ -103,7 +96,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
      * Sort metrics
      *
      * @param callable(Metric, Metric): int $comparator
-     * @return self
      */
     public function sort(callable $comparator): self
     {
@@ -115,22 +107,18 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
 
     /**
      * Sort by timestamp ascending
-     *
-     * @return self
      */
     public function sortByTimestamp(): self
     {
-        return $this->sort(fn(Metric $a, Metric $b) => $a->timestamp <=> $b->timestamp);
+        return $this->sort(fn (Metric $a, Metric $b) => $a->timestamp <=> $b->timestamp);
     }
 
     /**
      * Sort by step ascending
-     *
-     * @return self
      */
     public function sortByStep(): self
     {
-        return $this->sort(fn(Metric $a, Metric $b) => $a->step <=> $b->step);
+        return $this->sort(fn (Metric $a, Metric $b) => $a->step <=> $b->step);
     }
 
     /**
@@ -142,8 +130,8 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     {
         $grouped = [];
         foreach ($this->metrics as $metric) {
-            if (!isset($grouped[$metric->key])) {
-                $grouped[$metric->key] = new self();
+            if (! isset($grouped[$metric->key])) {
+                $grouped[$metric->key] = new self;
             }
             $grouped[$metric->key]->add($metric);
         }
@@ -160,8 +148,8 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     {
         $grouped = [];
         foreach ($this->metrics as $metric) {
-            if (!isset($grouped[$metric->step])) {
-                $grouped[$metric->step] = new self();
+            if (! isset($grouped[$metric->step])) {
+                $grouped[$metric->step] = new self;
             }
             $grouped[$metric->step]->add($metric);
         }
@@ -171,8 +159,6 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
 
     /**
      * Merge with another collection
-     *
-     * @return self
      */
     public function merge(self $other): self
     {
@@ -181,42 +167,34 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
 
     /**
      * Filter metrics by key prefix
-     *
-     * @return self
      */
     public function filterByKeyPrefix(string $prefix): self
     {
-        return $this->filter(fn(Metric $m) => str_starts_with($m->key, $prefix));
+        return $this->filter(fn (Metric $m) => str_starts_with($m->key, $prefix));
     }
 
     /**
      * Filter metrics by step range
-     *
-     * @return self
      */
     public function filterByStepRange(int $minStep, int $maxStep): self
     {
         return $this->filter(
-            fn(Metric $m) => $m->step >= $minStep && $m->step <= $maxStep
+            fn (Metric $m) => $m->step >= $minStep && $m->step <= $maxStep
         );
     }
 
     /**
      * Filter metrics by value range
-     *
-     * @return self
      */
     public function filterByValueRange(float $min, float $max): self
     {
         return $this->filter(
-            fn(Metric $m) => $m->value >= $min && $m->value <= $max
+            fn (Metric $m) => $m->value >= $min && $m->value <= $max
         );
     }
 
     /**
      * Get unique metrics by key (keeps first occurrence)
-     *
-     * @return self
      */
     public function uniqueByKey(): self
     {
@@ -224,7 +202,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
         $unique = [];
 
         foreach ($this->metrics as $metric) {
-            if (!isset($seen[$metric->key])) {
+            if (! isset($seen[$metric->key])) {
                 $seen[$metric->key] = true;
                 $unique[] = $metric;
             }
@@ -237,8 +215,10 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
      * Reduce collection to a single value
      *
      * @template TResult
+     *
      * @param callable(TResult, Metric): TResult $callback
-     * @param TResult $initial
+     * @param TResult                            $initial
+     *
      * @return TResult
      */
     public function reduce(callable $callback, mixed $initial = null): mixed
@@ -258,7 +238,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
             return null;
         }
 
-        $values = array_map(fn(Metric $m) => $m->value, $metrics);
+        $values = array_map(fn (Metric $m) => $m->value, $metrics);
 
         return [
             'min' => min($values),
@@ -273,7 +253,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
             return null;
         }
 
-        $sum = array_sum(array_map(fn(Metric $m) => $m->value, $metrics));
+        $sum = array_sum(array_map(fn (Metric $m) => $m->value, $metrics));
 
         return $sum / count($metrics);
     }
@@ -283,7 +263,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
      */
     public function toArray(): array
     {
-        return array_map(fn(Metric $m) => $m->toArray(), $this->metrics);
+        return array_map(fn (Metric $m) => $m->toArray(), $this->metrics);
     }
 
     public function count(): int
@@ -336,7 +316,7 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
 
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        if (!$value instanceof Metric) {
+        if (! $value instanceof Metric) {
             throw new \TypeError('Value must be an instance of Metric');
         }
 

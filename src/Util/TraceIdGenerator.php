@@ -38,6 +38,7 @@ class TraceIdGenerator
             return $hexId; // Keep as hex string
         }
         $decoded = hexdec($hexId);
+
         return is_int($decoded) ? $decoded : (int) $decoded;
     }
 

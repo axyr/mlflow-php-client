@@ -10,30 +10,32 @@ namespace MLflow\Model;
 class PromptVersion
 {
     private string $name;
+
     private string $version;
+
     private string $template;
+
     private ?string $description;
+
     /** @var array<string, string>|null */
     private ?array $tags;
+
     /** @var array<string, mixed>|null */
     private ?array $responseFormat;
+
     /** @var array<string, mixed>|null */
     private ?array $modelConfig;
+
     private ?int $creationTime;
+
     private ?int $lastUpdateTime;
+
     private ?string $userId;
 
     /**
-     * @param string $name
-     * @param string $version
-     * @param string $template
-     * @param string|null $description
      * @param array<string, string>|null $tags
-     * @param array<string, mixed>|null $responseFormat
-     * @param array<string, mixed>|null $modelConfig
-     * @param int|null $creationTime
-     * @param int|null $lastUpdateTime
-     * @param string|null $userId
+     * @param array<string, mixed>|null  $responseFormat
+     * @param array<string, mixed>|null  $modelConfig
      */
     public function __construct(
         string $name,
@@ -61,7 +63,6 @@ class PromptVersion
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -70,8 +71,23 @@ class PromptVersion
         $template = $data['template'] ?? '';
         $description = $data['description'] ?? null;
         $tags = $data['tags'] ?? null;
+        if (is_array($tags)) {
+            /** @var array<string, string> $tags */
+        } else {
+            $tags = null;
+        }
         $responseFormat = $data['response_format'] ?? null;
+        if (is_array($responseFormat)) {
+            /** @var array<string, mixed> $responseFormat */
+        } else {
+            $responseFormat = null;
+        }
         $modelConfig = $data['model_config'] ?? null;
+        if (is_array($modelConfig)) {
+            /** @var array<string, mixed> $modelConfig */
+        } else {
+            $modelConfig = null;
+        }
         $creationTime = $data['creation_time'] ?? null;
         $lastUpdateTime = $data['last_update_time'] ?? null;
         $userId = $data['user_id'] ?? null;
@@ -81,9 +97,9 @@ class PromptVersion
             is_string($version) ? $version : (is_int($version) ? (string) $version : ''),
             is_string($template) ? $template : '',
             is_string($description) ? $description : null,
-            is_array($tags) ? $tags : null,
-            is_array($responseFormat) ? $responseFormat : null,
-            is_array($modelConfig) ? $modelConfig : null,
+            $tags,
+            $responseFormat,
+            $modelConfig,
             is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
             is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null),
             is_string($userId) ? $userId : null

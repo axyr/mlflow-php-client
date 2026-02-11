@@ -4,22 +4,24 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
-use MLflow\Model\Metric;
-use MLflow\Model\MetricHistory;
+use MLflow\Contracts\MetricApiContract;
 use MLflow\Exception\MLflowException;
+use MLflow\Model\Metric;
 
 /**
  * Complete API for managing MLflow metrics
  * Implements all REST API endpoints from MLflow official documentation
  */
-class MetricApi extends BaseApi
+class MetricApi extends BaseApi implements MetricApiContract
 {
     /**
      * Get metric history for a run
      *
-     * @param string $runId The run ID
+     * @param string $runId     The run ID
      * @param string $metricKey The metric key
+     *
      * @return array<Metric> Array of metric values with timestamps
+     *
      * @throws MLflowException
      */
     public function getHistory(string $runId, string $metricKey): array
@@ -47,9 +49,11 @@ class MetricApi extends BaseApi
     /**
      * Get metric history for multiple metrics in bulk
      *
-     * @param string $runId The run ID
+     * @param string        $runId      The run ID
      * @param array<string> $metricKeys Array of metric keys
+     *
      * @return array<string, array<Metric>> Associative array of metric histories by key
+     *
      * @throws MLflowException
      */
     public function getHistoryBulk(string $runId, array $metricKeys): array
@@ -73,7 +77,7 @@ class MetricApi extends BaseApi
                         }
                     }
                 }
-                $histories[(string)$key] = $metrics;
+                $histories[(string) $key] = $metrics;
             }
         }
 
@@ -85,12 +89,13 @@ class MetricApi extends BaseApi
      * Log a single metric for a run
      *
      * @deprecated Use RunApi::logMetric() method instead
-     * @param string $runId The run ID
-     * @param string $key Metric key
-     * @param float $value Metric value
+     *
+     * @param string   $runId     The run ID
+     * @param string   $key       Metric key
+     * @param float    $value     Metric value
      * @param int|null $timestamp Timestamp (milliseconds since epoch)
-     * @param int|null $step Step number
-     * @return void
+     * @param int|null $step      Step number
+     *
      * @throws MLflowException
      */
     public function log(string $runId, string $key, float $value, ?int $timestamp = null, ?int $step = null): void
@@ -114,9 +119,10 @@ class MetricApi extends BaseApi
      * Log multiple metrics for a run
      *
      * @deprecated Use RunApi::logBatch() method instead
-     * @param string $runId The run ID
+     *
+     * @param string                                                                   $runId   The run ID
      * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logBatch(string $runId, array $metrics): void
@@ -125,7 +131,7 @@ class MetricApi extends BaseApi
         $timestamp = (int) (microtime(true) * 1000);
 
         foreach ($metrics as $metric) {
-            if (!is_array($metric)) {
+            if (! is_array($metric)) {
                 continue;
             }
             $formattedMetric = [
@@ -152,10 +158,11 @@ class MetricApi extends BaseApi
      * Log a parameter for a run
      *
      * @deprecated Use RunApi::logParameter() method instead
+     *
      * @param string $runId The run ID
-     * @param string $key Parameter key
+     * @param string $key   Parameter key
      * @param string $value Parameter value
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logParam(string $runId, string $key, string $value): void
@@ -172,9 +179,10 @@ class MetricApi extends BaseApi
      * Log multiple parameters for a run
      *
      * @deprecated Use RunApi::logBatch() method instead
-     * @param string $runId The run ID
+     *
+     * @param string                $runId  The run ID
      * @param array<string, string> $params Associative array of parameters
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logParams(string $runId, array $params): void
@@ -199,10 +207,11 @@ class MetricApi extends BaseApi
      * Set a tag on a run
      *
      * @deprecated Use RunApi::setTag() method instead
+     *
      * @param string $runId The run ID
-     * @param string $key Tag key
+     * @param string $key   Tag key
      * @param string $value Tag value
-     * @return void
+     *
      * @throws MLflowException
      */
     public function setTag(string $runId, string $key, string $value): void
@@ -219,9 +228,10 @@ class MetricApi extends BaseApi
      * Set multiple tags on a run
      *
      * @deprecated Use RunApi::logBatch() method instead
-     * @param string $runId The run ID
-     * @param array<string, string> $tags Associative array of tags
-     * @return void
+     *
+     * @param string                $runId The run ID
+     * @param array<string, string> $tags  Associative array of tags
+     *
      * @throws MLflowException
      */
     public function setTags(string $runId, array $tags): void

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace MLflow\Tests\Api;
 
-use MLflow\Api\WebhookApi;
-use MLflow\Model\Webhook;
-use MLflow\Exception\MLflowException;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
+use MLflow\Api\WebhookApi;
+use MLflow\Model\Webhook;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class WebhookApiTest extends TestCase
 {
     private WebhookApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -25,7 +25,7 @@ class WebhookApiTest extends TestCase
         $this->api = new WebhookApi($this->httpClient);
     }
 
-    public function testCreateWebhook(): void
+    public function test_create_webhook(): void
     {
         $expectedResponse = [
             'webhook' => [
@@ -46,6 +46,7 @@ class WebhookApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-webhook'
                         && $json['url'] === 'https://example.com/webhook'
                         && is_array($json['events']) && in_array('MODEL_REGISTERED', $json['events']);
@@ -65,7 +66,7 @@ class WebhookApiTest extends TestCase
         $this->assertTrue($webhook->isActive());
     }
 
-    public function testListWebhooks(): void
+    public function test_list_webhooks(): void
     {
         $expectedResponse = [
             'webhooks' => [
@@ -104,7 +105,7 @@ class WebhookApiTest extends TestCase
         $this->assertInstanceOf(Webhook::class, $result['webhooks'][0]);
     }
 
-    public function testGetWebhook(): void
+    public function test_get_webhook(): void
     {
         $expectedResponse = [
             'webhook' => [
@@ -133,7 +134,7 @@ class WebhookApiTest extends TestCase
         $this->assertEquals('webhook123', $webhook->getId());
     }
 
-    public function testDeleteWebhook(): void
+    public function test_delete_webhook(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -144,6 +145,7 @@ class WebhookApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['id'] === 'webhook123';
                 })
             )
@@ -153,7 +155,7 @@ class WebhookApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testUpdateWebhook(): void
+    public function test_update_webhook(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -164,6 +166,7 @@ class WebhookApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['id'] === 'webhook123'
                         && isset($json['status']) && $json['status'] === 'INACTIVE';
                 })
@@ -183,6 +186,7 @@ class WebhookApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],

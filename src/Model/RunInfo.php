@@ -14,13 +14,21 @@ use MLflow\Util\ValidationHelper;
 readonly class RunInfo
 {
     public string $runId;
+
     public string $experimentId;
+
     public RunStatus $status;
+
     public int $startTime;
+
     public ?int $endTime;
+
     public ?string $artifactUri;
+
     public ?string $userId;
+
     public ?string $runName;
+
     public LifecycleStage $lifecycleStage;
 
     public function __construct(
@@ -47,7 +55,6 @@ readonly class RunInfo
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {

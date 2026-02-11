@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace MLflow\Tests\Api;
 
+use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Psr7\Response;
 use MLflow\Api\PromptApi;
 use MLflow\Model\Prompt;
 use MLflow\Model\PromptVersion;
-use MLflow\Exception\MLflowException;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class PromptApiTest extends TestCase
 {
     private PromptApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -26,7 +26,7 @@ class PromptApiTest extends TestCase
         $this->api = new PromptApi($this->httpClient);
     }
 
-    public function testCreatePrompt(): void
+    public function test_create_prompt(): void
     {
         $expectedResponse = [
             'prompt' => [
@@ -45,6 +45,7 @@ class PromptApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-prompt'
                         && isset($json['description'])
                         && isset($json['tags']);
@@ -58,7 +59,7 @@ class PromptApiTest extends TestCase
         $this->assertEquals('test-prompt', $prompt->getName());
     }
 
-    public function testCreatePromptVersion(): void
+    public function test_create_prompt_version(): void
     {
         $expectedResponse = [
             'prompt_version' => [
@@ -77,6 +78,7 @@ class PromptApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-prompt'
                         && $json['template'] === 'Hello {{name}}';
                 })
@@ -90,7 +92,7 @@ class PromptApiTest extends TestCase
         $this->assertEquals('1', $version->getVersion());
     }
 
-    public function testGetPrompt(): void
+    public function test_get_prompt(): void
     {
         $expectedResponse = [
             'prompt' => [
@@ -117,7 +119,7 @@ class PromptApiTest extends TestCase
         $this->assertEquals('test-prompt', $prompt->getName());
     }
 
-    public function testGetPromptVersion(): void
+    public function test_get_prompt_version(): void
     {
         $expectedResponse = [
             'prompt_version' => [
@@ -146,7 +148,7 @@ class PromptApiTest extends TestCase
         $this->assertEquals('1', $version->getVersion());
     }
 
-    public function testSearchPromptVersions(): void
+    public function test_search_prompt_versions(): void
     {
         $expectedResponse = [
             'prompt_versions' => [
@@ -173,6 +175,7 @@ class PromptApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return isset($json['max_results']) && $json['max_results'] === 100;
                 })
             )
@@ -185,7 +188,7 @@ class PromptApiTest extends TestCase
         $this->assertInstanceOf(PromptVersion::class, $result['prompt_versions'][0]);
     }
 
-    public function testDeletePrompt(): void
+    public function test_delete_prompt(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -196,6 +199,7 @@ class PromptApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-prompt';
                 })
             )
@@ -205,7 +209,7 @@ class PromptApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSetPromptAlias(): void
+    public function test_set_prompt_alias(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -216,6 +220,7 @@ class PromptApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-prompt'
                         && $json['alias'] === 'production'
                         && $json['version'] === '1';
@@ -236,6 +241,7 @@ class PromptApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],

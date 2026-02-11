@@ -10,30 +10,30 @@ namespace MLflow\Model;
 class Dataset
 {
     private string $datasetId;
+
     private string $name;
+
     private ?string $experimentId;
+
     /** @var array<string, string>|null */
     private ?array $tags;
+
     private ?string $digest;
+
     private ?string $sourceType;
+
     private ?string $source;
+
     private ?string $schema;
+
     private ?string $profile;
+
     private ?int $creationTime;
+
     private ?int $lastUpdateTime;
 
     /**
-     * @param string $datasetId
-     * @param string $name
-     * @param string|null $experimentId
      * @param array<string, string>|null $tags
-     * @param string|null $digest
-     * @param string|null $sourceType
-     * @param string|null $source
-     * @param string|null $schema
-     * @param string|null $profile
-     * @param int|null $creationTime
-     * @param int|null $lastUpdateTime
      */
     public function __construct(
         string $datasetId,
@@ -63,7 +63,6 @@ class Dataset
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -71,6 +70,11 @@ class Dataset
         $name = $data['name'] ?? '';
         $experimentId = $data['experiment_id'] ?? null;
         $tags = $data['tags'] ?? null;
+        if (is_array($tags)) {
+            /** @var array<string, string> $tags */
+        } else {
+            $tags = null;
+        }
         $digest = $data['digest'] ?? null;
         $sourceType = $data['source_type'] ?? null;
         $source = $data['source'] ?? null;
@@ -83,7 +87,7 @@ class Dataset
             is_string($datasetId) ? $datasetId : '',
             is_string($name) ? $name : '',
             is_string($experimentId) ? $experimentId : null,
-            is_array($tags) ? $tags : null,
+            $tags,
             is_string($digest) ? $digest : null,
             is_string($sourceType) ? $sourceType : null,
             is_string($source) ? $source : null,

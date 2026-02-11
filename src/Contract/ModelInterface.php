@@ -13,7 +13,6 @@ interface ModelInterface
      * Create model instance from array data
      *
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self;
 

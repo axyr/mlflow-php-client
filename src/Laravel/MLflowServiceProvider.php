@@ -31,6 +31,37 @@ class MLflowServiceProvider extends ServiceProvider implements DeferrableProvide
         });
 
         $this->app->alias(MLflowClient::class, 'mlflow');
+
+        // Bind contracts to implementations
+        $this->app->bind(
+            \MLflow\Contracts\MLflowClientContract::class,
+            MLflowClient::class
+        );
+
+        $this->app->bind(
+            \MLflow\Contracts\ExperimentApiContract::class,
+            \MLflow\Api\ExperimentApi::class
+        );
+
+        $this->app->bind(
+            \MLflow\Contracts\RunApiContract::class,
+            \MLflow\Api\RunApi::class
+        );
+
+        $this->app->bind(
+            \MLflow\Contracts\ModelRegistryApiContract::class,
+            \MLflow\Api\ModelRegistryApi::class
+        );
+
+        $this->app->bind(
+            \MLflow\Contracts\MetricApiContract::class,
+            \MLflow\Api\MetricApi::class
+        );
+
+        $this->app->bind(
+            \MLflow\Contracts\ArtifactApiContract::class,
+            \MLflow\Api\ArtifactApi::class
+        );
     }
 
     /**
@@ -38,10 +69,21 @@ class MLflowServiceProvider extends ServiceProvider implements DeferrableProvide
      */
     public function boot(): void
     {
+        // Load helper functions
+        require_once __DIR__ . '/helpers.php';
+
         if ($this->app->runningInConsole()) {
             $this->publishes([
                 __DIR__ . '/../../config/mlflow.php' => config_path('mlflow.php'),
             ], 'mlflow-config');
+
+            $this->commands([
+                Console\InstallCommand::class,
+                Console\TestConnectionCommand::class,
+                Console\ListExperimentsCommand::class,
+                Console\ClearCacheCommand::class,
+                Console\GenerateIdeHelperCommand::class,
+            ]);
         }
     }
 

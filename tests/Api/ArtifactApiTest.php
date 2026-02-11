@@ -15,6 +15,7 @@ use Psr\Http\Message\ResponseInterface;
 class ArtifactApiTest extends TestCase
 {
     private ArtifactApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -33,10 +34,11 @@ class ArtifactApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response($status, ['Content-Type' => 'application/json'], $json);
     }
 
-    public function testList(): void
+    public function test_list(): void
     {
         $expectedResponse = [
             'root_uri' => 's3://bucket/artifacts',
@@ -76,7 +78,7 @@ class ArtifactApiTest extends TestCase
         $this->assertFalse($result['files'][0]->isDir);
     }
 
-    public function testListRootPath(): void
+    public function test_list_root_path(): void
     {
         $expectedResponse = [
             'root_uri' => 'file:///mlruns',
@@ -91,7 +93,7 @@ class ArtifactApiTest extends TestCase
                 'mlflow/artifacts/list',
                 $this->callback(function (array $options): bool {
                     return $options['query']['run_id'] === 'run-123'
-                        && !isset($options['query']['path']);
+                        && ! isset($options['query']['path']);
                 })
             )
             ->willReturn($this->createJsonResponse($expectedResponse));
@@ -102,7 +104,7 @@ class ArtifactApiTest extends TestCase
         $this->assertCount(0, $result['files']);
     }
 
-    public function testGetDownloadUri(): void
+    public function test_get_download_uri(): void
     {
         $expectedResponse = [
             'artifact_uri' => 's3://bucket/artifacts/run-123/model.pkl',
@@ -126,7 +128,7 @@ class ArtifactApiTest extends TestCase
         $this->assertEquals('s3://bucket/artifacts/run-123/model.pkl', $uri);
     }
 
-    public function testLogArtifactThrowsForNonExistentFile(): void
+    public function test_log_artifact_throws_for_non_existent_file(): void
     {
         $this->expectException(\MLflow\Exception\MLflowException::class);
         $this->expectExceptionMessage('File not found');
@@ -134,7 +136,7 @@ class ArtifactApiTest extends TestCase
         $this->api->logArtifact('run-123', '/non/existent/file.txt');
     }
 
-    public function testLogArtifactsThrowsForNonExistentDir(): void
+    public function test_log_artifacts_throws_for_non_existent_dir(): void
     {
         $this->expectException(\MLflow\Exception\MLflowException::class);
         $this->expectExceptionMessage('Directory not found');

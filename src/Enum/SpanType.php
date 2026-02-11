@@ -13,24 +13,39 @@ namespace MLflow\Enum;
 class SpanType
 {
     public const UNKNOWN = 'UNKNOWN';
+
     public const AGENT = 'AGENT';
+
     public const CHAIN = 'CHAIN';
+
     public const LLM = 'LLM';
+
     public const TOOL = 'TOOL';
+
     public const RETRIEVER = 'RETRIEVER';
+
     public const EMBEDDING = 'EMBEDDING';
+
     public const PARSER = 'PARSER';
+
     public const RERANKER = 'RERANKER';
+
     public const CHAT_MODEL = 'CHAT_MODEL';
+
     public const MEMORY = 'MEMORY';
+
     public const WORKFLOW = 'WORKFLOW';
+
     public const TASK = 'TASK';
+
     public const GUARDRAIL = 'GUARDRAIL';
+
     public const EVALUATOR = 'EVALUATOR';
 
     public static function isValid(string $type): bool
     {
         $reflection = new \ReflectionClass(self::class);
+
         return in_array($type, $reflection->getConstants(), true);
     }
 
@@ -50,6 +65,7 @@ class SpanType
     {
         $reflection = new \ReflectionClass(self::class);
         $constants = $reflection->getConstants();
+
         return array_values(array_filter($constants, 'is_string'));
     }
 }

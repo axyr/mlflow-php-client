@@ -12,24 +12,26 @@ use MLflow\Collection\TagCollection;
 readonly class RegisteredModel
 {
     public string $name;
+
     public ?string $description;
+
     public ?int $creationTimestamp;
+
     public ?int $lastUpdatedTimestamp;
+
     /** @var array<ModelVersion>|null */
     public ?array $latestVersions;
+
     /** @var TagCollection<ModelTag>|null */
     public ?TagCollection $tags;
+
     /** @var array<ModelAlias>|null */
     public ?array $aliases;
 
     /**
-     * @param string $name
-     * @param string|null $description
-     * @param int|null $creationTimestamp
-     * @param int|null $lastUpdatedTimestamp
-     * @param array<ModelVersion>|null $latestVersions
+     * @param array<ModelVersion>|null     $latestVersions
      * @param TagCollection<ModelTag>|null $tags
-     * @param array<ModelAlias>|null $aliases
+     * @param array<ModelAlias>|null       $aliases
      */
     public function __construct(
         string $name,
@@ -51,7 +53,6 @@ readonly class RegisteredModel
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -60,6 +61,7 @@ readonly class RegisteredModel
             $latestVersions = [];
             foreach ($data['latest_versions'] as $versionData) {
                 if (is_array($versionData)) {
+                    /** @var array<string, mixed> $versionData */
                     $latestVersions[] = ModelVersion::fromArray($versionData);
                 }
             }
@@ -67,7 +69,7 @@ readonly class RegisteredModel
 
         $tags = null;
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tagCollection = new TagCollection();
+            $tagCollection = new TagCollection;
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
@@ -142,7 +144,7 @@ readonly class RegisteredModel
         }
 
         if ($this->latestVersions !== null) {
-            $data['latest_versions'] = array_map(fn($v) => $v->toArray(), $this->latestVersions);
+            $data['latest_versions'] = array_map(fn ($v) => $v->toArray(), $this->latestVersions);
         }
 
         if ($this->tags !== null) {
@@ -150,7 +152,7 @@ readonly class RegisteredModel
         }
 
         if ($this->aliases !== null) {
-            $data['aliases'] = array_map(fn($a) => $a->toArray(), $this->aliases);
+            $data['aliases'] = array_map(fn ($a) => $a->toArray(), $this->aliases);
         }
 
         return $data;
@@ -183,6 +185,7 @@ readonly class RegisteredModel
 
     /**
      * @return ModelVersion[]|null
+     *
      * @deprecated Access $latestVersions property directly
      */
     public function getLatestVersions(): ?array
@@ -192,6 +195,7 @@ readonly class RegisteredModel
 
     /**
      * @return ModelTag[]|null
+     *
      * @deprecated Access $tags property directly
      */
     public function getTags(): ?array
@@ -201,6 +205,7 @@ readonly class RegisteredModel
 
     /**
      * @return array<ModelAlias>|null
+     *
      * @deprecated Access $aliases property directly
      */
     public function getAliases(): ?array

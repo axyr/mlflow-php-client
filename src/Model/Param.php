@@ -10,13 +10,12 @@ use MLflow\Util\ValidationHelper;
 /**
  * Represents an MLflow parameter (immutable key-value pair)
  */
-readonly class Param implements SerializableModelInterface, \Stringable
+readonly class Param implements \Stringable, SerializableModelInterface
 {
     public function __construct(
         public string $key,
         public string $value,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{key: string, value: string} $data
@@ -32,8 +31,8 @@ readonly class Param implements SerializableModelInterface, \Stringable
     /**
      * Create a parameter with any value type (automatically converted to string)
      *
-     * @param string $key Parameter key
-     * @param mixed $value Parameter value (will be converted to string)
+     * @param string $key   Parameter key
+     * @param mixed  $value Parameter value (will be converted to string)
      *
      * @example
      * ```php

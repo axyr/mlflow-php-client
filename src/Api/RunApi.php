@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
+use MLflow\Contracts\RunApiContract;
 use MLflow\Enum\RunStatus;
 use MLflow\Enum\ViewType;
-use MLflow\Model\Run;
-use MLflow\Model\RunInfo;
-use MLflow\Model\RunData;
 use MLflow\Exception\MLflowException;
+use MLflow\Model\Run;
 
 /**
  * Complete API for managing MLflow runs
  * Implements all REST API endpoints from MLflow official documentation
  */
-class RunApi extends BaseApi
+class RunApi extends BaseApi implements RunApiContract
 {
     /**
      * Create a new run
      *
-     * @param string $experimentId The experiment ID
-     * @param string|null $userId Optional user ID
-     * @param string|null $runName Optional run name
-     * @param array<string, string> $tags Optional tags for the run
-     * @param int|null $startTime Optional start time (milliseconds since epoch)
+     * @param string                $experimentId The experiment ID
+     * @param string|null           $userId       Optional user ID
+     * @param string|null           $runName      Optional run name
+     * @param array<string, string> $tags         Optional tags for the run
+     * @param int|null              $startTime    Optional start time (milliseconds since epoch)
+     *
      * @return Run The created run
+     *
      * @throws MLflowException
      */
     public function create(
@@ -45,7 +46,7 @@ class RunApi extends BaseApi
             $data['run_name'] = $runName;
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
@@ -54,10 +55,11 @@ class RunApi extends BaseApi
         $response = $this->post('mlflow/runs/create', $data);
 
         $run = $response['run'] ?? null;
-        if (!is_array($run)) {
+        if (! is_array($run)) {
             throw new MLflowException('Invalid run data in response');
         }
 
+        /** @var array<string, mixed> $run */
         return Run::fromArray($run);
     }
 
@@ -65,7 +67,9 @@ class RunApi extends BaseApi
      * Get a run by ID
      *
      * @param string $runId The run ID
+     *
      * @return Run The run
+     *
      * @throws MLflowException
      */
     public function getById(string $runId): Run
@@ -73,23 +77,26 @@ class RunApi extends BaseApi
         $response = $this->get('mlflow/runs/get', ['run_id' => $runId]);
 
         $run = $response['run'] ?? null;
-        if (!is_array($run)) {
+        if (! is_array($run)) {
             throw new MLflowException('Invalid run data in response');
         }
 
+        /** @var array<string, mixed> $run */
         return Run::fromArray($run);
     }
 
     /**
      * Search for runs
      *
-     * @param array<string> $experimentIds List of experiment IDs to search in
-     * @param string|null $filter Filter string (e.g., "metrics.accuracy > 0.9")
-     * @param ViewType $runViewType Run view type
-     * @param int|null $maxResults Maximum number of runs to return
-     * @param array<string>|null $orderBy List of columns to order by (e.g., ["metrics.accuracy DESC"])
-     * @param string|null $pageToken Pagination token
+     * @param array<string>      $experimentIds List of experiment IDs to search in
+     * @param string|null        $filter        Filter string (e.g., "metrics.accuracy > 0.9")
+     * @param ViewType           $runViewType   Run view type
+     * @param int|null           $maxResults    Maximum number of runs to return
+     * @param array<string>|null $orderBy       List of columns to order by (e.g., ["metrics.accuracy DESC"])
+     * @param string|null        $pageToken     Pagination token
+     *
      * @return array{runs: array<Run>, next_page_token: string|null} Array with runs and next_page_token
+     *
      * @throws MLflowException
      */
     public function search(
@@ -127,6 +134,7 @@ class RunApi extends BaseApi
         if (isset($response['runs']) && is_array($response['runs'])) {
             foreach ($response['runs'] as $runData) {
                 if (is_array($runData)) {
+                    /** @var array<string, mixed> $runData */
                     $runs[] = Run::fromArray($runData);
                 }
             }
@@ -143,11 +151,11 @@ class RunApi extends BaseApi
     /**
      * Update a run
      *
-     * @param string $runId The run ID
-     * @param RunStatus|null $status New status
-     * @param int|null $endTime End time (milliseconds since epoch)
-     * @param string|null $runName New name for the run
-     * @return void
+     * @param string         $runId   The run ID
+     * @param RunStatus|null $status  New status
+     * @param int|null       $endTime End time (milliseconds since epoch)
+     * @param string|null    $runName New name for the run
+     *
      * @throws MLflowException
      */
     public function update(
@@ -177,7 +185,7 @@ class RunApi extends BaseApi
      * Delete a run
      *
      * @param string $runId The run ID
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteRun(string $runId): void
@@ -189,7 +197,7 @@ class RunApi extends BaseApi
      * Restore a deleted run
      *
      * @param string $runId The run ID
-     * @return void
+     *
      * @throws MLflowException
      */
     public function restore(string $runId): void
@@ -201,9 +209,9 @@ class RunApi extends BaseApi
      * Set a tag on a run
      *
      * @param string $runId The run ID
-     * @param string $key Tag key
+     * @param string $key   Tag key
      * @param string $value Tag value
-     * @return void
+     *
      * @throws MLflowException
      */
     public function setTag(string $runId, string $key, string $value): void
@@ -219,8 +227,8 @@ class RunApi extends BaseApi
      * Delete a tag from a run
      *
      * @param string $runId The run ID
-     * @param string $key Tag key to delete
-     * @return void
+     * @param string $key   Tag key to delete
+     *
      * @throws MLflowException
      */
     public function deleteTag(string $runId, string $key): void
@@ -234,12 +242,12 @@ class RunApi extends BaseApi
     /**
      * Log a metric for a run
      *
-     * @param string $runId The run ID
-     * @param string $key Metric key
-     * @param float $value Metric value
+     * @param string   $runId     The run ID
+     * @param string   $key       Metric key
+     * @param float    $value     Metric value
      * @param int|null $timestamp Timestamp (milliseconds since epoch)
-     * @param int|null $step Step number
-     * @return void
+     * @param int|null $step      Step number
+     *
      * @throws MLflowException
      */
     public function logMetric(
@@ -249,11 +257,13 @@ class RunApi extends BaseApi
         ?int $timestamp = null,
         ?int $step = null
     ): void {
+        $timestamp = $timestamp ?? (int) (microtime(true) * 1000);
+
         $data = [
             'run_id' => $runId,
             'key' => $key,
             'value' => $value,
-            'timestamp' => $timestamp ?? (int) (microtime(true) * 1000),
+            'timestamp' => $timestamp,
         ];
 
         if ($step !== null) {
@@ -261,15 +271,22 @@ class RunApi extends BaseApi
         }
 
         $this->post('mlflow/runs/log-metric', $data);
+
+        // Fire event if Laravel Event facade is available and has a root set
+        if (class_exists(\Illuminate\Support\Facades\Event::class) && \Illuminate\Support\Facades\Event::getFacadeRoot() !== null) {
+            \Illuminate\Support\Facades\Event::dispatch(
+                new \MLflow\Laravel\Events\MetricLogged($runId, $key, $value, $timestamp, $step)
+            );
+        }
     }
 
     /**
      * Log a parameter for a run
      *
      * @param string $runId The run ID
-     * @param string $key Parameter key
+     * @param string $key   Parameter key
      * @param string $value Parameter value
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logParameter(string $runId, string $key, string $value): void
@@ -284,11 +301,11 @@ class RunApi extends BaseApi
     /**
      * Log multiple metrics, parameters, and tags in a single request
      *
-     * @param string $runId The run ID
+     * @param string                                                                   $runId   The run ID
      * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics to log
-     * @param array<string, string> $params Array of parameters to log
-     * @param array<string, string> $tags Array of tags to set
-     * @return void
+     * @param array<string, string>                                                    $params  Array of parameters to log
+     * @param array<string, string>                                                    $tags    Array of tags to set
+     *
      * @throws MLflowException
      */
     public function logBatch(
@@ -299,15 +316,15 @@ class RunApi extends BaseApi
     ): void {
         $data = ['run_id' => $runId];
 
-        if (!empty($metrics)) {
+        if (! empty($metrics)) {
             $data['metrics'] = $this->formatMetrics($metrics);
         }
 
-        if (!empty($params)) {
+        if (! empty($params)) {
             $data['params'] = $this->formatParams($params);
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
@@ -317,12 +334,12 @@ class RunApi extends BaseApi
     /**
      * Log a model to a run
      *
-     * @param string $runId The run ID
-     * @param string $artifactPath Path within the run's artifact directory
-     * @param array<string, mixed> $flavors Model flavors (e.g., {"python_function": {...}})
-     * @param string|null $modelJson Optional model JSON
-     * @param string|null $signatureJson Optional signature JSON
-     * @return void
+     * @param string               $runId         The run ID
+     * @param string               $artifactPath  Path within the run's artifact directory
+     * @param array<string, mixed> $flavors       Model flavors (e.g., {"python_function": {...}})
+     * @param string|null          $modelJson     Optional model JSON
+     * @param string|null          $signatureJson Optional signature JSON
+     *
      * @throws MLflowException
      */
     public function logModel(
@@ -357,7 +374,7 @@ class RunApi extends BaseApi
      *     dataset: array<string, mixed>,
      *     tags?: array<array{key: string, value: string}>
      * }> $datasets Array of dataset inputs
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logInputs(string $runId, array $datasets): void
@@ -371,10 +388,10 @@ class RunApi extends BaseApi
     /**
      * Set terminated status for a run
      *
-     * @param string $runId The run ID
-     * @param RunStatus $status Final status (must be terminal: FINISHED, FAILED, or KILLED)
-     * @param int|null $endTime End time (milliseconds since epoch)
-     * @return void
+     * @param string    $runId   The run ID
+     * @param RunStatus $status  Final status (must be terminal: FINISHED, FAILED, or KILLED)
+     * @param int|null  $endTime End time (milliseconds since epoch)
+     *
      * @throws MLflowException
      */
     public function setTerminated(
@@ -382,7 +399,7 @@ class RunApi extends BaseApi
         RunStatus $status = RunStatus::FINISHED,
         ?int $endTime = null
     ): void {
-        if (!$status->isTerminal()) {
+        if (! $status->isTerminal()) {
             throw new MLflowException("Status {$status->value} is not a terminal status");
         }
         $this->update($runId, $status, $endTime ?? (int) (microtime(true) * 1000));
@@ -392,6 +409,7 @@ class RunApi extends BaseApi
      * Format metrics for batch logging
      *
      * @param array<array{key: string, value: float|int, timestamp?: int, step?: int}> $metrics Array of metrics
+     *
      * @return array<int, array{key: string, value: float|int, timestamp: int, step?: int}> Formatted metrics
      */
     private function formatMetrics(array $metrics): array
@@ -400,7 +418,7 @@ class RunApi extends BaseApi
         $timestamp = (int) (microtime(true) * 1000);
 
         foreach ($metrics as $metric) {
-            if (!is_array($metric)) {
+            if (! is_array($metric)) {
                 continue;
             }
             $formattedMetric = [
@@ -423,7 +441,9 @@ class RunApi extends BaseApi
      * Get parent run (for nested runs)
      *
      * @param string $runId Child run ID
+     *
      * @return Run|null Parent run or null if no parent
+     *
      * @throws MLflowException
      */
     public function getParentRun(string $runId): ?Run
@@ -444,10 +464,10 @@ class RunApi extends BaseApi
     /**
      * Link a prompt version to a run
      *
-     * @param string $runId Run ID
-     * @param string $promptName Prompt name
+     * @param string $runId         Run ID
+     * @param string $promptName    Prompt name
      * @param string $promptVersion Prompt version
-     * @return void
+     *
      * @throws MLflowException
      */
     public function linkPromptVersionToRun(
@@ -465,11 +485,11 @@ class RunApi extends BaseApi
     /**
      * Link a prompt version to a model
      *
-     * @param string $modelName Model name
-     * @param string $modelVersion Model version
-     * @param string $promptName Prompt name
+     * @param string $modelName     Model name
+     * @param string $modelVersion  Model version
+     * @param string $promptName    Prompt name
      * @param string $promptVersion Prompt version
-     * @return void
+     *
      * @throws MLflowException
      */
     public function linkPromptVersionToModel(
@@ -489,9 +509,9 @@ class RunApi extends BaseApi
     /**
      * Link multiple traces to a run
      *
-     * @param string $runId Run ID
+     * @param string        $runId    Run ID
      * @param array<string> $traceIds Trace IDs to link
-     * @return void
+     *
      * @throws MLflowException
      */
     public function linkTracesToRun(string $runId, array $traceIds): void
@@ -506,6 +526,7 @@ class RunApi extends BaseApi
      * Format parameters for batch logging
      *
      * @param array<string, string> $params Associative array of parameters
+     *
      * @return array<int, array{key: string, value: string}> Formatted parameters
      */
     private function formatParams(array $params): array
@@ -517,6 +538,7 @@ class RunApi extends BaseApi
                 'value' => (string) $value,
             ];
         }
+
         return $formatted;
     }
 }

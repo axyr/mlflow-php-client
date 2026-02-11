@@ -13,8 +13,7 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
         public string $path,
         public bool $isDir,
         public ?int $fileSize = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{path: string, is_dir?: bool, file_size?: int|null} $data
@@ -92,6 +91,6 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
 
     public function isFile(): bool
     {
-        return !$this->isDir;
+        return ! $this->isDir;
     }
 }

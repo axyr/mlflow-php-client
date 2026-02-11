@@ -9,13 +9,12 @@ use MLflow\Contract\SerializableModelInterface;
 /**
  * Represents a tag on an experiment (immutable key-value pair)
  */
-readonly class ExperimentTag implements SerializableModelInterface, \Stringable
+readonly class ExperimentTag implements \Stringable, SerializableModelInterface
 {
     public function __construct(
         public string $key,
         public string $value,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{key: string, value: string} $data
@@ -31,8 +30,8 @@ readonly class ExperimentTag implements SerializableModelInterface, \Stringable
     /**
      * Create a tag with any value type (automatically converted to string)
      *
-     * @param string $key Tag key
-     * @param mixed $value Tag value (will be converted to string)
+     * @param string $key   Tag key
+     * @param mixed  $value Tag value (will be converted to string)
      *
      * @example
      * ```php

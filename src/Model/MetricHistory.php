@@ -10,11 +10,11 @@ namespace MLflow\Model;
 class MetricHistory
 {
     private string $key;
+
     /** @var Metric[] */
     private array $history;
 
     /**
-     * @param string $key
      * @param Metric[] $history
      */
     public function __construct(string $key, array $history)
@@ -25,7 +25,6 @@ class MetricHistory
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -55,7 +54,7 @@ class MetricHistory
     {
         return [
             'key' => $this->key,
-            'metrics' => array_map(fn($m) => $m->toArray(), $this->history),
+            'metrics' => array_map(fn ($m) => $m->toArray(), $this->history),
         ];
     }
 
@@ -81,7 +80,7 @@ class MetricHistory
 
         // Sort by timestamp descending
         $sorted = $this->history;
-        usort($sorted, fn($a, $b) => $b->timestamp <=> $a->timestamp);
+        usort($sorted, fn ($a, $b) => $b->timestamp <=> $a->timestamp);
 
         return $sorted[0];
     }
@@ -93,6 +92,7 @@ class MetricHistory
                 return $metric;
             }
         }
+
         return null;
     }
 }

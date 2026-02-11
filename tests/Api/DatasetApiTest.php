@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace MLflow\Tests\Api;
 
-use MLflow\Api\DatasetApi;
-use MLflow\Model\Dataset;
-use MLflow\Exception\MLflowException;
-use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
+use MLflow\Api\DatasetApi;
+use MLflow\Model\Dataset;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
 class DatasetApiTest extends TestCase
 {
     private DatasetApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -25,7 +25,7 @@ class DatasetApiTest extends TestCase
         $this->api = new DatasetApi($this->httpClient);
     }
 
-    public function testCreateDataset(): void
+    public function test_create_dataset(): void
     {
         $expectedResponse = [
             'dataset' => [
@@ -45,6 +45,7 @@ class DatasetApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['name'] === 'test-dataset'
                         && isset($json['experiment_id'])
                         && isset($json['tags']);
@@ -59,7 +60,7 @@ class DatasetApiTest extends TestCase
         $this->assertEquals('test-dataset', $dataset->getName());
     }
 
-    public function testGetDataset(): void
+    public function test_get_dataset(): void
     {
         $expectedResponse = [
             'dataset' => [
@@ -86,7 +87,7 @@ class DatasetApiTest extends TestCase
         $this->assertEquals('dataset123', $dataset->getDatasetId());
     }
 
-    public function testAddDatasetToExperiments(): void
+    public function test_add_dataset_to_experiments(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -97,6 +98,7 @@ class DatasetApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['dataset_id'] === 'dataset123'
                         && is_array($json['experiment_ids'])
                         && in_array('exp1', $json['experiment_ids']);
@@ -108,7 +110,7 @@ class DatasetApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSearchDatasets(): void
+    public function test_search_datasets(): void
     {
         $expectedResponse = [
             'datasets' => [
@@ -133,6 +135,7 @@ class DatasetApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return isset($json['max_results']) && $json['max_results'] === 100;
                 })
             )
@@ -145,7 +148,7 @@ class DatasetApiTest extends TestCase
         $this->assertInstanceOf(Dataset::class, $result['datasets'][0]);
     }
 
-    public function testDeleteDataset(): void
+    public function test_delete_dataset(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -156,6 +159,7 @@ class DatasetApiTest extends TestCase
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
                     assert(is_array($json));
+
                     return $json['dataset_id'] === 'dataset123';
                 })
             )
@@ -174,6 +178,7 @@ class DatasetApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response(
             $statusCode,
             ['Content-Type' => 'application/json'],

@@ -13,22 +13,22 @@ use MLflow\Enum\LifecycleStage;
 readonly class Experiment
 {
     public string $experimentId;
+
     public string $name;
+
     public ?string $artifactLocation;
+
     public ?LifecycleStage $lifecycleStage;
+
     /** @var TagCollection<ExperimentTag>|null */
     public ?TagCollection $tags;
+
     public ?int $creationTime;
+
     public ?int $lastUpdateTime;
 
     /**
-     * @param string $experimentId
-     * @param string $name
-     * @param string|null $artifactLocation
-     * @param LifecycleStage|null $lifecycleStage
      * @param TagCollection<ExperimentTag>|null $tags
-     * @param int|null $creationTime
-     * @param int|null $lastUpdateTime
      */
     public function __construct(
         string $experimentId,
@@ -50,7 +50,6 @@ readonly class Experiment
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -60,14 +59,14 @@ readonly class Experiment
         }
 
         $artifactLocation = $data['artifact_location'] ?? null;
-        if ($artifactLocation !== null && !is_string($artifactLocation)) {
+        if ($artifactLocation !== null && ! is_string($artifactLocation)) {
             $artifactLocation = null;
         }
 
         // Convert tags array to TagCollection
         $tags = null;
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tagCollection = new TagCollection();
+            $tagCollection = new TagCollection;
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
@@ -163,6 +162,7 @@ readonly class Experiment
 
     /**
      * @deprecated Access $tags property directly. Note: Returns TagCollection now, not array
+     *
      * @return TagCollection<ExperimentTag>|null
      */
     public function getTags(): ?TagCollection

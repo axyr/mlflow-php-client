@@ -12,8 +12,7 @@ readonly class ModelAlias implements \JsonSerializable, \Stringable
     public function __construct(
         public string $alias,
         public string $version,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{alias: string, version: string} $data

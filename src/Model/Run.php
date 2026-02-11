@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
-use MLflow\Enum\RunStatus;
 use MLflow\Enum\LifecycleStage;
+use MLflow\Enum\RunStatus;
 
 /**
  * Represents an MLflow run
@@ -13,13 +13,13 @@ use MLflow\Enum\LifecycleStage;
 readonly class Run
 {
     public RunInfo $info;
+
     public RunData $data;
+
     /** @var array<string, mixed>|null */
     public ?array $inputs;
 
     /**
-     * @param RunInfo $info
-     * @param RunData $data
      * @param array<string, mixed>|null $inputs
      */
     public function __construct(RunInfo $info, RunData $data, ?array $inputs = null)
@@ -31,7 +31,6 @@ readonly class Run
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -39,13 +38,15 @@ readonly class Run
         $dataArray = $data['data'] ?? [];
         $inputs = $data['inputs'] ?? null;
 
-        if (!is_array($info)) {
+        if (! is_array($info)) {
             $info = [];
         }
-        if (!is_array($dataArray)) {
+        if (! is_array($dataArray)) {
             $dataArray = [];
         }
-        if ($inputs !== null && !is_array($inputs)) {
+        if ($inputs !== null && is_array($inputs)) {
+            /** @var array<string, mixed> $inputs */
+        } else {
             $inputs = null;
         }
 
@@ -88,6 +89,7 @@ readonly class Run
 
     /**
      * @return array<string, mixed>|null
+     *
      * @deprecated Access $inputs property directly
      */
     public function getInputs(): ?array

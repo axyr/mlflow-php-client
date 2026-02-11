@@ -4,22 +4,33 @@ declare(strict_types=1);
 
 namespace MLflow\Builder;
 
-use MLflow\Model\Trace;
-use MLflow\Model\TraceInfo;
-use MLflow\Model\TraceData;
+use Illuminate\Support\Traits\Macroable;
+use MLflow\Enum\SpanType;
+use MLflow\Enum\TraceState;
 use MLflow\Model\MlflowExperimentLocation;
 use MLflow\Model\Span;
-use MLflow\Enum\TraceState;
-use MLflow\Enum\SpanType;
-use MLflow\Util\TraceIdGenerator;
+use MLflow\Model\Trace;
+use MLflow\Model\TraceData;
+use MLflow\Model\TraceInfo;
 use MLflow\Util\TimestampHelper;
+use MLflow\Util\TraceIdGenerator;
 
+/**
+ * Fluent builder for creating MLflow traces
+ *
+ * Supports macros for custom methods.
+ */
 class TraceBuilder
 {
+    use Macroable;
+
     private string $traceId;
+
     private string $experimentId;
-    /** @phpstan-ignore-next-line (Reserved for future use) */
+
+    /** @phpstan-ignore property.onlyWritten */
     private string $name;
+
     private int $startTimeNs;
 
     /** @var Span[] */
@@ -28,7 +39,7 @@ class TraceBuilder
     /** @var array<string, string> */
     private array $tags = [];
 
-    /** @phpstan-ignore-next-line (Reserved for future use) */
+    /** @phpstan-ignore property.onlyWritten */
     private ?string $rootSpanId = null;
 
     public function __construct(string $experimentId, string $name)
@@ -47,17 +58,17 @@ class TraceBuilder
     public function withTag(string $key, string $value): self
     {
         $this->tags[$key] = $value;
+
         return $this;
     }
 
     /**
      * Start a new span
      *
-     * @param string $name Span name
-     * @param string $spanType Span type
-     * @param array<string, mixed>|null $inputs Span inputs
+     * @param string                    $name       Span name
+     * @param string                    $spanType   Span type
+     * @param array<string, mixed>|null $inputs     Span inputs
      * @param array<string, mixed>|null $attributes Span attributes
-     * @return SpanBuilder
      */
     public function startSpan(
         string $name,

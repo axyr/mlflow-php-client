@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MLflow\Builder;
 
+use Illuminate\Support\Traits\Macroable;
 use MLflow\Api\ExperimentApi;
 use MLflow\Model\Experiment;
 
 /**
  * Fluent builder for creating MLflow experiments
+ *
+ * Supports macros for custom methods.
  *
  * @example
  * ```php
@@ -18,18 +21,26 @@ use MLflow\Model\Experiment;
  *     ->withTag('project', 'recommendation')
  *     ->create();
  * ```
+ * @example Using macros
+ * ```php
+ * ExperimentBuilder::macro('forTeam', function ($team) {
+ *     return $this->withTag('team', $team);
+ * });
+ * ```
  */
 final class ExperimentBuilder
 {
+    use Macroable;
+
     private ?string $artifactLocation = null;
+
     /** @var array<string, string> */
     private array $tags = [];
 
     public function __construct(
         private readonly ExperimentApi $experimentApi,
         private readonly string $name,
-    ) {
-    }
+    ) {}
 
     /**
      * Set the artifact location for the experiment

@@ -17,6 +17,7 @@ use Psr\Http\Message\ResponseInterface;
 class ModelRegistryApiTest extends TestCase
 {
     private ModelRegistryApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -35,10 +36,11 @@ class ModelRegistryApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response($status, ['Content-Type' => 'application/json'], $json);
     }
 
-    public function testCreateRegisteredModel(): void
+    public function test_create_registered_model(): void
     {
         $expectedResponse = [
             'registered_model' => [
@@ -57,6 +59,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/registered-models/create',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && $json['name'] === 'my-model';
                 })
             )
@@ -68,7 +71,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals('my-model', $model->name);
     }
 
-    public function testGetRegisteredModel(): void
+    public function test_get_registered_model(): void
     {
         $expectedResponse = [
             'registered_model' => [
@@ -96,7 +99,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals('my-model', $model->name);
     }
 
-    public function testDeleteRegisteredModel(): void
+    public function test_delete_registered_model(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -106,6 +109,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/registered-models/delete',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && $json['name'] === 'my-model';
                 })
             )
@@ -116,7 +120,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSearchRegisteredModels(): void
+    public function test_search_registered_models(): void
     {
         $expectedResponse = [
             'registered_models' => [
@@ -137,6 +141,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/registered-models/search',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && isset($json['max_results']);
                 })
             )
@@ -149,7 +154,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals('token-abc', $result['next_page_token']);
     }
 
-    public function testCreateModelVersion(): void
+    public function test_create_model_version(): void
     {
         $expectedResponse = [
             'model_version' => [
@@ -170,6 +175,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/model-versions/create',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['name'] === 'my-model'
                         && $json['source'] === 's3://bucket/model';
@@ -184,7 +190,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals('1', $version->version);
     }
 
-    public function testGetModelVersion(): void
+    public function test_get_model_version(): void
     {
         $expectedResponse = [
             'model_version' => [
@@ -215,7 +221,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals('1', $version->version);
     }
 
-    public function testTransitionModelVersionStage(): void
+    public function test_transition_model_version_stage(): void
     {
         $expectedResponse = [
             'model_version' => [
@@ -235,6 +241,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/model-versions/transition-stage',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['name'] === 'my-model'
                         && $json['version'] === '1'
@@ -252,7 +259,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertEquals(ModelStage::PRODUCTION, $version->currentStage);
     }
 
-    public function testSetRegisteredModelAlias(): void
+    public function test_set_registered_model_alias(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -262,6 +269,7 @@ class ModelRegistryApiTest extends TestCase
                 'mlflow/registered-models/set-alias',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['name'] === 'my-model'
                         && $json['alias'] === 'champion'
@@ -275,7 +283,7 @@ class ModelRegistryApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testGetModelVersionByAlias(): void
+    public function test_get_model_version_by_alias(): void
     {
         $expectedResponse = [
             'model_version' => [

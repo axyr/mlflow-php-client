@@ -31,9 +31,9 @@ final class SecurityHelper
         $realBase = realpath($baseDir);
 
         // Ensure path is within base directory
-        if ($realPath === false || $realBase === false || !str_starts_with($realPath, $realBase)) {
+        if ($realPath === false || $realBase === false || ! str_starts_with($realPath, $realBase)) {
             throw new InvalidArgumentException(
-                "Invalid path: path traversal detected or path does not exist"
+                'Invalid path: path traversal detected or path does not exist'
             );
         }
 
@@ -52,12 +52,12 @@ final class SecurityHelper
 
         if (strlen($name) > 255) {
             throw new InvalidArgumentException(
-                "Name too long: maximum 255 characters, got " . strlen($name)
+                'Name too long: maximum 255 characters, got ' . strlen($name)
             );
         }
 
         if ($name === '') {
-            throw new InvalidArgumentException("Name cannot be empty");
+            throw new InvalidArgumentException('Name cannot be empty');
         }
 
         return $name;
@@ -73,7 +73,7 @@ final class SecurityHelper
      */
     public static function validateTagKey(string $key): string
     {
-        if (!preg_match('/^[a-zA-Z0-9_\-\.\/]+$/', $key)) {
+        if (! preg_match('/^[a-zA-Z0-9_\-\.\/]+$/', $key)) {
             throw new InvalidArgumentException(
                 "Invalid tag key '{$key}': must contain only alphanumeric, underscore, hyphen, period, or forward slash"
             );
@@ -81,12 +81,12 @@ final class SecurityHelper
 
         if (strlen($key) > 250) {
             throw new InvalidArgumentException(
-                "Tag key too long: maximum 250 characters, got " . strlen($key)
+                'Tag key too long: maximum 250 characters, got ' . strlen($key)
             );
         }
 
         if ($key === '') {
-            throw new InvalidArgumentException("Tag key cannot be empty");
+            throw new InvalidArgumentException('Tag key cannot be empty');
         }
 
         return $key;
@@ -101,7 +101,7 @@ final class SecurityHelper
     {
         if (strlen($value) > 5000) {
             throw new InvalidArgumentException(
-                "Tag value too long: maximum 5000 characters, got " . strlen($value)
+                'Tag value too long: maximum 5000 characters, got ' . strlen($value)
             );
         }
 
@@ -115,21 +115,21 @@ final class SecurityHelper
      */
     public static function validateMetricKey(string $key): string
     {
-        if (!preg_match('/^[a-zA-Z0-9_\-\.\/\s]+$/', $key)) {
+        if (! preg_match('/^[a-zA-Z0-9_\-\.\/\s]+$/', $key)) {
             throw new InvalidArgumentException(
                 "Invalid metric key '{$key}': must contain only alphanumeric, underscore, " .
-                "hyphen, period, forward slash, or space"
+                'hyphen, period, forward slash, or space'
             );
         }
 
         if (strlen($key) > 250) {
             throw new InvalidArgumentException(
-                "Metric key too long: maximum 250 characters, got " . strlen($key)
+                'Metric key too long: maximum 250 characters, got ' . strlen($key)
             );
         }
 
         if ($key === '') {
-            throw new InvalidArgumentException("Metric key cannot be empty");
+            throw new InvalidArgumentException('Metric key cannot be empty');
         }
 
         return $key;
@@ -139,6 +139,7 @@ final class SecurityHelper
      * Mask sensitive data in headers for logging
      *
      * @param array<string, mixed> $headers
+     *
      * @return array<string, mixed>
      */
     public static function maskSensitiveHeaders(array $headers): array
@@ -162,7 +163,7 @@ final class SecurityHelper
      */
     public static function validateExperimentId(string $experimentId): string
     {
-        if (!preg_match('/^[0-9]+$/', $experimentId)) {
+        if (! preg_match('/^[0-9]+$/', $experimentId)) {
             throw new InvalidArgumentException(
                 "Invalid experiment ID '{$experimentId}': must be numeric"
             );
@@ -178,7 +179,7 @@ final class SecurityHelper
      */
     public static function validateRunId(string $runId): string
     {
-        if (!preg_match('/^[a-f0-9]{32}$/', $runId)) {
+        if (! preg_match('/^[a-f0-9]{32}$/', $runId)) {
             throw new InvalidArgumentException(
                 "Invalid run ID '{$runId}': must be a 32-character hex string"
             );

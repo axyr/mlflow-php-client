@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
+use MLflow\Exception\MLflowException;
 use MLflow\Model\Prompt;
 use MLflow\Model\PromptVersion;
-use MLflow\Exception\MLflowException;
 
 /**
  * API for managing MLflow Prompt Registry
@@ -16,10 +16,10 @@ class PromptApi extends BaseApi
     /**
      * Create a new prompt
      *
-     * @param string $name Prompt name
-     * @param string|null $description Prompt description
-     * @param array<string, string>|null $tags Optional tags
-     * @return Prompt
+     * @param string                     $name        Prompt name
+     * @param string|null                $description Prompt description
+     * @param array<string, string>|null $tags        Optional tags
+     *
      * @throws MLflowException
      */
     public function createPrompt(
@@ -40,23 +40,24 @@ class PromptApi extends BaseApi
         $response = $this->post('mlflow/prompts/create', $params);
 
         $promptData = $response['prompt'] ?? $response;
-        if (!is_array($promptData)) {
+        if (! is_array($promptData)) {
             throw new MLflowException('Invalid prompt data in response');
         }
 
+        /** @var array<string, mixed> $promptData */
         return Prompt::fromArray($promptData);
     }
 
     /**
      * Create a new prompt version
      *
-     * @param string $name Prompt name
-     * @param string $template Prompt template
-     * @param string|null $description Version description
-     * @param array<string, string>|null $tags Optional tags
-     * @param array<string, mixed>|null $responseFormat Optional response format
-     * @param array<string, mixed>|null $modelConfig Optional model configuration
-     * @return PromptVersion
+     * @param string                     $name           Prompt name
+     * @param string                     $template       Prompt template
+     * @param string|null                $description    Version description
+     * @param array<string, string>|null $tags           Optional tags
+     * @param array<string, mixed>|null  $responseFormat Optional response format
+     * @param array<string, mixed>|null  $modelConfig    Optional model configuration
+     *
      * @throws MLflowException
      */
     public function createPromptVersion(
@@ -91,10 +92,11 @@ class PromptApi extends BaseApi
         $response = $this->post('mlflow/prompts/versions/create', $params);
 
         $versionData = $response['prompt_version'] ?? $response;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid prompt version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return PromptVersion::fromArray($versionData);
     }
 
@@ -102,7 +104,7 @@ class PromptApi extends BaseApi
      * Get a prompt by name
      *
      * @param string $name Prompt name
-     * @return Prompt
+     *
      * @throws MLflowException
      */
     public function getPrompt(string $name): Prompt
@@ -112,19 +114,20 @@ class PromptApi extends BaseApi
         ]);
 
         $promptData = $response['prompt'] ?? $response;
-        if (!is_array($promptData)) {
+        if (! is_array($promptData)) {
             throw new MLflowException('Invalid prompt data in response');
         }
 
+        /** @var array<string, mixed> $promptData */
         return Prompt::fromArray($promptData);
     }
 
     /**
      * Get a specific prompt version
      *
-     * @param string $name Prompt name
+     * @param string     $name    Prompt name
      * @param string|int $version Version number or name
-     * @return PromptVersion
+     *
      * @throws MLflowException
      */
     public function getPromptVersion(string $name, string|int $version): PromptVersion
@@ -135,19 +138,20 @@ class PromptApi extends BaseApi
         ]);
 
         $versionData = $response['prompt_version'] ?? $response;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid prompt version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return PromptVersion::fromArray($versionData);
     }
 
     /**
      * Get a prompt version by alias
      *
-     * @param string $name Prompt name
+     * @param string $name  Prompt name
      * @param string $alias Alias name
-     * @return PromptVersion
+     *
      * @throws MLflowException
      */
     public function getPromptVersionByAlias(string $name, string $alias): PromptVersion
@@ -158,21 +162,24 @@ class PromptApi extends BaseApi
         ]);
 
         $versionData = $response['prompt_version'] ?? $response;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid prompt version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return PromptVersion::fromArray($versionData);
     }
 
     /**
      * Search prompt versions
      *
-     * @param string|null $filter Filter string
-     * @param int $maxResults Maximum results to return
-     * @param string|null $pageToken Page token for pagination
-     * @param array<string>|null $orderBy Order by fields
+     * @param string|null        $filter     Filter string
+     * @param int                $maxResults Maximum results to return
+     * @param string|null        $pageToken  Page token for pagination
+     * @param array<string>|null $orderBy    Order by fields
+     *
      * @return array{prompt_versions: PromptVersion[], next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function searchPromptVersions(
@@ -201,12 +208,14 @@ class PromptApi extends BaseApi
         if (isset($response['prompt_versions']) && is_array($response['prompt_versions'])) {
             foreach ($response['prompt_versions'] as $versionData) {
                 if (is_array($versionData)) {
+                    /** @var array<string, mixed> $versionData */
                     $versions[] = PromptVersion::fromArray($versionData);
                 }
             }
         }
 
         $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'prompt_versions' => $versions,
             'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
@@ -217,7 +226,7 @@ class PromptApi extends BaseApi
      * Delete a prompt
      *
      * @param string $name Prompt name
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deletePrompt(string $name): void
@@ -230,9 +239,9 @@ class PromptApi extends BaseApi
     /**
      * Delete a prompt version
      *
-     * @param string $name Prompt name
+     * @param string     $name    Prompt name
      * @param string|int $version Version number or name
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deletePromptVersion(string $name, string|int $version): void
@@ -246,10 +255,10 @@ class PromptApi extends BaseApi
     /**
      * Set an alias for a prompt version
      *
-     * @param string $name Prompt name
-     * @param string $alias Alias name
+     * @param string     $name    Prompt name
+     * @param string     $alias   Alias name
      * @param string|int $version Version number or name
-     * @return void
+     *
      * @throws MLflowException
      */
     public function setPromptAlias(string $name, string $alias, string|int $version): void
@@ -264,9 +273,9 @@ class PromptApi extends BaseApi
     /**
      * Delete an alias from a prompt version
      *
-     * @param string $name Prompt name
+     * @param string $name  Prompt name
      * @param string $alias Alias name
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deletePromptAlias(string $name, string $alias): void
@@ -280,10 +289,10 @@ class PromptApi extends BaseApi
     /**
      * Update a prompt
      *
-     * @param string $name Prompt name
-     * @param string|null $description New description
-     * @param array<string, string>|null $tags New tags
-     * @return void
+     * @param string                     $name        Prompt name
+     * @param string|null                $description New description
+     * @param array<string, string>|null $tags        New tags
+     *
      * @throws MLflowException
      */
     public function updatePrompt(
@@ -307,11 +316,11 @@ class PromptApi extends BaseApi
     /**
      * Update a prompt version
      *
-     * @param string $name Prompt name
-     * @param string|int $version Version number or name
-     * @param string|null $description New description
-     * @param array<string, string>|null $tags New tags
-     * @return void
+     * @param string                     $name        Prompt name
+     * @param string|int                 $version     Version number or name
+     * @param string|null                $description New description
+     * @param array<string, string>|null $tags        New tags
+     *
      * @throws MLflowException
      */
     public function updatePromptVersion(

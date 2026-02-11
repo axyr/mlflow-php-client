@@ -19,7 +19,7 @@ class TraceApi extends BaseApi
      * Get trace by ID
      *
      * @param string $traceId Trace ID
-     * @return Trace
+     *
      * @throws MLflowException
      */
     public function getTrace(string $traceId): Trace
@@ -29,10 +29,11 @@ class TraceApi extends BaseApi
         ]);
 
         $traceData = $response['trace'] ?? $response;
-        if (!is_array($traceData)) {
+        if (! is_array($traceData)) {
             throw new MLflowException('Invalid trace data in response');
         }
 
+        /** @var array<string, mixed> $traceData */
         return Trace::fromArray($traceData);
     }
 
@@ -41,6 +42,7 @@ class TraceApi extends BaseApi
      *
      * @param string[] $experimentIds
      * @param string[] $orderBy
+     *
      * @return array{traces: Trace[], next_page_token: string|null}
      */
     public function searchTraces(
@@ -83,12 +85,14 @@ class TraceApi extends BaseApi
         if (isset($response['traces']) && is_array($response['traces'])) {
             foreach ($response['traces'] as $traceData) {
                 if (is_array($traceData)) {
+                    /** @var array<string, mixed> $traceData */
                     $traces[] = Trace::fromArray($traceData);
                 }
             }
         }
 
         $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'traces' => $traces,
             'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
@@ -101,7 +105,7 @@ class TraceApi extends BaseApi
      * Note: In MLflow Python, this is called at the END of a trace
      *
      * @param Trace $trace Trace to log
-     * @return TraceInfo
+     *
      * @throws MLflowException
      */
     public function logTrace(Trace $trace): TraceInfo
@@ -111,19 +115,21 @@ class TraceApi extends BaseApi
         ]);
 
         $traceInfoData = $response['trace_info'] ?? $response;
-        if (!is_array($traceInfoData)) {
+        if (! is_array($traceInfoData)) {
             throw new MLflowException('Invalid trace_info data in response');
         }
 
+        /** @var array<string, mixed> $traceInfoData */
         return TraceInfo::fromArray($traceInfoData);
     }
 
     /**
      * Delete traces
      *
-     * @param array<string> $traceIds Trace IDs to delete
-     * @param string $experimentId Experiment ID
-     * @param int $maxTraces Maximum number of traces to delete
+     * @param array<string> $traceIds     Trace IDs to delete
+     * @param string        $experimentId Experiment ID
+     * @param int           $maxTraces    Maximum number of traces to delete
+     *
      * @return int Number of traces deleted
      */
     public function deleteTraces(

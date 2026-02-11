@@ -11,8 +11,7 @@ class TraceData
      */
     public function __construct(
         private array $spans = []
-    ) {
-    }
+    ) {}
 
     /**
      * @return Span[]
@@ -29,12 +28,10 @@ class TraceData
                 return $span;
             }
         }
+
         return null;
     }
 
-    /**
-     * @param string $spanId
-     */
     public function getSpanById(string $spanId): ?Span
     {
         foreach ($this->spans as $span) {
@@ -42,12 +39,12 @@ class TraceData
                 return $span;
             }
         }
+
         return null;
     }
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -55,6 +52,7 @@ class TraceData
         if (isset($data['spans']) && is_array($data['spans'])) {
             foreach ($data['spans'] as $spanData) {
                 if (is_array($spanData)) {
+                    /** @var array<string, mixed> $spanData */
                     $spans[] = Span::fromArray($spanData);
                 }
             }
@@ -69,7 +67,7 @@ class TraceData
     public function toArray(): array
     {
         return [
-            'spans' => array_map(fn(Span $span) => $span->toArray(), $this->spans),
+            'spans' => array_map(fn (Span $span) => $span->toArray(), $this->spans),
         ];
     }
 }

@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
+use MLflow\Contracts\ExperimentApiContract;
 use MLflow\Enum\ViewType;
-use MLflow\Model\Experiment;
-use MLflow\Model\ExperimentTag;
 use MLflow\Exception\MLflowException;
+use MLflow\Model\Experiment;
 
 /**
  * Complete API for managing MLflow experiments
  * Implements all REST API endpoints from MLflow official documentation
  */
-class ExperimentApi extends BaseApi
+class ExperimentApi extends BaseApi implements ExperimentApiContract
 {
     /**
      * Create a new experiment
      *
-     * @param string $name Experiment name (must be unique)
-     * @param string|null $artifactLocation Optional artifact location
-     * @param array<string, string> $tags Optional tags for the experiment
+     * @param string                $name             Experiment name (must be unique)
+     * @param string|null           $artifactLocation Optional artifact location
+     * @param array<string, string> $tags             Optional tags for the experiment
+     *
      * @return Experiment The created experiment
+     *
      * @throws MLflowException
      */
     public function create(string $name, ?string $artifactLocation = null, array $tags = []): Experiment
@@ -32,25 +34,34 @@ class ExperimentApi extends BaseApi
             $data['artifact_location'] = $artifactLocation;
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
         $response = $this->post('mlflow/experiments/create', $data);
 
         $experimentId = $response['experiment_id'] ?? '';
-        if (!is_string($experimentId)) {
+        if (! is_string($experimentId)) {
             throw new MLflowException('Invalid experiment_id in response');
         }
 
-        return new Experiment($experimentId, $name);
+        $experiment = new Experiment($experimentId, $name);
+
+        // Fire event if Laravel Event facade is available and has a root set
+        if (class_exists(\Illuminate\Support\Facades\Event::class) && \Illuminate\Support\Facades\Event::getFacadeRoot() !== null) {
+            \Illuminate\Support\Facades\Event::dispatch(new \MLflow\Laravel\Events\ExperimentCreated($experiment));
+        }
+
+        return $experiment;
     }
 
     /**
      * Get an experiment by ID
      *
      * @param string $experimentId The experiment ID
+     *
      * @return Experiment The experiment
+     *
      * @throws MLflowException
      */
     public function getById(string $experimentId): Experiment
@@ -60,10 +71,11 @@ class ExperimentApi extends BaseApi
         ]);
 
         $experiment = $response['experiment'] ?? null;
-        if (!is_array($experiment)) {
+        if (! is_array($experiment)) {
             throw new MLflowException('Invalid experiment data in response');
         }
 
+        /** @var array<string, mixed> $experiment */
         return Experiment::fromArray($experiment);
     }
 
@@ -71,7 +83,9 @@ class ExperimentApi extends BaseApi
      * Get an experiment by name
      *
      * @param string $name The experiment name
+     *
      * @return Experiment The experiment
+     *
      * @throws MLflowException
      */
     public function getByName(string $name): Experiment
@@ -81,22 +95,25 @@ class ExperimentApi extends BaseApi
         ]);
 
         $experiment = $response['experiment'] ?? null;
-        if (!is_array($experiment)) {
+        if (! is_array($experiment)) {
             throw new MLflowException('Invalid experiment data in response');
         }
 
+        /** @var array<string, mixed> $experiment */
         return Experiment::fromArray($experiment);
     }
 
     /**
      * Search experiments (preferred over list)
      *
-     * @param string|null $filterString Filter string (e.g., "attribute.name = 'my_experiment'")
-     * @param int|null $maxResults Maximum number of experiments to return
-     * @param string|null $pageToken Token for pagination
-     * @param array<string>|null $orderBy List of columns to order by (e.g., ["name DESC"])
-     * @param ViewType $viewType View type for filtering by lifecycle stage
+     * @param string|null        $filterString Filter string (e.g., "attribute.name = 'my_experiment'")
+     * @param int|null           $maxResults   Maximum number of experiments to return
+     * @param string|null        $pageToken    Token for pagination
+     * @param array<string>|null $orderBy      List of columns to order by (e.g., ["name DESC"])
+     * @param ViewType           $viewType     View type for filtering by lifecycle stage
+     *
      * @return array{experiments: array<Experiment>, next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function search(
@@ -130,6 +147,7 @@ class ExperimentApi extends BaseApi
         if (isset($response['experiments']) && is_array($response['experiments'])) {
             foreach ($response['experiments'] as $expData) {
                 if (is_array($expData)) {
+                    /** @var array<string, mixed> $expData */
                     $experiments[] = Experiment::fromArray($expData);
                 }
             }
@@ -147,10 +165,13 @@ class ExperimentApi extends BaseApi
      * List all experiments (deprecated - use search instead)
      *
      * @deprecated Use search() method instead
-     * @param ViewType $viewType View type for filtering by lifecycle stage
-     * @param int|null $maxResults Maximum number of experiments to return
-     * @param string|null $pageToken Token for pagination
+     *
+     * @param ViewType    $viewType   View type for filtering by lifecycle stage
+     * @param int|null    $maxResults Maximum number of experiments to return
+     * @param string|null $pageToken  Token for pagination
+     *
      * @return array{experiments: array<Experiment>, next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function list(
@@ -164,9 +185,9 @@ class ExperimentApi extends BaseApi
     /**
      * Update an experiment
      *
-     * @param string $experimentId The experiment ID
-     * @param string|null $newName New name for the experiment
-     * @return void
+     * @param string      $experimentId The experiment ID
+     * @param string|null $newName      New name for the experiment
+     *
      * @throws MLflowException
      */
     public function update(string $experimentId, ?string $newName = null): void
@@ -184,7 +205,7 @@ class ExperimentApi extends BaseApi
      * Delete an experiment
      *
      * @param string $experimentId The experiment ID
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteExperiment(string $experimentId): void
@@ -198,7 +219,7 @@ class ExperimentApi extends BaseApi
      * Restore a deleted experiment
      *
      * @param string $experimentId The experiment ID
-     * @return void
+     *
      * @throws MLflowException
      */
     public function restore(string $experimentId): void
@@ -212,9 +233,9 @@ class ExperimentApi extends BaseApi
      * Set a tag on an experiment
      *
      * @param string $experimentId The experiment ID
-     * @param string $key Tag key
-     * @param string $value Tag value
-     * @return void
+     * @param string $key          Tag key
+     * @param string $value        Tag value
+     *
      * @throws MLflowException
      */
     public function setTag(string $experimentId, string $key, string $value): void
@@ -230,8 +251,8 @@ class ExperimentApi extends BaseApi
      * Delete a tag from an experiment
      *
      * @param string $experimentId The experiment ID
-     * @param string $key Tag key to delete
-     * @return void
+     * @param string $key          Tag key to delete
+     *
      * @throws MLflowException
      */
     public function deleteTag(string $experimentId, string $key): void

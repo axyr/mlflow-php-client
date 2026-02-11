@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MLflow\Builder;
 
+use Illuminate\Support\Traits\Macroable;
 use MLflow\Api\RunApi;
 use MLflow\Model\Run;
 
 /**
  * Fluent builder for creating and configuring MLflow runs
+ *
+ * Supports macros for custom methods.
  *
  * @example
  * ```php
@@ -20,24 +23,36 @@ use MLflow\Model\Run;
  *     ->withTag('model_type', 'neural_network')
  *     ->start();
  * ```
+ * @example Using macros
+ * ```php
+ * RunBuilder::macro('withDefaults', function () {
+ *     return $this->withTag('created_by', 'automated');
+ * });
+ * ```
  */
 final class RunBuilder
 {
+    use Macroable;
+
     private ?string $runName = null;
+
     private ?int $startTime = null;
+
     private ?string $userId = null;
+
     /** @var array<string, string> */
     private array $tags = [];
+
     /** @var array<string, string> */
     private array $params = [];
+
     /** @var array<array{key: string, value: float, step: int, timestamp: int}> */
     private array $metrics = [];
 
     public function __construct(
         private readonly RunApi $runApi,
         private readonly string $experimentId,
-    ) {
-    }
+    ) {}
 
     /**
      * Set the run name
@@ -163,8 +178,13 @@ final class RunBuilder
             tags: $this->tags,
         );
 
+        // Fire event if Laravel Event facade is available and has a root set
+        if (class_exists(\Illuminate\Support\Facades\Event::class) && \Illuminate\Support\Facades\Event::getFacadeRoot() !== null) {
+            \Illuminate\Support\Facades\Event::dispatch(new \MLflow\Laravel\Events\RunStarted($run));
+        }
+
         // Log batch data if any params or metrics were configured
-        if (!empty($this->params) || !empty($this->metrics)) {
+        if (! empty($this->params) || ! empty($this->metrics)) {
             $this->runApi->logBatch(
                 runId: $run->info->runId,
                 metrics: $this->metrics,

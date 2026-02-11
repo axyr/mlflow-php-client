@@ -12,10 +12,11 @@ use MLflow\Model\RunTag;
  * Type-safe collection for tags (key-value pairs)
  *
  * @template T of ExperimentTag|RunTag|ModelTag
+ *
  * @implements \IteratorAggregate<string, T>
  * @implements \ArrayAccess<string, T>
  */
-class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable, \ArrayAccess
+class TagCollection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable
 {
     /** @var array<string, T> */
     private array $tags = [];
@@ -34,13 +35,15 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      * Create from associative array
      *
      * @template TagType of ExperimentTag|RunTag|ModelTag
+     *
      * @param array<string, string> $data
      * @param class-string<TagType> $tagClass
+     *
      * @return self<TagType>
      */
     public static function fromAssociativeArray(array $data, string $tagClass): self
     {
-        $collection = new self();
+        $collection = new self;
         foreach ($data as $key => $value) {
             $collection->add($tagClass::fromArray(['key' => $key, 'value' => $value]));
         }
@@ -52,13 +55,15 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      * Create from array of tag arrays
      *
      * @template TagType of ExperimentTag|RunTag|ModelTag
+     *
      * @param array<array{key: string, value: string}> $data
-     * @param class-string<TagType> $tagClass
+     * @param class-string<TagType>                    $tagClass
+     *
      * @return self<TagType>
      */
     public static function fromArrays(array $data, string $tagClass): self
     {
-        $collection = new self();
+        $collection = new self;
         foreach ($data as $tagData) {
             $collection->add($tagClass::fromArray($tagData));
         }
@@ -120,18 +125,19 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      */
     public function toArray(): array
     {
-        return array_values(array_map(fn($tag) => $tag->toArray(), $this->tags));
+        return array_values(array_map(fn ($tag) => $tag->toArray(), $this->tags));
     }
 
     /**
      * Filter tags by predicate
      *
      * @param callable(T): bool $predicate
+     *
      * @return self<T>
      */
     public function filter(callable $predicate): self
     {
-        $filtered = new self();
+        $filtered = new self;
         foreach ($this->tags as $tag) {
             if ($predicate($tag)) {
                 $filtered->add($tag);
@@ -148,7 +154,7 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      */
     public function filterSystemTags(): self
     {
-        return $this->filter(fn($tag) => str_starts_with($tag->key, 'mlflow.'));
+        return $this->filter(fn ($tag) => str_starts_with($tag->key, 'mlflow.'));
     }
 
     /**
@@ -158,13 +164,14 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      */
     public function filterUserTags(): self
     {
-        return $this->filter(fn($tag) => !str_starts_with($tag->key, 'mlflow.'));
+        return $this->filter(fn ($tag) => ! str_starts_with($tag->key, 'mlflow.'));
     }
 
     /**
      * Merge with another collection
      *
      * @param self<T> $other
+     *
      * @return self<T>
      */
     public function merge(self $other): self
@@ -181,8 +188,10 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
      * Reduce collection to a single value
      *
      * @template TResult
+     *
      * @param callable(TResult, T): TResult $callback
-     * @param TResult $initial
+     * @param TResult                       $initial
+     *
      * @return TResult
      */
     public function reduce(callable $callback, mixed $initial = null): mixed

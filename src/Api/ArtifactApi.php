@@ -5,22 +5,24 @@ declare(strict_types=1);
 namespace MLflow\Api;
 
 use GuzzleHttp\Psr7;
-use MLflow\Model\FileInfo;
+use MLflow\Contracts\ArtifactApiContract;
 use MLflow\Exception\MLflowException;
-use Psr\Http\Message\StreamInterface;
+use MLflow\Model\FileInfo;
 
 /**
  * Complete API for managing MLflow artifacts
  * Implements all REST API endpoints from MLflow official documentation
  */
-class ArtifactApi extends BaseApi
+class ArtifactApi extends BaseApi implements ArtifactApiContract
 {
     /**
      * List artifacts for a run
      *
-     * @param string $runId The run ID
-     * @param string|null $path Optional path within the artifact directory
+     * @param string      $runId The run ID
+     * @param string|null $path  Optional path within the artifact directory
+     *
      * @return array{root_uri: string|null, files: FileInfo[]} Array with root_uri and FileInfo objects
+     *
      * @throws MLflowException
      */
     public function list(string $runId, ?string $path = null): array
@@ -44,6 +46,7 @@ class ArtifactApi extends BaseApi
         }
 
         $rootUri = $response['root_uri'] ?? null;
+
         return [
             'root_uri' => is_string($rootUri) ? $rootUri : null,
             'files' => $files,
@@ -53,19 +56,19 @@ class ArtifactApi extends BaseApi
     /**
      * Log a single artifact file for a run
      *
-     * @param string $runId The run ID
-     * @param string $localPath Path to the local file
+     * @param string      $runId        The run ID
+     * @param string      $localPath    Path to the local file
      * @param string|null $artifactPath Optional path within the artifact directory
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logArtifact(string $runId, string $localPath, ?string $artifactPath = null): void
     {
-        if (!file_exists($localPath)) {
+        if (! file_exists($localPath)) {
             throw new MLflowException("File not found: $localPath");
         }
 
-        if (!is_file($localPath)) {
+        if (! is_file($localPath)) {
             throw new MLflowException("Path is not a file: $localPath");
         }
 
@@ -76,13 +79,14 @@ class ArtifactApi extends BaseApi
         $runInfo = $this->getRunInfo($runId);
         $artifactUri = $runInfo['artifact_uri'] ?? null;
 
-        if (!is_string($artifactUri) || $artifactUri === '') {
+        if (! is_string($artifactUri) || $artifactUri === '') {
             throw new MLflowException("Could not get artifact URI for run $runId");
         }
 
         // For file store, directly copy the file
         if (str_starts_with($artifactUri, 'file://')) {
             $this->copyToFileStore($localPath, $artifactUri, $fullArtifactPath);
+
             return;
         }
 
@@ -93,15 +97,15 @@ class ArtifactApi extends BaseApi
     /**
      * Log multiple artifacts from a directory
      *
-     * @param string $runId The run ID
-     * @param string $localDir Path to the local directory
+     * @param string      $runId        The run ID
+     * @param string      $localDir     Path to the local directory
      * @param string|null $artifactPath Optional path within the artifact directory
-     * @return void
+     *
      * @throws MLflowException
      */
     public function logArtifacts(string $runId, string $localDir, ?string $artifactPath = null): void
     {
-        if (!is_dir($localDir)) {
+        if (! is_dir($localDir)) {
             throw new MLflowException("Directory not found: $localDir");
         }
 
@@ -129,10 +133,12 @@ class ArtifactApi extends BaseApi
     /**
      * Download artifacts for a run
      *
-     * @param string $runId The run ID
+     * @param string      $runId        The run ID
      * @param string|null $artifactPath Path within the artifact directory
-     * @param string $dstPath Local destination path
+     * @param string      $dstPath      Local destination path
+     *
      * @return string The path to downloaded artifacts
+     *
      * @throws MLflowException
      */
     public function download(string $runId, ?string $artifactPath, string $dstPath): string
@@ -141,13 +147,13 @@ class ArtifactApi extends BaseApi
         $artifacts = $this->list($runId, $artifactPath);
         $rootUri = $artifacts['root_uri'] ?? null;
 
-        if (!$rootUri) {
+        if (! $rootUri) {
             throw new MLflowException("Could not get artifact URI for run $runId");
         }
 
         // Create destination directory if it doesn't exist
-        if (!is_dir($dstPath)) {
-            if (!mkdir($dstPath, 0777, true)) {
+        if (! is_dir($dstPath)) {
+            if (! mkdir($dstPath, 0777, true)) {
                 throw new MLflowException("Failed to create directory: $dstPath");
             }
         }
@@ -163,9 +169,11 @@ class ArtifactApi extends BaseApi
     /**
      * Get download URI for artifacts
      *
-     * @param string $runId The run ID
+     * @param string      $runId        The run ID
      * @param string|null $artifactPath Path within the artifact directory
+     *
      * @return string The download URI
+     *
      * @throws MLflowException
      */
     public function getDownloadUri(string $runId, ?string $artifactPath = null): string
@@ -179,16 +187,17 @@ class ArtifactApi extends BaseApi
         $response = $this->get('mlflow/artifacts/get-artifact', $query);
 
         $uri = $response['artifact_uri'] ?? '';
+
         return is_string($uri) ? $uri : '';
     }
 
     /**
      * Upload artifact via proxy (when MLFLOW_ENABLE_PROXY_MULTIPART_UPLOAD is enabled)
      *
-     * @param string $runId The run ID
-     * @param string $localPath Path to local file
+     * @param string $runId        The run ID
+     * @param string $localPath    Path to local file
      * @param string $artifactPath Path within the artifact directory
-     * @return void
+     *
      * @throws MLflowException
      */
     private function uploadViaProxy(string $runId, string $localPath, string $artifactPath): void
@@ -209,7 +218,7 @@ class ArtifactApi extends BaseApi
             ]);
         } catch (\Exception $e) {
             throw new MLflowException(
-                "Failed to upload artifact: " . $e->getMessage(),
+                'Failed to upload artifact: ' . $e->getMessage(),
                 0,
                 null,
                 $e
@@ -220,10 +229,10 @@ class ArtifactApi extends BaseApi
     /**
      * Copy file to file store
      *
-     * @param string $localPath Source file path
-     * @param string $artifactUri Artifact store URI
+     * @param string $localPath    Source file path
+     * @param string $artifactUri  Artifact store URI
      * @param string $artifactPath Target path within artifacts
-     * @return void
+     *
      * @throws MLflowException
      */
     private function copyToFileStore(string $localPath, string $artifactUri, string $artifactPath): void
@@ -231,13 +240,13 @@ class ArtifactApi extends BaseApi
         $targetPath = str_replace('file://', '', $artifactUri) . '/' . $artifactPath;
         $targetDir = dirname($targetPath);
 
-        if (!is_dir($targetDir)) {
-            if (!mkdir($targetDir, 0777, true)) {
+        if (! is_dir($targetDir)) {
+            if (! mkdir($targetDir, 0777, true)) {
                 throw new MLflowException("Failed to create artifact directory: $targetDir");
             }
         }
 
-        if (!copy($localPath, $targetPath)) {
+        if (! copy($localPath, $targetPath)) {
             throw new MLflowException("Failed to copy file to artifact store: $targetPath");
         }
     }
@@ -246,6 +255,7 @@ class ArtifactApi extends BaseApi
      * Scan directory recursively for files
      *
      * @param string $dir Directory to scan
+     *
      * @return string[] Array of file paths
      */
     private function scanDirectory(string $dir): array
@@ -268,11 +278,11 @@ class ArtifactApi extends BaseApi
     /**
      * Download a single file
      *
-     * @param string $runId The run ID
-     * @param FileInfo $fileInfo File information
-     * @param string $dstPath Destination directory
+     * @param string      $runId        The run ID
+     * @param FileInfo    $fileInfo     File information
+     * @param string      $dstPath      Destination directory
      * @param string|null $artifactPath Artifact path
-     * @return void
+     *
      * @throws MLflowException
      */
     private function downloadFile(
@@ -287,6 +297,7 @@ class ArtifactApi extends BaseApi
         if ($fileInfo->isDir) {
             // Recursively download directory contents
             $this->download($runId, $filePath, $localPath);
+
             return;
         }
 
@@ -298,7 +309,7 @@ class ArtifactApi extends BaseApi
             );
 
             $fileHandle = fopen($localPath, 'wb');
-            if (!$fileHandle) {
+            if (! $fileHandle) {
                 throw new MLflowException("Failed to create file: $localPath");
             }
 
@@ -306,7 +317,7 @@ class ArtifactApi extends BaseApi
             fclose($fileHandle);
         } catch (\Exception $e) {
             throw new MLflowException(
-                "Failed to download artifact: " . $e->getMessage(),
+                'Failed to download artifact: ' . $e->getMessage(),
                 0,
                 null,
                 $e
@@ -318,17 +329,20 @@ class ArtifactApi extends BaseApi
      * Get run info to retrieve artifact URI
      *
      * @param string $runId The run ID
+     *
      * @return array<string, mixed> Run information
+     *
      * @throws MLflowException
      */
     private function getRunInfo(string $runId): array
     {
         $response = $this->get('mlflow/runs/get', ['run_id' => $runId]);
         $run = $response['run'] ?? null;
-        if (!is_array($run)) {
+        if (! is_array($run)) {
             return [];
         }
         $info = $run['info'] ?? [];
+
         return is_array($info) ? $info : [];
     }
 }

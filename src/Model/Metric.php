@@ -17,8 +17,7 @@ readonly class Metric implements SerializableModelInterface
         public float $value,
         public int $timestamp,
         public int $step = 0,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $data
@@ -54,10 +53,10 @@ readonly class Metric implements SerializableModelInterface
     /**
      * Create a metric with a specific timestamp
      *
-     * @param string $key Metric key
-     * @param float $value Metric value
-     * @param int $timestamp Timestamp in milliseconds
-     * @param int $step Training step
+     * @param string $key       Metric key
+     * @param float  $value     Metric value
+     * @param int    $timestamp Timestamp in milliseconds
+     * @param int    $step      Training step
      *
      * @example
      * ```php
@@ -77,10 +76,10 @@ readonly class Metric implements SerializableModelInterface
     /**
      * Create a metric from seconds-based timestamp
      *
-     * @param string $key Metric key
-     * @param float $value Metric value
-     * @param int $timestampSeconds Timestamp in seconds (Unix timestamp)
-     * @param int $step Training step
+     * @param string $key              Metric key
+     * @param float  $value            Metric value
+     * @param int    $timestampSeconds Timestamp in seconds (Unix timestamp)
+     * @param int    $step             Training step
      *
      * @example
      * ```php
@@ -122,7 +121,8 @@ readonly class Metric implements SerializableModelInterface
     {
         $format = 'U.u';
         $timestamp = sprintf('%.3f', $this->timestamp / 1000);
-        return \DateTimeImmutable::createFromFormat($format, $timestamp) ?: new \DateTimeImmutable();
+
+        return \DateTimeImmutable::createFromFormat($format, $timestamp) ?: new \DateTimeImmutable;
     }
 
     public function isNewerThan(self $other): bool

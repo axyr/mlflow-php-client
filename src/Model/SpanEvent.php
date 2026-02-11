@@ -13,8 +13,7 @@ class SpanEvent
         private string $name,
         private int $timestampNs,
         private array $attributes = []
-    ) {
-    }
+    ) {}
 
     public function getName(): string
     {
@@ -49,7 +48,6 @@ class SpanEvent
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {

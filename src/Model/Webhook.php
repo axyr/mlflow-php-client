@@ -13,14 +13,14 @@ use MLflow\Enum\WebhookStatus;
 readonly class Webhook implements SerializableModelInterface
 {
     /**
-     * @param string $id Webhook ID
-     * @param string $name Webhook name
-     * @param string $url Webhook URL
-     * @param array<string> $events List of events that trigger the webhook
-     * @param WebhookStatus $status Webhook status
-     * @param string|null $description Optional description
-     * @param int|null $creationTime Creation timestamp
-     * @param int|null $lastUpdateTime Last update timestamp
+     * @param string        $id             Webhook ID
+     * @param string        $name           Webhook name
+     * @param string        $url            Webhook URL
+     * @param array<string> $events         List of events that trigger the webhook
+     * @param WebhookStatus $status         Webhook status
+     * @param string|null   $description    Optional description
+     * @param int|null      $creationTime   Creation timestamp
+     * @param int|null      $lastUpdateTime Last update timestamp
      */
     public function __construct(
         public string $id,
@@ -31,14 +31,12 @@ readonly class Webhook implements SerializableModelInterface
         public ?string $description = null,
         public ?int $creationTime = null,
         public ?int $lastUpdateTime = null,
-    ) {
-    }
+    ) {}
 
     /**
      * Create Webhook from array data
      *
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -46,6 +44,11 @@ readonly class Webhook implements SerializableModelInterface
         $name = $data['name'] ?? '';
         $url = $data['url'] ?? '';
         $events = $data['events'] ?? [];
+        if (is_array($events)) {
+            /** @var array<string> $events */
+        } else {
+            $events = [];
+        }
         $description = $data['description'] ?? null;
         $statusStr = $data['status'] ?? 'ACTIVE';
         $status = WebhookStatus::from(is_string($statusStr) ? $statusStr : 'ACTIVE');
@@ -72,7 +75,7 @@ readonly class Webhook implements SerializableModelInterface
             id: is_string($id) ? $id : '',
             name: is_string($name) ? $name : '',
             url: is_string($url) ? $url : '',
-            events: is_array($events) ? $events : [],
+            events: $events,
             status: $status,
             description: is_string($description) ? $description : null,
             creationTime: $creationTs,
@@ -156,6 +159,7 @@ readonly class Webhook implements SerializableModelInterface
 
     /**
      * @deprecated Use public property $events instead
+     *
      * @return array<string>
      */
     public function getEvents(): array

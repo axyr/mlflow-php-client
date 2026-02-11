@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
-use MLflow\Model\Webhook;
 use MLflow\Exception\MLflowException;
+use MLflow\Model\Webhook;
 
 /**
  * API for managing MLflow Webhooks
@@ -15,13 +15,13 @@ class WebhookApi extends BaseApi
     /**
      * Create a new webhook
      *
-     * @param string $name Webhook name
-     * @param string $url Webhook URL endpoint
-     * @param array<string> $events Events to trigger the webhook
-     * @param string|null $description Webhook description
-     * @param string|null $secret Secret for webhook authentication
-     * @param string|null $status Webhook status (ACTIVE, INACTIVE)
-     * @return Webhook
+     * @param string        $name        Webhook name
+     * @param string        $url         Webhook URL endpoint
+     * @param array<string> $events      Events to trigger the webhook
+     * @param string|null   $description Webhook description
+     * @param string|null   $secret      Secret for webhook authentication
+     * @param string|null   $status      Webhook status (ACTIVE, INACTIVE)
+     *
      * @throws MLflowException
      */
     public function createWebhook(
@@ -53,19 +53,22 @@ class WebhookApi extends BaseApi
         $response = $this->post('mlflow/registry-webhooks/create', $params);
 
         $webhookData = $response['webhook'] ?? $response;
-        if (!is_array($webhookData)) {
+        if (! is_array($webhookData)) {
             throw new MLflowException('Invalid webhook data in response');
         }
 
+        /** @var array<string, mixed> $webhookData */
         return Webhook::fromArray($webhookData);
     }
 
     /**
      * List all webhooks
      *
-     * @param int|null $maxResults Maximum results to return
-     * @param string|null $pageToken Page token for pagination
+     * @param int|null    $maxResults Maximum results to return
+     * @param string|null $pageToken  Page token for pagination
+     *
      * @return array{webhooks: Webhook[], next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function listWebhooks(
@@ -88,12 +91,14 @@ class WebhookApi extends BaseApi
         if (isset($response['webhooks']) && is_array($response['webhooks'])) {
             foreach ($response['webhooks'] as $webhookData) {
                 if (is_array($webhookData)) {
+                    /** @var array<string, mixed> $webhookData */
                     $webhooks[] = Webhook::fromArray($webhookData);
                 }
             }
         }
 
         $nextPageToken = $response['next_page_token'] ?? null;
+
         return [
             'webhooks' => $webhooks,
             'next_page_token' => is_string($nextPageToken) ? $nextPageToken : null,
@@ -104,7 +109,7 @@ class WebhookApi extends BaseApi
      * Get a webhook by ID
      *
      * @param string $webhookId Webhook ID
-     * @return Webhook
+     *
      * @throws MLflowException
      */
     public function getWebhook(string $webhookId): Webhook
@@ -114,10 +119,11 @@ class WebhookApi extends BaseApi
         ]);
 
         $webhookData = $response['webhook'] ?? $response;
-        if (!is_array($webhookData)) {
+        if (! is_array($webhookData)) {
             throw new MLflowException('Invalid webhook data in response');
         }
 
+        /** @var array<string, mixed> $webhookData */
         return Webhook::fromArray($webhookData);
     }
 
@@ -125,7 +131,7 @@ class WebhookApi extends BaseApi
      * Delete a webhook
      *
      * @param string $webhookId Webhook ID
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteWebhook(string $webhookId): void
@@ -138,12 +144,12 @@ class WebhookApi extends BaseApi
     /**
      * Update a webhook
      *
-     * @param string $webhookId Webhook ID
-     * @param string|null $name New name
-     * @param string|null $description New description
-     * @param string|null $status New status (ACTIVE, INACTIVE)
-     * @param array<string>|null $events New events
-     * @return void
+     * @param string             $webhookId   Webhook ID
+     * @param string|null        $name        New name
+     * @param string|null        $description New description
+     * @param string|null        $status      New status (ACTIVE, INACTIVE)
+     * @param array<string>|null $events      New events
+     *
      * @throws MLflowException
      */
     public function updateWebhook(
@@ -178,15 +184,15 @@ class WebhookApi extends BaseApi
      * Test a webhook
      *
      * @param string $webhookId Webhook ID
+     *
      * @return array<string, mixed> Test response
+     *
      * @throws MLflowException
      */
     public function testWebhook(string $webhookId): array
     {
-        $response = $this->post('mlflow/registry-webhooks/test', [
+        return $this->post('mlflow/registry-webhooks/test', [
             'id' => $webhookId,
         ]);
-
-        return is_array($response) ? $response : [];
     }
 }

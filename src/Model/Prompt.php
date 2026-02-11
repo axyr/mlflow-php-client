@@ -10,20 +10,20 @@ namespace MLflow\Model;
 class Prompt
 {
     private string $name;
+
     private ?string $description;
+
     /** @var array<string, string>|null */
     private ?array $tags;
+
     private ?int $creationTime;
+
     private ?int $lastUpdateTime;
+
     private ?string $userId;
 
     /**
-     * @param string $name
-     * @param string|null $description
      * @param array<string, string>|null $tags
-     * @param int|null $creationTime
-     * @param int|null $lastUpdateTime
-     * @param string|null $userId
      */
     public function __construct(
         string $name,
@@ -43,13 +43,17 @@ class Prompt
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
         $name = $data['name'] ?? '';
         $description = $data['description'] ?? null;
         $tags = $data['tags'] ?? null;
+        if (is_array($tags)) {
+            /** @var array<string, string> $tags */
+        } else {
+            $tags = null;
+        }
         $creationTime = $data['creation_time'] ?? null;
         $lastUpdateTime = $data['last_update_time'] ?? null;
         $userId = $data['user_id'] ?? null;
@@ -57,7 +61,7 @@ class Prompt
         return new self(
             is_string($name) ? $name : '',
             is_string($description) ? $description : null,
-            is_array($tags) ? $tags : null,
+            $tags,
             is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
             is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null),
             is_string($userId) ? $userId : null

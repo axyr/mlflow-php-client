@@ -13,7 +13,6 @@ abstract class TraceLocation
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     abstract public static function fromArray(array $data): self;
 }

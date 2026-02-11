@@ -1,17 +1,36 @@
+# Dependencies
 /vendor/
 /composer.lock
-/.phpunit.result.cache
-/.php-cs-fixer.cache
-/phpunit.xml
+
+# Build & Cache
 /build/
+/.phpunit.result.cache
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/coverage/
+/infection.log
+/.infection/
+/docs/api/
+/.phpdoc/
+
+# IDE
 /.idea/
 /.vscode/
 /.claude/
+*.swp
+*.swo
+*~
+
+# OS
 .DS_Store
-*.log
+Thumbs.db
+
+# Environment
 .env
 .env.local
-/docs/api/
-/.phpdoc/
-/infection.log
-/.infection/
+.env.*.local
+phpunit.xml
+
+# Generated files
+_ide_helper_mlflow.php
+*.log

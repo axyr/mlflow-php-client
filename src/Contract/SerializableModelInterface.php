@@ -7,7 +7,7 @@ namespace MLflow\Contract;
 /**
  * Interface for models that support JSON serialization
  */
-interface SerializableModelInterface extends ModelInterface, \JsonSerializable
+interface SerializableModelInterface extends \JsonSerializable, ModelInterface
 {
     /**
      * Specify data which should be serialized to JSON

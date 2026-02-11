@@ -16,6 +16,7 @@ use Psr\Http\Message\ResponseInterface;
 class TraceApiTest extends TestCase
 {
     private TraceApi $api;
+
     /** @var ClientInterface&MockObject */
     private ClientInterface $httpClient;
 
@@ -34,10 +35,11 @@ class TraceApiTest extends TestCase
         if ($json === false) {
             throw new \RuntimeException('Failed to encode JSON');
         }
+
         return new Response($status, ['Content-Type' => 'application/json'], $json);
     }
 
-    public function testGetTrace(): void
+    public function test_get_trace(): void
     {
         $expectedResponse = [
             'trace' => [
@@ -59,6 +61,7 @@ class TraceApiTest extends TestCase
                 'mlflow/traces/get',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json) && $json['trace_id'] === 'trace-123';
                 })
             )
@@ -71,7 +74,7 @@ class TraceApiTest extends TestCase
         $this->assertEquals(TraceState::OK, $trace->getInfo()->getState());
     }
 
-    public function testSearchTraces(): void
+    public function test_search_traces(): void
     {
         $expectedResponse = [
             'traces' => [
@@ -103,6 +106,7 @@ class TraceApiTest extends TestCase
                 'mlflow/traces/search',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['experiment_ids'] === ['exp-1']
                         && $json['max_results'] === 100;
@@ -122,7 +126,7 @@ class TraceApiTest extends TestCase
         $this->assertEquals('trace-1', $result['traces'][0]->getInfo()->getTraceId());
     }
 
-    public function testSetTraceTag(): void
+    public function test_set_trace_tag(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -132,6 +136,7 @@ class TraceApiTest extends TestCase
                 'mlflow/traces/set-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['trace_id'] === 'trace-123'
                         && $json['key'] === 'env'
@@ -145,7 +150,7 @@ class TraceApiTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testDeleteTraceTag(): void
+    public function test_delete_trace_tag(): void
     {
         $this->httpClient
             ->expects($this->once())
@@ -155,6 +160,7 @@ class TraceApiTest extends TestCase
                 'mlflow/traces/delete-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
+
                     return is_array($json)
                         && $json['trace_id'] === 'trace-123'
                         && $json['key'] === 'env';

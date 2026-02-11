@@ -9,8 +9,7 @@ class Trace
     public function __construct(
         private TraceInfo $info,
         private TraceData $data
-    ) {
-    }
+    ) {}
 
     public function getInfo(): TraceInfo
     {
@@ -24,7 +23,6 @@ class Trace
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -54,6 +52,7 @@ class Trace
         if ($json === false) {
             throw new \RuntimeException('Failed to encode trace to JSON: ' . json_last_error_msg());
         }
+
         return $json;
     }
 }

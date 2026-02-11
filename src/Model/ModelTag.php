@@ -12,8 +12,7 @@ readonly class ModelTag implements \JsonSerializable, \Stringable
     public function __construct(
         public string $key,
         public string $value,
-    ) {
-    }
+    ) {}
 
     /**
      * @param array{key: string, value: string} $data

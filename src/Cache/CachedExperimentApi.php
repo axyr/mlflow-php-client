@@ -19,6 +19,7 @@ use Psr\SimpleCache\CacheInterface;
 final class CachedExperimentApi extends ExperimentApi
 {
     private readonly CacheInterface $cache;
+
     private readonly int $ttl;
 
     public function __construct(
@@ -42,6 +43,7 @@ final class CachedExperimentApi extends ExperimentApi
         $cached = $this->cache->get($cacheKey);
         if ($cached instanceof Experiment) {
             $this->logger->debug("Cache hit for experiment {$experimentId}");
+
             return $cached;
         }
 
@@ -57,11 +59,12 @@ final class CachedExperimentApi extends ExperimentApi
      */
     public function getByName(string $name): Experiment
     {
-        $cacheKey = "mlflow:experiment:name:" . md5($name);
+        $cacheKey = 'mlflow:experiment:name:' . md5($name);
 
         $cached = $this->cache->get($cacheKey);
         if ($cached instanceof Experiment) {
             $this->logger->debug("Cache hit for experiment '{$name}'");
+
             return $cached;
         }
 
@@ -87,7 +90,7 @@ final class CachedExperimentApi extends ExperimentApi
 
         // Cache the newly created experiment
         $this->cache->set("mlflow:experiment:id:{$experiment->experimentId}", $experiment, $this->ttl);
-        $this->cache->set("mlflow:experiment:name:" . md5($name), $experiment, $this->ttl);
+        $this->cache->set('mlflow:experiment:name:' . md5($name), $experiment, $this->ttl);
 
         return $experiment;
     }

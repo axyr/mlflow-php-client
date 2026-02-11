@@ -8,8 +8,7 @@ class MlflowExperimentLocation extends TraceLocation
 {
     public function __construct(
         private string $experimentId
-    ) {
-    }
+    ) {}
 
     public function getExperimentId(): string
     {
@@ -29,7 +28,6 @@ class MlflowExperimentLocation extends TraceLocation
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {

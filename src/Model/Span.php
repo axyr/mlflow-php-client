@@ -9,18 +9,18 @@ use MLflow\Enum\SpanStatusCode;
 class Span
 {
     /**
-     * @param string $traceId 32-character hex string
-     * @param string $spanId 16-character hex string
-     * @param string $name Span name
-     * @param int $startTimeNs Start time in nanoseconds
-     * @param int|null $endTimeNs End time in nanoseconds
-     * @param string|null $parentId Parent span ID (16-char hex, null for root)
-     * @param SpanStatusCode $status Status code
-     * @param string $spanType Span type (uses string, not enum for extensibility)
-     * @param mixed $inputs Input data (serializable)
-     * @param mixed $outputs Output data (serializable)
-     * @param array<string, mixed> $attributes Span attributes
-     * @param SpanEvent[] $events Span events
+     * @param string               $traceId     32-character hex string
+     * @param string               $spanId      16-character hex string
+     * @param string               $name        Span name
+     * @param int                  $startTimeNs Start time in nanoseconds
+     * @param int|null             $endTimeNs   End time in nanoseconds
+     * @param string|null          $parentId    Parent span ID (16-char hex, null for root)
+     * @param SpanStatusCode       $status      Status code
+     * @param string               $spanType    Span type (uses string, not enum for extensibility)
+     * @param mixed                $inputs      Input data (serializable)
+     * @param mixed                $outputs     Output data (serializable)
+     * @param array<string, mixed> $attributes  Span attributes
+     * @param SpanEvent[]          $events      Span events
      */
     public function __construct(
         private string $traceId,
@@ -35,8 +35,7 @@ class Span
         private mixed $outputs = null,
         private array $attributes = [],
         private array $events = []
-    ) {
-    }
+    ) {}
 
     public function getTraceId(): string
     {
@@ -122,6 +121,7 @@ class Span
         if ($this->endTimeNs === null) {
             return null;
         }
+
         return $this->endTimeNs - $this->startTimeNs;
     }
 
@@ -131,12 +131,12 @@ class Span
         if ($durationNs === null) {
             return null;
         }
+
         return $durationNs / 1_000_000;
     }
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
@@ -144,6 +144,7 @@ class Span
         if (isset($data['events']) && is_array($data['events'])) {
             foreach ($data['events'] as $eventData) {
                 if (is_array($eventData)) {
+                    /** @var array<string, mixed> $eventData */
                     $events[] = SpanEvent::fromArray($eventData);
                 }
             }
@@ -194,7 +195,7 @@ class Span
             'status' => $this->status->value,
             'span_type' => $this->spanType,
             'attributes' => $this->attributes,
-            'events' => array_map(fn($e) => $e->toArray(), $this->events),
+            'events' => array_map(fn ($e) => $e->toArray(), $this->events),
         ];
 
         if ($this->endTimeNs !== null) {

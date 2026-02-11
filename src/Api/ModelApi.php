@@ -15,10 +15,12 @@ class ModelApi extends BaseApi
     /**
      * Create a registered model
      *
-     * @param string $name Model name
-     * @param string|null $description Model description
-     * @param array<string, string> $tags Model tags
+     * @param string                $name        Model name
+     * @param string|null           $description Model description
+     * @param array<string, string> $tags        Model tags
+     *
      * @return array<string, mixed> Response data
+     *
      * @deprecated Use ModelRegistryApi::createRegisteredModel() instead
      */
     public function createRegisteredModel(string $name, ?string $description = null, array $tags = []): array
@@ -29,7 +31,7 @@ class ModelApi extends BaseApi
             $data['description'] = $description;
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
@@ -40,7 +42,9 @@ class ModelApi extends BaseApi
      * Get a registered model
      *
      * @param string $name Model name
+     *
      * @return array<string, mixed> Response data
+     *
      * @deprecated Use ModelRegistryApi::getRegisteredModel() instead
      */
     public function getRegisteredModel(string $name): array
@@ -77,9 +81,11 @@ class ModelApi extends BaseApi
     /**
      * List registered models
      *
-     * @param int|null $maxResults Maximum number of results
-     * @param string|null $pageToken Pagination token
+     * @param int|null    $maxResults Maximum number of results
+     * @param string|null $pageToken  Pagination token
+     *
      * @return array<string, mixed> Response data
+     *
      * @deprecated Use ModelRegistryApi::searchRegisteredModels() instead
      */
     public function listRegisteredModels(?int $maxResults = null, ?string $pageToken = null): array
@@ -100,10 +106,12 @@ class ModelApi extends BaseApi
     /**
      * Create a model version
      *
-     * @param string $name Model name
-     * @param string $source Model source path
-     * @param string|null $runId Run ID
+     * @param string      $name   Model name
+     * @param string      $source Model source path
+     * @param string|null $runId  Run ID
+     *
      * @return array<string, mixed> Response data
+     *
      * @deprecated Use ModelRegistryApi::createModelVersion() instead
      */
     public function createModelVersion(string $name, string $source, ?string $runId = null): array
@@ -123,9 +131,11 @@ class ModelApi extends BaseApi
     /**
      * Get a model version
      *
-     * @param string $name Model name
+     * @param string $name    Model name
      * @param string $version Model version
+     *
      * @return array<string, mixed> Response data
+     *
      * @deprecated Use ModelRegistryApi::getModelVersion() instead
      */
     public function getModelVersion(string $name, string $version): array

@@ -17,10 +17,10 @@ class MLflowException extends Exception
     /**
      * Create a new MLflow exception with optional context
      *
-     * @param string $message The exception message
-     * @param int $code The exception code
-     * @param array<string, mixed>|null $context Additional context information
-     * @param \Throwable|null $previous The previous exception
+     * @param string                    $message  The exception message
+     * @param int                       $code     The exception code
+     * @param array<string, mixed>|null $context  Additional context information
+     * @param \Throwable|null           $previous The previous exception
      */
     public function __construct(
         string $message = '',
@@ -47,10 +47,9 @@ class MLflowException extends Exception
      *
      * Maps HTTP status codes to specific exception types for better error handling
      *
-     * @param int $statusCode HTTP status code
-     * @param string $message Error message
-     * @param array<string, mixed>|null $body Response body
-     * @return self
+     * @param int                       $statusCode HTTP status code
+     * @param string                    $message    Error message
+     * @param array<string, mixed>|null $body       Response body
      */
     public static function fromHttpError(int $statusCode, string $message, ?array $body = null): self
     {

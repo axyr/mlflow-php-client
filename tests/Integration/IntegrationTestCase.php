@@ -16,7 +16,9 @@ use PHPUnit\Framework\TestCase;
 abstract class IntegrationTestCase extends TestCase
 {
     protected MLflowClient $client;
+
     protected string $testExperimentId;
+
     protected string $testExperimentName;
 
     protected function setUp(): void

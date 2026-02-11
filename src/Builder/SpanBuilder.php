@@ -4,22 +4,30 @@ declare(strict_types=1);
 
 namespace MLflow\Builder;
 
+use MLflow\Enum\SpanStatusCode;
 use MLflow\Model\Span;
 use MLflow\Model\SpanEvent;
-use MLflow\Enum\SpanStatusCode;
-use MLflow\Util\TraceIdGenerator;
 use MLflow\Util\TimestampHelper;
+use MLflow\Util\TraceIdGenerator;
 
 class SpanBuilder
 {
     private TraceBuilder $traceBuilder;
+
     private string $spanId;
+
     private string $name;
+
     private string $spanType;
+
     private int $startTimeNs;
+
     private ?int $endTimeNs = null;
+
     private ?string $parentId = null;
+
     private mixed $inputs;
+
     private mixed $outputs = null;
 
     /** @var array<string, mixed> */
@@ -31,11 +39,11 @@ class SpanBuilder
     private SpanStatusCode $status = SpanStatusCode::UNSET;
 
     /**
-     * @param TraceBuilder $traceBuilder Parent trace builder
-     * @param string $name Span name
-     * @param string $spanType Span type
-     * @param array<string, mixed>|null $inputs Span inputs
-     * @param array<string, mixed>|null $attributes Span attributes
+     * @param TraceBuilder              $traceBuilder Parent trace builder
+     * @param string                    $name         Span name
+     * @param string                    $spanType     Span type
+     * @param array<string, mixed>|null $inputs       Span inputs
+     * @param array<string, mixed>|null $attributes   Span attributes
      */
     public function __construct(
         TraceBuilder $traceBuilder,
@@ -56,37 +64,40 @@ class SpanBuilder
     public function withParent(string $parentSpanId): self
     {
         $this->parentId = $parentSpanId;
+
         return $this;
     }
 
     public function withInput(string $key, mixed $value): self
     {
-        if (!is_array($this->inputs)) {
+        if (! is_array($this->inputs)) {
             $this->inputs = [];
         }
         $this->inputs[$key] = $value;
+
         return $this;
     }
 
     public function withOutput(string $key, mixed $value): self
     {
-        if (!is_array($this->outputs)) {
+        if (! is_array($this->outputs)) {
             $this->outputs = [];
         }
         $this->outputs[$key] = $value;
+
         return $this;
     }
 
     public function withAttribute(string $key, mixed $value): self
     {
         $this->attributes[$key] = $value;
+
         return $this;
     }
 
     /**
-     * @param string $name Event name
+     * @param string               $name       Event name
      * @param array<string, mixed> $attributes Event attributes
-     * @return self
      */
     public function withEvent(string $name, array $attributes = []): self
     {
@@ -95,6 +106,7 @@ class SpanBuilder
             TimestampHelper::nowNs(),
             $attributes
         );
+
         return $this;
     }
 
@@ -102,6 +114,7 @@ class SpanBuilder
     {
         $this->status = SpanStatusCode::ERROR;
         $this->events[] = SpanEvent::exception($exception, TimestampHelper::nowNs());
+
         return $this;
     }
 

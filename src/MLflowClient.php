@@ -20,6 +20,7 @@ use MLflow\Builder\ModelBuilder;
 use MLflow\Builder\RunBuilder;
 use MLflow\Builder\TraceBuilder;
 use MLflow\Config\MLflowConfig;
+use MLflow\Contracts\MLflowClientContract;
 use MLflow\Exception\MLflowException;
 use MLflow\Exception\NetworkException;
 use Psr\Log\LoggerInterface;
@@ -28,27 +29,38 @@ use Psr\Log\NullLogger;
 /**
  * Main MLflow client class for interacting with MLflow Tracking Server
  */
-class MLflowClient
+class MLflowClient implements MLflowClientContract
 {
     private ClientInterface $httpClient;
+
     protected LoggerInterface $logger;
+
     private string $trackingUri;
+
     private ?ExperimentApi $experimentApi = null;
+
     private ?RunApi $runApi = null;
+
     private ?ModelRegistryApi $modelRegistryApi = null;
+
     private ?MetricApi $metricApi = null;
+
     private ?ArtifactApi $artifactApi = null;
+
     private ?TraceApi $traceApi = null;
+
     private ?PromptApi $promptApi = null;
+
     private ?WebhookApi $webhookApi = null;
+
     private ?DatasetApi $datasetApi = null;
 
     /**
      * MLflowClient constructor.
      *
-     * @param string $trackingUri The MLflow tracking server URI
-     * @param MLflowConfig|array<string, mixed> $config Configuration object or array for backward compatibility
-     * @param LoggerInterface|null $logger PSR-3 compatible logger
+     * @param string                            $trackingUri The MLflow tracking server URI
+     * @param MLflowConfig|array<string, mixed> $config      Configuration object or array for backward compatibility
+     * @param LoggerInterface|null              $logger      PSR-3 compatible logger
      */
     public function __construct(
         string $trackingUri,
@@ -56,7 +68,7 @@ class MLflowClient
         ?LoggerInterface $logger = null
     ) {
         $this->trackingUri = rtrim($trackingUri, '/');
-        $this->logger = $logger ?? new NullLogger();
+        $this->logger = $logger ?? new NullLogger;
 
         // Convert array to MLflowConfig for backward compatibility
         $mlflowConfig = $config instanceof MLflowConfig ? $config : MLflowConfig::fromArray($config);
@@ -92,6 +104,7 @@ class MLflowClient
         if ($this->experimentApi === null) {
             $this->experimentApi = new ExperimentApi($this->httpClient, $this->logger);
         }
+
         return $this->experimentApi;
     }
 
@@ -103,6 +116,7 @@ class MLflowClient
         if ($this->runApi === null) {
             $this->runApi = new RunApi($this->httpClient, $this->logger);
         }
+
         return $this->runApi;
     }
 
@@ -114,6 +128,7 @@ class MLflowClient
         if ($this->modelRegistryApi === null) {
             $this->modelRegistryApi = new ModelRegistryApi($this->httpClient, $this->logger);
         }
+
         return $this->modelRegistryApi;
     }
 
@@ -133,6 +148,7 @@ class MLflowClient
         if ($this->metricApi === null) {
             $this->metricApi = new MetricApi($this->httpClient, $this->logger);
         }
+
         return $this->metricApi;
     }
 
@@ -144,6 +160,7 @@ class MLflowClient
         if ($this->artifactApi === null) {
             $this->artifactApi = new ArtifactApi($this->httpClient, $this->logger);
         }
+
         return $this->artifactApi;
     }
 
@@ -189,6 +206,7 @@ class MLflowClient
         if ($this->traceApi === null) {
             $this->traceApi = new TraceApi($this->httpClient, $this->logger);
         }
+
         return $this->traceApi;
     }
 
@@ -257,6 +275,7 @@ class MLflowClient
         if ($this->promptApi === null) {
             $this->promptApi = new PromptApi($this->httpClient, $this->logger);
         }
+
         return $this->promptApi;
     }
 
@@ -268,6 +287,7 @@ class MLflowClient
         if ($this->webhookApi === null) {
             $this->webhookApi = new WebhookApi($this->httpClient, $this->logger);
         }
+
         return $this->webhookApi;
     }
 
@@ -279,6 +299,7 @@ class MLflowClient
         if ($this->datasetApi === null) {
             $this->datasetApi = new DatasetApi($this->httpClient, $this->logger);
         }
+
         return $this->datasetApi;
     }
 
@@ -288,8 +309,9 @@ class MLflowClient
      * Attempts a lightweight operation to verify server is reachable
      *
      * @return bool True if connection is successful
+     *
      * @throws NetworkException If server is unreachable
-     * @throws MLflowException If server returns an error
+     * @throws MLflowException  If server returns an error
      *
      * @example
      * ```php

@@ -7,6 +7,4 @@ namespace MLflow\Exception;
 /**
  * Exception thrown for resource conflicts (HTTP 409)
  */
-class ConflictException extends ApiException
-{
-}
+class ConflictException extends ApiException {}

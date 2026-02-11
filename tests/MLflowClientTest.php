@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace MLflow\Tests;
 
-use MLflow\MLflowClient;
-use MLflow\Api\ExperimentApi;
-use MLflow\Api\RunApi;
-use MLflow\Api\ModelRegistryApi;
-use MLflow\Api\MetricApi;
-use MLflow\Api\ArtifactApi;
-use PHPUnit\Framework\TestCase;
 use GuzzleHttp\ClientInterface;
+use MLflow\Api\ArtifactApi;
+use MLflow\Api\ExperimentApi;
+use MLflow\Api\MetricApi;
+use MLflow\Api\ModelRegistryApi;
+use MLflow\Api\RunApi;
+use MLflow\MLflowClient;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 class MLflowClientTest extends TestCase
@@ -23,13 +23,13 @@ class MLflowClientTest extends TestCase
         $this->client = new MLflowClient('http://localhost:5000');
     }
 
-    public function testClientInitialization(): void
+    public function test_client_initialization(): void
     {
         $this->assertInstanceOf(MLflowClient::class, $this->client);
         $this->assertEquals('http://localhost:5000', $this->client->getTrackingUri());
     }
 
-    public function testExperimentsApiAccess(): void
+    public function test_experiments_api_access(): void
     {
         $api = $this->client->experiments();
         $this->assertInstanceOf(ExperimentApi::class, $api);
@@ -38,21 +38,21 @@ class MLflowClientTest extends TestCase
         $this->assertSame($api, $this->client->experiments());
     }
 
-    public function testRunsApiAccess(): void
+    public function test_runs_api_access(): void
     {
         $api = $this->client->runs();
         $this->assertInstanceOf(RunApi::class, $api);
         $this->assertSame($api, $this->client->runs());
     }
 
-    public function testModelsApiAccess(): void
+    public function test_models_api_access(): void
     {
         $api = $this->client->models();
         $this->assertInstanceOf(ModelRegistryApi::class, $api);
         $this->assertSame($api, $this->client->models());
     }
 
-    public function testModelRegistryApiAccess(): void
+    public function test_model_registry_api_access(): void
     {
         $api = $this->client->modelRegistry();
         $this->assertInstanceOf(ModelRegistryApi::class, $api);
@@ -61,21 +61,21 @@ class MLflowClientTest extends TestCase
         $this->assertSame($api, $this->client->models());
     }
 
-    public function testMetricsApiAccess(): void
+    public function test_metrics_api_access(): void
     {
         $api = $this->client->metrics();
         $this->assertInstanceOf(MetricApi::class, $api);
         $this->assertSame($api, $this->client->metrics());
     }
 
-    public function testArtifactsApiAccess(): void
+    public function test_artifacts_api_access(): void
     {
         $api = $this->client->artifacts();
         $this->assertInstanceOf(ArtifactApi::class, $api);
         $this->assertSame($api, $this->client->artifacts());
     }
 
-    public function testCustomHttpClient(): void
+    public function test_custom_http_client(): void
     {
         $mockClient = $this->createMock(ClientInterface::class);
         $this->client->setHttpClient($mockClient);
@@ -89,7 +89,7 @@ class MLflowClientTest extends TestCase
         $this->assertNotSame($api1, $api2);
     }
 
-    public function testCustomLogger(): void
+    public function test_custom_logger(): void
     {
         $mockLogger = $this->createMock(LoggerInterface::class);
         $mockLogger->expects($this->once())
@@ -99,7 +99,7 @@ class MLflowClientTest extends TestCase
         new MLflowClient('http://localhost:5000', [], $mockLogger);
     }
 
-    public function testTrailingSlashRemoval(): void
+    public function test_trailing_slash_removal(): void
     {
         $client = new MLflowClient('http://localhost:5000/');
         $this->assertEquals('http://localhost:5000', $client->getTrackingUri());

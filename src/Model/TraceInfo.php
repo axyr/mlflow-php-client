@@ -9,16 +9,16 @@ use MLflow\Enum\TraceState;
 class TraceInfo
 {
     /**
-     * @param string $traceId 32-character hex string
-     * @param TraceLocation $traceLocation Experiment or inference table
-     * @param int $requestTime Milliseconds since epoch
-     * @param TraceState $state OK, ERROR, IN_PROGRESS
-     * @param string|null $requestPreview Preview of request
-     * @param string|null $responsePreview Preview of response
-     * @param string|null $clientRequestId Client-provided request ID
-     * @param int|null $executionDuration Duration in milliseconds
-     * @param array<string, string> $traceMetadata Metadata key-value pairs
-     * @param array<string, string> $tags Tags key-value pairs
+     * @param string                $traceId           32-character hex string
+     * @param TraceLocation         $traceLocation     Experiment or inference table
+     * @param int                   $requestTime       Milliseconds since epoch
+     * @param TraceState            $state             OK, ERROR, IN_PROGRESS
+     * @param string|null           $requestPreview    Preview of request
+     * @param string|null           $responsePreview   Preview of response
+     * @param string|null           $clientRequestId   Client-provided request ID
+     * @param int|null              $executionDuration Duration in milliseconds
+     * @param array<string, string> $traceMetadata     Metadata key-value pairs
+     * @param array<string, string> $tags              Tags key-value pairs
      */
     public function __construct(
         private string $traceId,
@@ -31,8 +31,7 @@ class TraceInfo
         private ?int $executionDuration = null,
         private array $traceMetadata = [],
         private array $tags = []
-    ) {
-    }
+    ) {}
 
     public function getTraceId(): string
     {
@@ -100,13 +99,12 @@ class TraceInfo
 
     /**
      * @param array<string, mixed> $data
-     * @return self
      */
     public static function fromArray(array $data): self
     {
         // Parse trace location
         $locationData = $data['trace_location'] ?? $data['location'] ?? [];
-        if (!is_array($locationData)) {
+        if (! is_array($locationData)) {
             $locationData = [];
         }
         $locationType = is_string($locationData['type'] ?? null) ? $locationData['type'] : 'MLFLOW_EXPERIMENT';
@@ -127,7 +125,17 @@ class TraceInfo
         $clientRequestId = $data['client_request_id'] ?? null;
         $executionDuration = $data['execution_duration'] ?? null;
         $traceMetadata = $data['trace_metadata'] ?? [];
+        if (is_array($traceMetadata)) {
+            /** @var array<string, string> $traceMetadata */
+        } else {
+            $traceMetadata = [];
+        }
         $tags = $data['tags'] ?? [];
+        if (is_array($tags)) {
+            /** @var array<string, string> $tags */
+        } else {
+            $tags = [];
+        }
 
         if (is_int($executionDuration)) {
             $execDuration = $executionDuration;
@@ -146,8 +154,8 @@ class TraceInfo
             responsePreview: is_string($responsePreview) ? $responsePreview : null,
             clientRequestId: is_string($clientRequestId) ? $clientRequestId : null,
             executionDuration: $execDuration,
-            traceMetadata: is_array($traceMetadata) ? $traceMetadata : [],
-            tags: is_array($tags) ? $tags : []
+            traceMetadata: $traceMetadata,
+            tags: $tags
         );
     }
 

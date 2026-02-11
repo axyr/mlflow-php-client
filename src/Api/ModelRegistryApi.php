@@ -4,26 +4,29 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
+use MLflow\Contracts\ModelRegistryApiContract;
 use MLflow\Enum\ModelStage;
-use MLflow\Model\RegisteredModel;
-use MLflow\Model\ModelVersion;
 use MLflow\Exception\MLflowException;
+use MLflow\Model\ModelVersion;
+use MLflow\Model\RegisteredModel;
 
 /**
  * Complete API for MLflow Model Registry
  * Implements all REST API endpoints from MLflow official documentation
  */
-class ModelRegistryApi extends BaseApi
+class ModelRegistryApi extends BaseApi implements ModelRegistryApiContract
 {
     // ========== REGISTERED MODEL ENDPOINTS ==========
 
     /**
      * Create a new registered model
      *
-     * @param string $name The model name (must be unique)
-     * @param string|null $description Optional description
-     * @param array<string, string> $tags Optional tags
+     * @param string                $name        The model name (must be unique)
+     * @param string|null           $description Optional description
+     * @param array<string, string> $tags        Optional tags
+     *
      * @return RegisteredModel The created model
+     *
      * @throws MLflowException
      */
     public function createRegisteredModel(
@@ -37,25 +40,35 @@ class ModelRegistryApi extends BaseApi
             $data['description'] = $description;
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
         $response = $this->post('mlflow/registered-models/create', $data);
 
         $model = $response['registered_model'] ?? null;
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             throw new MLflowException('Invalid registered_model data in response');
         }
 
-        return RegisteredModel::fromArray($model);
+        /** @var array<string, mixed> $model */
+        $registeredModel = RegisteredModel::fromArray($model);
+
+        // Fire event if Laravel Event facade is available and has a root set
+        if (class_exists(\Illuminate\Support\Facades\Event::class) && \Illuminate\Support\Facades\Event::getFacadeRoot() !== null) {
+            \Illuminate\Support\Facades\Event::dispatch(new \MLflow\Laravel\Events\ModelRegistered($registeredModel));
+        }
+
+        return $registeredModel;
     }
 
     /**
      * Get a registered model by name
      *
      * @param string $name The model name
+     *
      * @return RegisteredModel The model
+     *
      * @throws MLflowException
      */
     public function getRegisteredModel(string $name): RegisteredModel
@@ -63,19 +76,22 @@ class ModelRegistryApi extends BaseApi
         $response = $this->get('mlflow/registered-models/get', ['name' => $name]);
 
         $model = $response['registered_model'] ?? null;
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             throw new MLflowException('Invalid registered_model data in response');
         }
 
+        /** @var array<string, mixed> $model */
         return RegisteredModel::fromArray($model);
     }
 
     /**
      * Update a registered model
      *
-     * @param string $name The model name
+     * @param string      $name        The model name
      * @param string|null $description New description
+     *
      * @return RegisteredModel The updated model
+     *
      * @throws MLflowException
      */
     public function updateRegisteredModel(string $name, ?string $description = null): RegisteredModel
@@ -89,19 +105,22 @@ class ModelRegistryApi extends BaseApi
         $response = $this->patch('mlflow/registered-models/update', $data);
 
         $model = $response['registered_model'] ?? null;
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             throw new MLflowException('Invalid registered_model data in response');
         }
 
+        /** @var array<string, mixed> $model */
         return RegisteredModel::fromArray($model);
     }
 
     /**
      * Rename a registered model
      *
-     * @param string $name Current model name
+     * @param string $name    Current model name
      * @param string $newName New model name
+     *
      * @return RegisteredModel The renamed model
+     *
      * @throws MLflowException
      */
     public function renameRegisteredModel(string $name, string $newName): RegisteredModel
@@ -112,10 +131,11 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $model = $response['registered_model'] ?? null;
-        if (!is_array($model)) {
+        if (! is_array($model)) {
             throw new MLflowException('Invalid registered_model data in response');
         }
 
+        /** @var array<string, mixed> $model */
         return RegisteredModel::fromArray($model);
     }
 
@@ -123,7 +143,7 @@ class ModelRegistryApi extends BaseApi
      * Delete a registered model
      *
      * @param string $name The model name
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteRegisteredModel(string $name): void
@@ -134,11 +154,13 @@ class ModelRegistryApi extends BaseApi
     /**
      * Search for registered models
      *
-     * @param string|null $filter Filter string (e.g., "name = 'my_model'")
-     * @param int|null $maxResults Maximum number of models to return
-     * @param array<string>|null $orderBy List of columns to order by
-     * @param string|null $pageToken Pagination token
+     * @param string|null        $filter     Filter string (e.g., "name = 'my_model'")
+     * @param int|null           $maxResults Maximum number of models to return
+     * @param array<string>|null $orderBy    List of columns to order by
+     * @param string|null        $pageToken  Pagination token
+     *
      * @return array{registered_models: array<RegisteredModel>, next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function searchRegisteredModels(
@@ -171,6 +193,7 @@ class ModelRegistryApi extends BaseApi
         if (isset($response['registered_models']) && is_array($response['registered_models'])) {
             foreach ($response['registered_models'] as $modelData) {
                 if (is_array($modelData)) {
+                    /** @var array<string, mixed> $modelData */
                     $models[] = RegisteredModel::fromArray($modelData);
                 }
             }
@@ -187,9 +210,11 @@ class ModelRegistryApi extends BaseApi
     /**
      * Get latest model versions for stages
      *
-     * @param string $name The model name
+     * @param string                 $name   The model name
      * @param array<ModelStage>|null $stages List of stages to retrieve versions for
+     *
      * @return array<ModelVersion> Array of ModelVersion objects
+     *
      * @throws MLflowException
      */
     public function getLatestVersions(string $name, ?array $stages = null): array
@@ -197,7 +222,7 @@ class ModelRegistryApi extends BaseApi
         $data = ['name' => $name];
 
         if ($stages !== null) {
-            $data['stages'] = array_map(fn(ModelStage $stage) => $stage->value, $stages);
+            $data['stages'] = array_map(fn (ModelStage $stage) => $stage->value, $stages);
         }
 
         $response = $this->post('mlflow/registered-models/get-latest-versions', $data);
@@ -206,6 +231,7 @@ class ModelRegistryApi extends BaseApi
         if (isset($response['model_versions']) && is_array($response['model_versions'])) {
             foreach ($response['model_versions'] as $versionData) {
                 if (is_array($versionData)) {
+                    /** @var array<string, mixed> $versionData */
                     $versions[] = ModelVersion::fromArray($versionData);
                 }
             }
@@ -217,10 +243,10 @@ class ModelRegistryApi extends BaseApi
     /**
      * Set a tag on a registered model
      *
-     * @param string $name The model name
-     * @param string $key Tag key
+     * @param string $name  The model name
+     * @param string $key   Tag key
      * @param string $value Tag value
-     * @return void
+     *
      * @throws MLflowException
      */
     public function setRegisteredModelTag(string $name, string $key, string $value): void
@@ -236,8 +262,8 @@ class ModelRegistryApi extends BaseApi
      * Delete a tag from a registered model
      *
      * @param string $name The model name
-     * @param string $key Tag key to delete
-     * @return void
+     * @param string $key  Tag key to delete
+     *
      * @throws MLflowException
      */
     public function deleteRegisteredModelTag(string $name, string $key): void
@@ -251,10 +277,10 @@ class ModelRegistryApi extends BaseApi
     /**
      * Set an alias for a model version
      *
-     * @param string $name The model name
-     * @param string $alias The alias to set
+     * @param string $name    The model name
+     * @param string $alias   The alias to set
      * @param string $version The version number
-     * @return void
+     *
      * @throws MLflowException
      */
     public function setRegisteredModelAlias(string $name, string $alias, string $version): void
@@ -269,9 +295,9 @@ class ModelRegistryApi extends BaseApi
     /**
      * Delete an alias from a registered model
      *
-     * @param string $name The model name
+     * @param string $name  The model name
      * @param string $alias The alias to delete
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteRegisteredModelAlias(string $name, string $alias): void
@@ -285,9 +311,11 @@ class ModelRegistryApi extends BaseApi
     /**
      * Get a model version by alias
      *
-     * @param string $name The model name
+     * @param string $name  The model name
      * @param string $alias The alias
+     *
      * @return ModelVersion The model version
+     *
      * @throws MLflowException
      */
     public function getModelVersionByAlias(string $name, string $alias): ModelVersion
@@ -298,10 +326,11 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $version = $response['model_version'] ?? null;
-        if (!is_array($version)) {
+        if (! is_array($version)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $version */
         return ModelVersion::fromArray($version);
     }
 
@@ -310,13 +339,15 @@ class ModelRegistryApi extends BaseApi
     /**
      * Create a new model version
      *
-     * @param string $name The model name
-     * @param string $source The source path where the model artifacts are stored
-     * @param string|null $runId Optional run ID that generated this model
-     * @param string|null $description Optional description
-     * @param array<string, string> $tags Optional tags
-     * @param string|null $runLink Optional link to the run
+     * @param string                $name        The model name
+     * @param string                $source      The source path where the model artifacts are stored
+     * @param string|null           $runId       Optional run ID that generated this model
+     * @param string|null           $description Optional description
+     * @param array<string, string> $tags        Optional tags
+     * @param string|null           $runLink     Optional link to the run
+     *
      * @return ModelVersion The created model version
+     *
      * @throws MLflowException
      */
     public function createModelVersion(
@@ -340,7 +371,7 @@ class ModelRegistryApi extends BaseApi
             $data['description'] = $description;
         }
 
-        if (!empty($tags)) {
+        if (! empty($tags)) {
             $data['tags'] = $this->formatTags($tags);
         }
 
@@ -351,19 +382,22 @@ class ModelRegistryApi extends BaseApi
         $response = $this->post('mlflow/model-versions/create', $data);
 
         $version = $response['model_version'] ?? null;
-        if (!is_array($version)) {
+        if (! is_array($version)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $version */
         return ModelVersion::fromArray($version);
     }
 
     /**
      * Get a specific model version
      *
-     * @param string $name The model name
+     * @param string $name    The model name
      * @param string $version The version number
+     *
      * @return ModelVersion The model version
+     *
      * @throws MLflowException
      */
     public function getModelVersion(string $name, string $version): ModelVersion
@@ -374,20 +408,23 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $versionData = $response['model_version'] ?? null;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return ModelVersion::fromArray($versionData);
     }
 
     /**
      * Update a model version
      *
-     * @param string $name The model name
-     * @param string $version The version number
+     * @param string      $name        The model name
+     * @param string      $version     The version number
      * @param string|null $description New description
+     *
      * @return ModelVersion The updated model version
+     *
      * @throws MLflowException
      */
     public function updateModelVersion(
@@ -407,19 +444,20 @@ class ModelRegistryApi extends BaseApi
         $response = $this->patch('mlflow/model-versions/update', $data);
 
         $versionData = $response['model_version'] ?? null;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return ModelVersion::fromArray($versionData);
     }
 
     /**
      * Delete a model version
      *
-     * @param string $name The model name
+     * @param string $name    The model name
      * @param string $version The version number
-     * @return void
+     *
      * @throws MLflowException
      */
     public function deleteModelVersion(string $name, string $version): void
@@ -433,11 +471,13 @@ class ModelRegistryApi extends BaseApi
     /**
      * Search for model versions
      *
-     * @param string|null $filter Filter string
-     * @param int|null $maxResults Maximum number of versions to return
-     * @param array<string>|null $orderBy List of columns to order by
-     * @param string|null $pageToken Pagination token
+     * @param string|null        $filter     Filter string
+     * @param int|null           $maxResults Maximum number of versions to return
+     * @param array<string>|null $orderBy    List of columns to order by
+     * @param string|null        $pageToken  Pagination token
+     *
      * @return array{model_versions: array<ModelVersion>, next_page_token: string|null}
+     *
      * @throws MLflowException
      */
     public function searchModelVersions(
@@ -470,6 +510,7 @@ class ModelRegistryApi extends BaseApi
         if (isset($response['model_versions']) && is_array($response['model_versions'])) {
             foreach ($response['model_versions'] as $versionData) {
                 if (is_array($versionData)) {
+                    /** @var array<string, mixed> $versionData */
                     $versions[] = ModelVersion::fromArray($versionData);
                 }
             }
@@ -486,11 +527,13 @@ class ModelRegistryApi extends BaseApi
     /**
      * Transition a model version to a new stage
      *
-     * @param string $name The model name
-     * @param string $version The version number
-     * @param ModelStage $stage The target stage
-     * @param bool $archiveExistingVersions Whether to archive existing versions in the target stage
+     * @param string     $name                    The model name
+     * @param string     $version                 The version number
+     * @param ModelStage $stage                   The target stage
+     * @param bool       $archiveExistingVersions Whether to archive existing versions in the target stage
+     *
      * @return ModelVersion The updated model version
+     *
      * @throws MLflowException
      */
     public function transitionModelVersionStage(
@@ -507,19 +550,22 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $versionData = $response['model_version'] ?? null;
-        if (!is_array($versionData)) {
+        if (! is_array($versionData)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $versionData */
         return ModelVersion::fromArray($versionData);
     }
 
     /**
      * Get download URI for model version artifacts
      *
-     * @param string $name The model name
+     * @param string $name    The model name
      * @param string $version The version number
+     *
      * @return string The download URI
+     *
      * @throws MLflowException
      */
     public function getModelVersionDownloadUri(string $name, string $version): string
@@ -530,17 +576,18 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $uri = $response['artifact_uri'] ?? '';
+
         return is_string($uri) ? $uri : '';
     }
 
     /**
      * Set a tag on a model version
      *
-     * @param string $name The model name
+     * @param string $name    The model name
      * @param string $version The version number
-     * @param string $key Tag key
-     * @param string $value Tag value
-     * @return void
+     * @param string $key     Tag key
+     * @param string $value   Tag value
+     *
      * @throws MLflowException
      */
     public function setModelVersionTag(string $name, string $version, string $key, string $value): void
@@ -556,10 +603,10 @@ class ModelRegistryApi extends BaseApi
     /**
      * Delete a tag from a model version
      *
-     * @param string $name The model name
+     * @param string $name    The model name
      * @param string $version The version number
-     * @param string $key Tag key to delete
-     * @return void
+     * @param string $key     Tag key to delete
+     *
      * @throws MLflowException
      */
     public function deleteModelVersionTag(string $name, string $version, string $key): void
@@ -574,10 +621,12 @@ class ModelRegistryApi extends BaseApi
     /**
      * Copy a model version to another registered model (Unity Catalog migration)
      *
-     * @param string $sourceName Source model name
-     * @param string $sourceVersion Source version
+     * @param string $sourceName      Source model name
+     * @param string $sourceVersion   Source version
      * @param string $destinationName Destination model name
+     *
      * @return ModelVersion The copied model version
+     *
      * @throws MLflowException
      */
     public function copyModelVersion(
@@ -592,10 +641,11 @@ class ModelRegistryApi extends BaseApi
         ]);
 
         $version = $response['model_version'] ?? null;
-        if (!is_array($version)) {
+        if (! is_array($version)) {
             throw new MLflowException('Invalid model_version data in response');
         }
 
+        /** @var array<string, mixed> $version */
         return ModelVersion::fromArray($version);
     }
 }

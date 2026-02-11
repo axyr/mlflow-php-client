@@ -22,20 +22,20 @@ use MLflow\Builder\TraceBuilder;
 /**
  * MLflow Facade
  *
- * @method static ExperimentApi experiments()
- * @method static RunApi runs()
- * @method static ModelRegistryApi modelRegistry()
- * @method static MetricApi metrics()
- * @method static ArtifactApi artifacts()
- * @method static TraceApi traces()
- * @method static PromptApi prompts()
- * @method static WebhookApi webhooks()
- * @method static DatasetApi datasets()
- * @method static RunBuilder createRunBuilder(string $experimentId)
- * @method static ExperimentBuilder createExperimentBuilder(string $name)
- * @method static ModelBuilder createModelBuilder(string $name)
- * @method static TraceBuilder createTraceBuilder(string $experimentId, string $name)
- * @method static bool validateConnection()
+ * @method static ExperimentApi        experiments()
+ * @method static RunApi               runs()
+ * @method static ModelRegistryApi     modelRegistry()
+ * @method static MetricApi            metrics()
+ * @method static ArtifactApi          artifacts()
+ * @method static TraceApi             traces()
+ * @method static PromptApi            prompts()
+ * @method static WebhookApi           webhooks()
+ * @method static DatasetApi           datasets()
+ * @method static RunBuilder           createRunBuilder(string $experimentId)
+ * @method static ExperimentBuilder    createExperimentBuilder(string $name)
+ * @method static ModelBuilder         createModelBuilder(string $name)
+ * @method static TraceBuilder         createTraceBuilder(string $experimentId, string $name)
+ * @method static bool                 validateConnection()
  * @method static array<string, mixed> getServerInfo()
  *
  * @see \MLflow\MLflowClient
@@ -48,5 +48,27 @@ class MLflow extends Facade
     protected static function getFacadeAccessor(): string
     {
         return 'mlflow';
+    }
+
+    /**
+     * Replace the bound instance with a fake for testing
+     *
+     * @example
+     * ```php
+     * MLflow::fake();
+     *
+     * // Your code that uses MLflow
+     * $experiment = MLflow::experiments()->create('test-experiment');
+     *
+     * // Assert interactions
+     * MLflow::assertExperimentCreated('test-experiment');
+     * ```
+     */
+    public static function fake(): \MLflow\Testing\Fakes\MLflowFake
+    {
+        $fake = \MLflow\Testing\Fakes\MLflowFake::create();
+        static::swap($fake);
+
+        return $fake;
     }
 }

@@ -12,16 +12,17 @@ use MLflow\Exception\ConfigurationException;
 readonly class MLflowConfig
 {
     /**
-     * @param float $timeout Request timeout in seconds
-     * @param int $connectTimeout Connection timeout in seconds
-     * @param int $maxRetries Maximum number of retry attempts
-     * @param float $retryDelay Delay between retries in seconds
-     * @param array<string, string> $headers Additional HTTP headers
-     * @param bool $verify Verify SSL certificates
-     * @param string|null $proxy Proxy server URL
-     * @param string|null $cert Path to SSL certificate
-     * @param string|null $sslKey Path to SSL key
-     * @param bool $debug Enable debug mode
+     * @param float                 $timeout        Request timeout in seconds
+     * @param int                   $connectTimeout Connection timeout in seconds
+     * @param int                   $maxRetries     Maximum number of retry attempts
+     * @param float                 $retryDelay     Delay between retries in seconds
+     * @param array<string, string> $headers        Additional HTTP headers
+     * @param bool                  $verify         Verify SSL certificates
+     * @param string|null           $proxy          Proxy server URL
+     * @param string|null           $cert           Path to SSL certificate
+     * @param string|null           $sslKey         Path to SSL key
+     * @param bool                  $debug          Enable debug mode
+     *
      * @throws ConfigurationException If configuration is invalid
      */
     public function __construct(
@@ -57,16 +58,22 @@ readonly class MLflowConfig
      * Create config from array (backward compatibility)
      *
      * @param array<string, mixed> $config Configuration array
-     * @return self
      */
     public static function fromArray(array $config): self
     {
+        $headers = $config['headers'] ?? null;
+        if (is_array($headers)) {
+            /** @var array<string, string> $headers */
+        } else {
+            $headers = [];
+        }
+
         return new self(
             timeout: is_numeric($config['timeout'] ?? null) ? (float) $config['timeout'] : 30.0,
             connectTimeout: is_int($config['connect_timeout'] ?? null) ? $config['connect_timeout'] : 10,
             maxRetries: is_int($config['retries'] ?? null) ? $config['retries'] : 3,
             retryDelay: is_numeric($config['retry_delay'] ?? null) ? (float) $config['retry_delay'] : 1.0,
-            headers: is_array($config['headers'] ?? null) ? $config['headers'] : [],
+            headers: $headers,
             verify: is_bool($config['verify'] ?? null) ? $config['verify'] : true,
             proxy: is_string($config['proxy'] ?? null) ? $config['proxy'] : null,
             cert: is_string($config['cert'] ?? null) ? $config['cert'] : null,
@@ -80,7 +87,7 @@ readonly class MLflowConfig
      */
     public static function default(): self
     {
-        return new self();
+        return new self;
     }
 
     /**

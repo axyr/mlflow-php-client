@@ -9,7 +9,7 @@ namespace MLflow\Tests\Integration;
  */
 final class ExperimentLifecycleTest extends IntegrationTestCase
 {
-    public function testCreateAndRetrieveExperiment(): void
+    public function test_create_and_retrieve_experiment(): void
     {
         $experiment = $this->client->experiments()->create(
             'test-exp-' . uniqid(),
@@ -32,7 +32,7 @@ final class ExperimentLifecycleTest extends IntegrationTestCase
         $this->client->experiments()->deleteExperiment($experiment->experimentId);
     }
 
-    public function testExperimentBuilder(): void
+    public function test_experiment_builder(): void
     {
         $experiment = $this->client->createExperimentBuilder('builder-exp-' . uniqid())
             ->withTag('created_by', 'builder')
@@ -45,7 +45,7 @@ final class ExperimentLifecycleTest extends IntegrationTestCase
         $this->client->experiments()->deleteExperiment($experiment->experimentId);
     }
 
-    public function testSearchExperiments(): void
+    public function test_search_experiments(): void
     {
         // Create multiple experiments
         $exp1 = $this->client->experiments()->create(

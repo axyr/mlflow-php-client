@@ -7,6 +7,4 @@ namespace MLflow\Exception;
 /**
  * Exception thrown for API-related errors
  */
-class ApiException extends MLflowException
-{
-}
+class ApiException extends MLflowException {}

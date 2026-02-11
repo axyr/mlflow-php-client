@@ -8,6 +8,7 @@ namespace MLflow\Contract;
  * Interface for all collection classes
  *
  * @template T
+ *
  * @extends \IteratorAggregate<array-key, T>
  */
 interface CollectionInterface extends \Countable, \IteratorAggregate
@@ -47,7 +48,6 @@ interface CollectionInterface extends \Countable, \IteratorAggregate
      * Filter collection by callback
      *
      * @param callable(T): bool $callback
-     * @return static
      */
     public function filter(callable $callback): static;
 

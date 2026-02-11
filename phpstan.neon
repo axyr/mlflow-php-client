@@ -1,3 +1,6 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
 parameters:
     level: 9
     paths:
@@ -5,10 +8,17 @@ parameters:
         - tests
     excludePaths:
         - vendor
-        - src/Laravel
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         # Allow mixed types in collections for now
         - '#Method .+Collection::.+ has parameter .+ with no value type specified in iterable type array#'
         - '#Method .+Collection::.+ return type has no value type specified in iterable type array#'
+        # Helper function can return null when config not set
+        -
+            message: '#Function mlflow_experiment\(\) never returns null#'
+            path: src/Laravel/helpers.php
+        # Ignore redundant assertions in tests - these are intentional for documentation
+        -
+            message: '#Call to method PHPUnit\\Framework\\Assert::(assertTrue|assertIsArray|assertNotNull)\(\) with .+ will always evaluate to true#'
+            path: tests/*

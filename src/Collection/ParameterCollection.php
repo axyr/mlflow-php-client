@@ -12,7 +12,7 @@ use MLflow\Model\Param;
  * @implements \IteratorAggregate<string, Param>
  * @implements \ArrayAccess<string, Param>
  */
-class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerializable, \ArrayAccess
+class ParameterCollection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonSerializable
 {
     /** @var array<string, Param> */
     private array $params = [];
@@ -34,7 +34,7 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
      */
     public static function fromAssociativeArray(array $data): self
     {
-        $collection = new self();
+        $collection = new self;
         foreach ($data as $key => $value) {
             $collection->add(new Param($key, $value));
         }
@@ -49,7 +49,7 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
      */
     public static function fromArrays(array $data): self
     {
-        $collection = new self();
+        $collection = new self;
         foreach ($data as $paramData) {
             $collection->add(Param::fromArray($paramData));
         }
@@ -70,6 +70,7 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     public function getValue(string $key): ?string
     {
         $param = $this->get($key);
+
         return $param?->value;
     }
 
@@ -111,18 +112,17 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
      */
     public function toArray(): array
     {
-        return array_values(array_map(fn(Param $p) => $p->toArray(), $this->params));
+        return array_values(array_map(fn (Param $p) => $p->toArray(), $this->params));
     }
 
     /**
      * Filter parameters by predicate
      *
      * @param callable(Param): bool $predicate
-     * @return self
      */
     public function filter(callable $predicate): self
     {
-        $filtered = new self();
+        $filtered = new self;
         foreach ($this->params as $param) {
             if ($predicate($param)) {
                 $filtered->add($param);
@@ -134,28 +134,22 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
 
     /**
      * Filter parameters by key prefix
-     *
-     * @return self
      */
     public function filterByKeyPrefix(string $prefix): self
     {
-        return $this->filter(fn(Param $p) => str_starts_with($p->key, $prefix));
+        return $this->filter(fn (Param $p) => str_starts_with($p->key, $prefix));
     }
 
     /**
      * Filter parameters by value pattern
-     *
-     * @return self
      */
     public function filterByValuePattern(string $pattern): self
     {
-        return $this->filter(fn(Param $p) => preg_match($pattern, $p->value) === 1);
+        return $this->filter(fn (Param $p) => preg_match($pattern, $p->value) === 1);
     }
 
     /**
      * Merge with another collection
-     *
-     * @return self
      */
     public function merge(self $other): self
     {
@@ -171,8 +165,10 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
      * Reduce collection to a single value
      *
      * @template TResult
+     *
      * @param callable(TResult, Param): TResult $callback
-     * @param TResult $initial
+     * @param TResult                           $initial
+     *
      * @return TResult
      */
     public function reduce(callable $callback, mixed $initial = null): mixed
@@ -193,7 +189,7 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
      */
     public function values(): array
     {
-        return array_map(fn(Param $p) => $p->value, $this->params);
+        return array_map(fn (Param $p) => $p->value, $this->params);
     }
 
     public function count(): int
@@ -260,7 +256,7 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
 
         foreach ($this->params as $key => $param) {
             $otherParam = $other->get($key);
-            if ($otherParam === null || !$param->equals($otherParam)) {
+            if ($otherParam === null || ! $param->equals($otherParam)) {
                 return false;
             }
         }
