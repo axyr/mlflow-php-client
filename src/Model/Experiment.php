@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Collection\TagCollection;
 use MLflow\Enum\LifecycleStage;
 
 /**
@@ -15,8 +16,8 @@ readonly class Experiment
     public string $name;
     public ?string $artifactLocation;
     public ?LifecycleStage $lifecycleStage;
-    /** @var array<string, mixed>|null */
-    public ?array $tags;
+    /** @var TagCollection<ExperimentTag>|null */
+    public ?TagCollection $tags;
     public ?int $creationTime;
     public ?int $lastUpdateTime;
 
@@ -25,7 +26,7 @@ readonly class Experiment
      * @param string $name
      * @param string|null $artifactLocation
      * @param LifecycleStage|null $lifecycleStage
-     * @param array<string, mixed>|null $tags
+     * @param TagCollection<ExperimentTag>|null $tags
      * @param int|null $creationTime
      * @param int|null $lastUpdateTime
      */
@@ -34,7 +35,7 @@ readonly class Experiment
         string $name,
         ?string $artifactLocation = null,
         ?LifecycleStage $lifecycleStage = null,
-        ?array $tags = null,
+        ?TagCollection $tags = null,
         ?int $creationTime = null,
         ?int $lastUpdateTime = null
     ) {
@@ -63,9 +64,17 @@ readonly class Experiment
             $artifactLocation = null;
         }
 
-        $tags = $data['tags'] ?? null;
-        if ($tags !== null && !is_array($tags)) {
-            $tags = null;
+        // Convert tags array to TagCollection
+        $tags = null;
+        if (isset($data['tags']) && is_array($data['tags'])) {
+            $tagCollection = new TagCollection();
+            foreach ($data['tags'] as $tagData) {
+                if (is_array($tagData)) {
+                    /** @phpstan-ignore-next-line Array shape validated */
+                    $tagCollection->add(ExperimentTag::fromArray($tagData));
+                }
+            }
+            $tags = $tagCollection;
         }
 
         $experimentId = $data['experiment_id'] ?? '';
@@ -103,7 +112,7 @@ readonly class Experiment
         }
 
         if ($this->tags !== null) {
-            $data['tags'] = $this->tags;
+            $data['tags'] = $this->tags->toArray();
         }
 
         if ($this->creationTime !== null) {
@@ -153,10 +162,10 @@ readonly class Experiment
     }
 
     /**
-     * @deprecated Access $tags property directly
-     * @return array<string, mixed>|null
+     * @deprecated Access $tags property directly. Note: Returns TagCollection now, not array
+     * @return TagCollection<ExperimentTag>|null
      */
-    public function getTags(): ?array
+    public function getTags(): ?TagCollection
     {
         return $this->tags;
     }
