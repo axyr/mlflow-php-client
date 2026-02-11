@@ -8,6 +8,7 @@ use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\RequestException;
 use MLflow\Exception\MLflowException;
+use MLflow\Exception\NetworkException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -168,7 +169,7 @@ abstract class BaseApi
         $response = $e->getResponse();
 
         if ($response === null) {
-            throw new MLflowException(
+            throw new NetworkException(
                 'Network error: ' . $e->getMessage(),
                 0,
                 null,

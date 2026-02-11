@@ -2162,14 +2162,14 @@ protected function logRequest(string $method, string $uri, array $options): void
 ## Progress Tracking
 
 ### Phase 1: Foundation ✅❌
-- [ ] 1.1 Eliminate formatTags() duplication
-- [ ] 1.2 Create exception hierarchy
+- [x] 1.1 Eliminate formatTags() duplication
+- [x] 1.2 Create exception hierarchy
 - [ ] 1.3 Fix Webhook immutability
 - [ ] 1.4 Fix Experiment tags
 - [ ] 1.5 Add validation in fromArray()
 - [ ] 1.6 Create constant classes
 
-**Progress**: 0/6 (0%)
+**Progress**: 2/6 (33%)
 
 ### Phase 2: Type Safety ✅❌
 - [ ] 2.1 Create MLflowConfig value object

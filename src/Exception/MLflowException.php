@@ -45,6 +45,8 @@ class MLflowException extends Exception
     /**
      * Create an exception from an HTTP error
      *
+     * Maps HTTP status codes to specific exception types for better error handling
+     *
      * @param int $statusCode HTTP status code
      * @param string $message Error message
      * @param array<string, mixed>|null $body Response body
@@ -58,6 +60,14 @@ class MLflowException extends Exception
             $errorMessage = sprintf('HTTP %d: %s', $statusCode, $body['message']);
         }
 
-        return new self($errorMessage, $statusCode, $body);
+        return match ($statusCode) {
+            404 => new NotFoundException($errorMessage, $statusCode, $body),
+            401, 403 => new AuthenticationException($errorMessage, $statusCode, $body),
+            429 => new RateLimitException($errorMessage, $statusCode, $body),
+            408, 504 => new TimeoutException($errorMessage, $statusCode, $body),
+            409 => new ConflictException($errorMessage, $statusCode, $body),
+            400, 422 => new ValidationException($errorMessage, $statusCode, $body),
+            default => new ApiException($errorMessage, $statusCode, $body),
+        };
     }
 }
