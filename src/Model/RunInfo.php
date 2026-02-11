@@ -10,17 +10,17 @@ use MLflow\Enum\LifecycleStage;
 /**
  * Represents metadata about an MLflow run
  */
-class RunInfo
+readonly class RunInfo
 {
-    private string $runId;
-    private string $experimentId;
-    private RunStatus $status;
-    private int $startTime;
-    private ?int $endTime;
-    private ?string $artifactUri;
-    private ?string $userId;
-    private ?string $runName;
-    private LifecycleStage $lifecycleStage;
+    public string $runId;
+    public string $experimentId;
+    public RunStatus $status;
+    public int $startTime;
+    public ?int $endTime;
+    public ?string $artifactUri;
+    public ?string $userId;
+    public ?string $runName;
+    public LifecycleStage $lifecycleStage;
 
     public function __construct(
         string $runId,
@@ -116,52 +116,6 @@ class RunInfo
         return $data;
     }
 
-    // Getters
-    public function getRunId(): string
-    {
-        return $this->runId;
-    }
-
-    public function getExperimentId(): string
-    {
-        return $this->experimentId;
-    }
-
-    public function getStatus(): RunStatus
-    {
-        return $this->status;
-    }
-
-    public function getStartTime(): int
-    {
-        return $this->startTime;
-    }
-
-    public function getEndTime(): ?int
-    {
-        return $this->endTime;
-    }
-
-    public function getArtifactUri(): ?string
-    {
-        return $this->artifactUri;
-    }
-
-    public function getUserId(): ?string
-    {
-        return $this->userId;
-    }
-
-    public function getRunName(): ?string
-    {
-        return $this->runName;
-    }
-
-    public function getLifecycleStage(): LifecycleStage
-    {
-        return $this->lifecycleStage;
-    }
-
     public function isRunning(): bool
     {
         return $this->status === RunStatus::RUNNING;
@@ -170,5 +124,60 @@ class RunInfo
     public function isFinished(): bool
     {
         return $this->status->isTerminal();
+    }
+
+    // Legacy methods for backwards compatibility (deprecated)
+    /** @deprecated Access $runId property directly */
+    public function getRunId(): string
+    {
+        return $this->runId;
+    }
+
+    /** @deprecated Access $experimentId property directly */
+    public function getExperimentId(): string
+    {
+        return $this->experimentId;
+    }
+
+    /** @deprecated Access $status property directly */
+    public function getStatus(): RunStatus
+    {
+        return $this->status;
+    }
+
+    /** @deprecated Access $startTime property directly */
+    public function getStartTime(): int
+    {
+        return $this->startTime;
+    }
+
+    /** @deprecated Access $endTime property directly */
+    public function getEndTime(): ?int
+    {
+        return $this->endTime;
+    }
+
+    /** @deprecated Access $artifactUri property directly */
+    public function getArtifactUri(): ?string
+    {
+        return $this->artifactUri;
+    }
+
+    /** @deprecated Access $userId property directly */
+    public function getUserId(): ?string
+    {
+        return $this->userId;
+    }
+
+    /** @deprecated Access $runName property directly */
+    public function getRunName(): ?string
+    {
+        return $this->runName;
+    }
+
+    /** @deprecated Access $lifecycleStage property directly */
+    public function getLifecycleStage(): LifecycleStage
+    {
+        return $this->lifecycleStage;
     }
 }
