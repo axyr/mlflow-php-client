@@ -10,8 +10,9 @@ use MLflow\Model\Metric;
  * Type-safe collection for metrics
  *
  * @implements \IteratorAggregate<int, Metric>
+ * @implements \ArrayAccess<int, Metric>
  */
-class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializable
+class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializable, \ArrayAccess
 {
     /** @var array<Metric> */
     private array $metrics = [];
@@ -242,5 +243,35 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     public function jsonSerialize(): array
     {
         return $this->toArray();
+    }
+
+    // ArrayAccess implementation
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return isset($this->metrics[$offset]);
+    }
+
+    public function offsetGet(mixed $offset): ?Metric
+    {
+        return $this->metrics[$offset] ?? null;
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if (!$value instanceof Metric) {
+            throw new \TypeError('Value must be an instance of Metric');
+        }
+
+        if ($offset === null) {
+            $this->metrics[] = $value;
+        } else {
+            $this->metrics[$offset] = $value;
+        }
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        unset($this->metrics[$offset]);
     }
 }
