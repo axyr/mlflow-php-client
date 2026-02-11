@@ -17,7 +17,6 @@ use MLflow\Exception\MLflowException;
  */
 class RunApi extends BaseApi
 {
-
     /**
      * Create a new run
      *
@@ -517,5 +516,4 @@ class RunApi extends BaseApi
         }
         return $formatted;
     }
-
 }

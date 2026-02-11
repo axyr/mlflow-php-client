@@ -7,4 +7,6 @@ namespace MLflow\Exception;
 /**
  * Exception thrown for network/communication errors
  */
-class NetworkException extends MLflowException {}
+class NetworkException extends MLflowException
+{
+}

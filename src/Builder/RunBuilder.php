@@ -36,7 +36,8 @@ final class RunBuilder
     public function __construct(
         private readonly RunApi $runApi,
         private readonly string $experimentId,
-    ) {}
+    ) {
+    }
 
     /**
      * Set the run name

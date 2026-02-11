@@ -28,7 +28,8 @@ final class ModelBuilder
     public function __construct(
         private readonly ModelRegistryApi $registryApi,
         private readonly string $name,
-    ) {}
+    ) {
+    }
 
     /**
      * Set the model description

@@ -241,5 +241,4 @@ class ExperimentApi extends BaseApi
             'key' => $key,
         ]);
     }
-
 }

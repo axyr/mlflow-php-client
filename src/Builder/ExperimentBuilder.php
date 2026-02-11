@@ -28,7 +28,8 @@ final class ExperimentBuilder
     public function __construct(
         private readonly ExperimentApi $experimentApi,
         private readonly string $name,
-    ) {}
+    ) {
+    }
 
     /**
      * Set the artifact location for the experiment

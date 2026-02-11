@@ -31,7 +31,8 @@ readonly class Webhook implements SerializableModelInterface
         public ?string $description = null,
         public ?int $creationTime = null,
         public ?int $lastUpdateTime = null,
-    ) {}
+    ) {
+    }
 
     /**
      * Create Webhook from array data

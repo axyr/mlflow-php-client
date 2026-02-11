@@ -15,7 +15,6 @@ use MLflow\Exception\MLflowException;
  */
 class ModelRegistryApi extends BaseApi
 {
-
     // ========== REGISTERED MODEL ENDPOINTS ==========
 
     /**
@@ -599,5 +598,4 @@ class ModelRegistryApi extends BaseApi
 
         return ModelVersion::fromArray($version);
     }
-
 }
