@@ -6,6 +6,9 @@ namespace MLflow\Api;
 
 /**
  * API for managing MLflow models
+ *
+ * @deprecated Use ModelRegistryApi instead. ModelApi will be removed in v3.0.
+ *             ModelRegistryApi provides the same functionality with proper return types.
  */
 class ModelApi extends BaseApi
 {
@@ -16,6 +19,7 @@ class ModelApi extends BaseApi
      * @param string|null $description Model description
      * @param array<string, string> $tags Model tags
      * @return array<string, mixed> Response data
+     * @deprecated Use ModelRegistryApi::createRegisteredModel() instead
      */
     public function createRegisteredModel(string $name, ?string $description = null, array $tags = []): array
     {
@@ -37,6 +41,7 @@ class ModelApi extends BaseApi
      *
      * @param string $name Model name
      * @return array<string, mixed> Response data
+     * @deprecated Use ModelRegistryApi::getRegisteredModel() instead
      */
     public function getRegisteredModel(string $name): array
     {
@@ -45,6 +50,8 @@ class ModelApi extends BaseApi
 
     /**
      * Update a registered model
+     *
+     * @deprecated Use ModelRegistryApi::updateRegisteredModel() instead
      */
     public function updateRegisteredModel(string $name, ?string $description = null): void
     {
@@ -59,6 +66,8 @@ class ModelApi extends BaseApi
 
     /**
      * Delete a registered model
+     *
+     * @deprecated Use ModelRegistryApi::deleteRegisteredModel() instead
      */
     public function deleteRegisteredModel(string $name): void
     {
@@ -71,6 +80,7 @@ class ModelApi extends BaseApi
      * @param int|null $maxResults Maximum number of results
      * @param string|null $pageToken Pagination token
      * @return array<string, mixed> Response data
+     * @deprecated Use ModelRegistryApi::searchRegisteredModels() instead
      */
     public function listRegisteredModels(?int $maxResults = null, ?string $pageToken = null): array
     {
@@ -94,6 +104,7 @@ class ModelApi extends BaseApi
      * @param string $source Model source path
      * @param string|null $runId Run ID
      * @return array<string, mixed> Response data
+     * @deprecated Use ModelRegistryApi::createModelVersion() instead
      */
     public function createModelVersion(string $name, string $source, ?string $runId = null): array
     {
@@ -115,6 +126,7 @@ class ModelApi extends BaseApi
      * @param string $name Model name
      * @param string $version Model version
      * @return array<string, mixed> Response data
+     * @deprecated Use ModelRegistryApi::getModelVersion() instead
      */
     public function getModelVersion(string $name, string $version): array
     {
@@ -126,6 +138,8 @@ class ModelApi extends BaseApi
 
     /**
      * Transition model version stage
+     *
+     * @deprecated Use ModelRegistryApi::transitionModelVersionStage() instead
      */
     public function transitionModelVersionStage(
         string $name,
