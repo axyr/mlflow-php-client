@@ -31,7 +31,7 @@ use Psr\Log\NullLogger;
 class MLflowClient
 {
     private ClientInterface $httpClient;
-    private LoggerInterface $logger;
+    protected LoggerInterface $logger;
     private string $trackingUri;
     private ?ExperimentApi $experimentApi = null;
     private ?RunApi $runApi = null;
@@ -76,6 +76,14 @@ class MLflowClient
         $this->httpClient = new HttpClient($guzzleConfig);
 
         $this->logger->info('MLflow client initialized', ['tracking_uri' => $this->trackingUri]);
+    }
+
+    /**
+     * Get HTTP client for subclasses
+     */
+    protected function getHttpClient(): ClientInterface
+    {
+        return $this->httpClient;
     }
 
     /**
