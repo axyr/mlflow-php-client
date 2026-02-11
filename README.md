@@ -509,7 +509,29 @@ composer cs-fix
 
 # Generate API documentation
 composer docs
+
+# Run ALL CI/CD checks locally (recommended before pushing)
+./bin/ci-check
 ```
+
+### Pre-commit Hook
+
+Install the pre-commit hook to automatically run checks before each commit:
+
+```bash
+cp hooks/pre-commit .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+This ensures:
+- PHPStan passes (level 9)
+- Code style is PSR-12 compliant
+- All unit tests pass
+
+**Benefits:**
+- Catch issues before CI/CD
+- Faster feedback loop
+- Prevent broken commits
 
 ## Documentation
 
