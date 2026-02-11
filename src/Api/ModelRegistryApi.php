@@ -600,21 +600,4 @@ class ModelRegistryApi extends BaseApi
         return ModelVersion::fromArray($version);
     }
 
-    /**
-     * Format tags for API request
-     *
-     * @param array<string, string> $tags Associative array of tags
-     * @return array<int, array{key: string, value: string}> Formatted tags
-     */
-    private function formatTags(array $tags): array
-    {
-        $formatted = [];
-        foreach ($tags as $key => $value) {
-            $formatted[] = [
-                'key' => (string) $key,
-                'value' => (string) $value,
-            ];
-        }
-        return $formatted;
-    }
 }
