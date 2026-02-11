@@ -9,16 +9,16 @@ use MLflow\Enum\LifecycleStage;
 /**
  * Represents an MLflow experiment
  */
-class Experiment
+readonly class Experiment
 {
-    private string $experimentId;
-    private string $name;
-    private ?string $artifactLocation;
-    private ?LifecycleStage $lifecycleStage;
+    public string $experimentId;
+    public string $name;
+    public ?string $artifactLocation;
+    public ?LifecycleStage $lifecycleStage;
     /** @var array<string, mixed>|null */
-    private ?array $tags;
-    private ?int $creationTime;
-    private ?int $lastUpdateTime;
+    public ?array $tags;
+    public ?int $creationTime;
+    public ?int $lastUpdateTime;
 
     /**
      * @param string $experimentId
@@ -117,45 +117,6 @@ class Experiment
         return $data;
     }
 
-    // Getters
-    public function getExperimentId(): string
-    {
-        return $this->experimentId;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getArtifactLocation(): ?string
-    {
-        return $this->artifactLocation;
-    }
-
-    public function getLifecycleStage(): ?LifecycleStage
-    {
-        return $this->lifecycleStage;
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    public function getTags(): ?array
-    {
-        return $this->tags;
-    }
-
-    public function getCreationTime(): ?int
-    {
-        return $this->creationTime;
-    }
-
-    public function getLastUpdateTime(): ?int
-    {
-        return $this->lastUpdateTime;
-    }
-
     public function isActive(): bool
     {
         return $this->lifecycleStage?->isActive() ?? true;
@@ -164,5 +125,51 @@ class Experiment
     public function isDeleted(): bool
     {
         return $this->lifecycleStage?->isDeleted() ?? false;
+    }
+
+    // Legacy methods for backwards compatibility (deprecated)
+    /** @deprecated Access $experimentId property directly */
+    public function getExperimentId(): string
+    {
+        return $this->experimentId;
+    }
+
+    /** @deprecated Access $name property directly */
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    /** @deprecated Access $artifactLocation property directly */
+    public function getArtifactLocation(): ?string
+    {
+        return $this->artifactLocation;
+    }
+
+    /** @deprecated Access $lifecycleStage property directly */
+    public function getLifecycleStage(): ?LifecycleStage
+    {
+        return $this->lifecycleStage;
+    }
+
+    /**
+     * @deprecated Access $tags property directly
+     * @return array<string, mixed>|null
+     */
+    public function getTags(): ?array
+    {
+        return $this->tags;
+    }
+
+    /** @deprecated Access $creationTime property directly */
+    public function getCreationTime(): ?int
+    {
+        return $this->creationTime;
+    }
+
+    /** @deprecated Access $lastUpdateTime property directly */
+    public function getLastUpdateTime(): ?int
+    {
+        return $this->lastUpdateTime;
     }
 }

@@ -4,37 +4,40 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Enum\ModelStage;
+use MLflow\Enum\ModelVersionStatus;
+
 /**
  * Represents a model version in MLflow Model Registry
  */
-class ModelVersion
+readonly class ModelVersion
 {
-    private string $name;
-    private string $version;
-    private ?int $creationTimestamp;
-    private ?int $lastUpdatedTimestamp;
-    private ?string $currentStage;
-    private ?string $description;
-    private ?string $source;
-    private ?string $runId;
-    private ?string $status;
-    private ?string $statusMessage;
+    public string $name;
+    public string $version;
+    public ?int $creationTimestamp;
+    public ?int $lastUpdatedTimestamp;
+    public ?ModelStage $currentStage;
+    public ?string $description;
+    public ?string $source;
+    public ?string $runId;
+    public ?ModelVersionStatus $status;
+    public ?string $statusMessage;
     /** @var array<ModelTag>|null */
-    private ?array $tags;
-    private ?string $runLink;
+    public ?array $tags;
+    public ?string $runLink;
     /** @var array<string>|null */
-    private ?array $aliases;
+    public ?array $aliases;
 
     /**
      * @param string $name
      * @param string $version
      * @param int|null $creationTimestamp
      * @param int|null $lastUpdatedTimestamp
-     * @param string|null $currentStage
+     * @param ModelStage|null $currentStage
      * @param string|null $description
      * @param string|null $source
      * @param string|null $runId
-     * @param string|null $status
+     * @param ModelVersionStatus|null $status
      * @param string|null $statusMessage
      * @param array<ModelTag>|null $tags
      * @param string|null $runLink
@@ -45,11 +48,11 @@ class ModelVersion
         string $version,
         ?int $creationTimestamp = null,
         ?int $lastUpdatedTimestamp = null,
-        ?string $currentStage = null,
+        ?ModelStage $currentStage = null,
         ?string $description = null,
         ?string $source = null,
         ?string $runId = null,
-        ?string $status = null,
+        ?ModelVersionStatus $status = null,
         ?string $statusMessage = null,
         ?array $tags = null,
         ?string $runLink = null,
@@ -87,11 +90,21 @@ class ModelVersion
             }
         }
 
-        $currentStage = $data['current_stage'] ?? null;
+        $currentStageStr = $data['current_stage'] ?? null;
+        $currentStage = null;
+        if (is_string($currentStageStr) && $currentStageStr !== '') {
+            $currentStage = ModelStage::tryFrom($currentStageStr);
+        }
+
+        $statusStr = $data['status'] ?? null;
+        $status = null;
+        if (is_string($statusStr) && $statusStr !== '') {
+            $status = ModelVersionStatus::tryFrom($statusStr);
+        }
+
         $description = $data['description'] ?? null;
         $source = $data['source'] ?? null;
         $runId = $data['run_id'] ?? null;
-        $status = $data['status'] ?? null;
         $statusMessage = $data['status_message'] ?? null;
         $runLink = $data['run_link'] ?? null;
         $aliases = $data['aliases'] ?? null;
@@ -106,11 +119,11 @@ class ModelVersion
             is_string($version) ? $version : '',
             is_int($creationTimestamp) ? $creationTimestamp : (is_numeric($creationTimestamp) ? (int) $creationTimestamp : null),
             is_int($lastUpdatedTimestamp) ? $lastUpdatedTimestamp : (is_numeric($lastUpdatedTimestamp) ? (int) $lastUpdatedTimestamp : null),
-            is_string($currentStage) ? $currentStage : null,
+            $currentStage,
             is_string($description) ? $description : null,
             is_string($source) ? $source : null,
             is_string($runId) ? $runId : null,
-            is_string($status) ? $status : null,
+            $status,
             is_string($statusMessage) ? $statusMessage : null,
             $tags,
             is_string($runLink) ? $runLink : null,
@@ -137,7 +150,7 @@ class ModelVersion
         }
 
         if ($this->currentStage !== null) {
-            $data['current_stage'] = $this->currentStage;
+            $data['current_stage'] = $this->currentStage->value;
         }
 
         if ($this->description !== null) {
@@ -153,7 +166,7 @@ class ModelVersion
         }
 
         if ($this->status !== null) {
-            $data['status'] = $this->status;
+            $data['status'] = $this->status->value;
         }
 
         if ($this->statusMessage !== null) {
@@ -175,107 +188,35 @@ class ModelVersion
         return $data;
     }
 
-    // Getters
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getVersion(): string
-    {
-        return $this->version;
-    }
-
-    public function getCreationTimestamp(): ?int
-    {
-        return $this->creationTimestamp;
-    }
-
-    public function getLastUpdatedTimestamp(): ?int
-    {
-        return $this->lastUpdatedTimestamp;
-    }
-
-    public function getCurrentStage(): ?string
-    {
-        return $this->currentStage;
-    }
-
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function getSource(): ?string
-    {
-        return $this->source;
-    }
-
-    public function getRunId(): ?string
-    {
-        return $this->runId;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function getStatusMessage(): ?string
-    {
-        return $this->statusMessage;
-    }
-
-    /**
-     * @return ModelTag[]|null
-     */
-    public function getTags(): ?array
-    {
-        return $this->tags;
-    }
-
-    public function getRunLink(): ?string
-    {
-        return $this->runLink;
-    }
-
-    /**
-     * @return array<string>|null
-     */
-    public function getAliases(): ?array
-    {
-        return $this->aliases;
-    }
-
     // Status checks
     public function isReady(): bool
     {
-        return $this->status === 'READY';
+        return $this->status?->isReady() ?? false;
     }
 
     public function isPending(): bool
     {
-        return in_array($this->status, ['PENDING_REGISTRATION', 'PENDING']);
+        return $this->status?->isPending() ?? false;
     }
 
     public function isFailed(): bool
     {
-        return $this->status === 'FAILED_REGISTRATION';
+        return $this->status?->isFailed() ?? false;
     }
 
     // Stage checks
     public function isInProduction(): bool
     {
-        return $this->currentStage === 'Production';
+        return $this->currentStage === ModelStage::PRODUCTION;
     }
 
     public function isInStaging(): bool
     {
-        return $this->currentStage === 'Staging';
+        return $this->currentStage === ModelStage::STAGING;
     }
 
     public function isArchived(): bool
     {
-        return $this->currentStage === 'Archived';
+        return $this->currentStage === ModelStage::ARCHIVED;
     }
 }
