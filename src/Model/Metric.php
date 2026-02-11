@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Util\ValidationHelper;
+
 /**
  * Represents an MLflow metric (immutable)
  */
@@ -23,10 +25,10 @@ readonly class Metric implements \JsonSerializable
     public static function fromArray(array $data): self
     {
         return new self(
-            key: $data['key'],
-            value: (float) $data['value'],
-            timestamp: (int) $data['timestamp'],
-            step: (int) ($data['step'] ?? 0),
+            key: ValidationHelper::requireString($data, 'key'),
+            value: ValidationHelper::requireFloat($data, 'value'),
+            timestamp: ValidationHelper::requireInt($data, 'timestamp'),
+            step: ValidationHelper::optionalInt($data, 'step') ?? 0,
         );
     }
 

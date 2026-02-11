@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
-use MLflow\Enum\RunStatus;
 use MLflow\Enum\LifecycleStage;
+use MLflow\Enum\RunStatus;
+use MLflow\Util\ValidationHelper;
 
 /**
  * Represents metadata about an MLflow run
@@ -63,23 +64,15 @@ readonly class RunInfo
             }
         }
 
-        $runId = $data['run_id'] ?? $data['run_uuid'] ?? ''; // Support both old and new field names
-        $experimentId = $data['experiment_id'] ?? '';
-        $artifactUri = $data['artifact_uri'] ?? null;
-        $userId = $data['user_id'] ?? null;
-        $runName = $data['run_name'] ?? null;
-        $startTime = $data['start_time'] ?? 0;
-        $endTime = $data['end_time'] ?? null;
-
         return new self(
-            is_string($runId) ? $runId : '',
-            is_string($experimentId) ? $experimentId : '',
+            ValidationHelper::requireString($data, 'run_id', 'run_uuid'),
+            ValidationHelper::requireString($data, 'experiment_id'),
             $status,
-            is_int($startTime) ? $startTime : (is_numeric($startTime) ? (int) $startTime : 0),
-            is_int($endTime) ? $endTime : (is_numeric($endTime) ? (int) $endTime : null),
-            is_string($artifactUri) ? $artifactUri : null,
-            is_string($userId) ? $userId : null,
-            is_string($runName) ? $runName : null,
+            ValidationHelper::optionalInt($data, 'start_time') ?? 0,
+            ValidationHelper::optionalInt($data, 'end_time'),
+            ValidationHelper::optionalString($data, 'artifact_uri'),
+            ValidationHelper::optionalString($data, 'user_id'),
+            ValidationHelper::optionalString($data, 'run_name'),
             $lifecycleStage
         );
     }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Util\ValidationHelper;
+
 /**
  * Represents an MLflow parameter (immutable key-value pair)
  */
@@ -21,8 +23,8 @@ readonly class Param implements \JsonSerializable, \Stringable
     public static function fromArray(array $data): self
     {
         return new self(
-            key: $data['key'],
-            value: $data['value'],
+            key: ValidationHelper::requireString($data, 'key'),
+            value: ValidationHelper::requireString($data, 'value'),
         );
     }
 
