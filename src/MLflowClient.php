@@ -15,6 +15,9 @@ use MLflow\Api\PromptApi;
 use MLflow\Api\RunApi;
 use MLflow\Api\TraceApi;
 use MLflow\Api\WebhookApi;
+use MLflow\Builder\ExperimentBuilder;
+use MLflow\Builder\ModelBuilder;
+use MLflow\Builder\RunBuilder;
 use MLflow\Builder\TraceBuilder;
 use MLflow\Config\MLflowConfig;
 use MLflow\Exception\MLflowException;
@@ -188,6 +191,55 @@ class MLflowClient
     public function createTraceBuilder(string $experimentId, string $name): TraceBuilder
     {
         return new TraceBuilder($experimentId, $name);
+    }
+
+    /**
+     * Create a run builder for fluent API
+     *
+     * @example
+     * ```php
+     * $run = $client->createRunBuilder($experimentId)
+     *     ->withName('training-001')
+     *     ->withParam('lr', '0.01')
+     *     ->withMetric('accuracy', 0.95)
+     *     ->start();
+     * ```
+     */
+    public function createRunBuilder(string $experimentId): RunBuilder
+    {
+        return new RunBuilder($this->runs(), $experimentId);
+    }
+
+    /**
+     * Create an experiment builder for fluent API
+     *
+     * @example
+     * ```php
+     * $exp = $client->createExperimentBuilder('my-experiment')
+     *     ->withArtifactLocation('s3://bucket/path')
+     *     ->withTag('team', 'ml-team')
+     *     ->create();
+     * ```
+     */
+    public function createExperimentBuilder(string $name): ExperimentBuilder
+    {
+        return new ExperimentBuilder($this->experiments(), $name);
+    }
+
+    /**
+     * Create a model builder for fluent API
+     *
+     * @example
+     * ```php
+     * $model = $client->createModelBuilder('my-model')
+     *     ->withDescription('Image classification model')
+     *     ->withTag('framework', 'pytorch')
+     *     ->create();
+     * ```
+     */
+    public function createModelBuilder(string $name): ModelBuilder
+    {
+        return new ModelBuilder($this->modelRegistry(), $name);
     }
 
     /**

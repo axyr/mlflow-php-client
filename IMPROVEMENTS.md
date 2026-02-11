@@ -2182,7 +2182,7 @@ protected function logRequest(string $method, string $uri, array $options): void
 **Progress**: 6/6 (100%) ✅ **COMPLETE**
 
 ### Phase 3: Developer Experience ✅❌
-- [ ] 3.1 Add builder classes
+- [x] 3.1 Add builder classes
 - [ ] 3.2 Complete collection APIs
 - [ ] 3.3 Add connection validation
 - [ ] 3.4 Add usage examples in docblocks
