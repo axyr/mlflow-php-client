@@ -6,16 +6,17 @@ namespace MLflow;
 
 use GuzzleHttp\Client as HttpClient;
 use GuzzleHttp\ClientInterface;
-use MLflow\Api\ExperimentApi;
-use MLflow\Api\RunApi;
-use MLflow\Api\ModelRegistryApi;
-use MLflow\Api\MetricApi;
 use MLflow\Api\ArtifactApi;
-use MLflow\Api\TraceApi;
-use MLflow\Api\PromptApi;
-use MLflow\Api\WebhookApi;
 use MLflow\Api\DatasetApi;
+use MLflow\Api\ExperimentApi;
+use MLflow\Api\MetricApi;
+use MLflow\Api\ModelRegistryApi;
+use MLflow\Api\PromptApi;
+use MLflow\Api\RunApi;
+use MLflow\Api\TraceApi;
+use MLflow\Api\WebhookApi;
 use MLflow\Builder\TraceBuilder;
+use MLflow\Config\MLflowConfig;
 use MLflow\Exception\MLflowException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -42,27 +43,33 @@ class MLflowClient
      * MLflowClient constructor.
      *
      * @param string $trackingUri The MLflow tracking server URI
-     * @param array<string, mixed> $config Optional Guzzle client configuration
+     * @param MLflowConfig|array<string, mixed> $config Configuration object or array for backward compatibility
      * @param LoggerInterface|null $logger PSR-3 compatible logger
      */
     public function __construct(
         string $trackingUri,
-        array $config = [],
+        MLflowConfig|array $config = [],
         ?LoggerInterface $logger = null
     ) {
         $this->trackingUri = rtrim($trackingUri, '/');
         $this->logger = $logger ?? new NullLogger();
 
+        // Convert array to MLflowConfig for backward compatibility
+        $mlflowConfig = $config instanceof MLflowConfig
+            ? $config
+            : MLflowConfig::fromArray($config);
+
         $defaultConfig = [
             'base_uri' => $this->trackingUri . '/api/2.0/',
-            'timeout' => 30.0,
             'headers' => [
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ],
         ];
 
-        $this->httpClient = new HttpClient(array_merge($defaultConfig, $config));
+        $guzzleConfig = array_merge($defaultConfig, $mlflowConfig->toGuzzleArray());
+
+        $this->httpClient = new HttpClient($guzzleConfig);
 
         $this->logger->info('MLflow client initialized', ['tracking_uri' => $this->trackingUri]);
     }
