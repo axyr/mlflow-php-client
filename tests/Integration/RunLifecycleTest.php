@@ -11,7 +11,7 @@ use MLflow\Enum\RunStatus;
  */
 final class RunLifecycleTest extends IntegrationTestCase
 {
-    public function test_complete_run_lifecycle(): void
+    public function testCompleteRunLifecycle(): void
     {
         // Create a run
         $run = $this->client->runs()->create(
@@ -57,7 +57,7 @@ final class RunLifecycleTest extends IntegrationTestCase
         $this->assertNotNull($final->info->endTime);
     }
 
-    public function test_batch_logging(): void
+    public function testBatchLogging(): void
     {
         $runId = $this->createTestRun();
 
@@ -92,7 +92,7 @@ final class RunLifecycleTest extends IntegrationTestCase
         $this->assertCount(3, $accuracyMetrics);
     }
 
-    public function test_run_builder_integration(): void
+    public function testRunBuilderIntegration(): void
     {
         // Use builder to create and configure run
         $run = $this->client->createRunBuilder($this->testExperimentId)
