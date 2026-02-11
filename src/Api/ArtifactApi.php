@@ -113,8 +113,7 @@ class ArtifactApi extends BaseApi
         }
 
         foreach ($files as $file) {
-            $relativePath = str_replace($basePath . DIRECTORY_SEPARATOR, '', $file);
-            $relativePath = str_replace(DIRECTORY_SEPARATOR, '/', $relativePath);
+            $relativePath = str_replace([$basePath . DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR], ['', '/'], $file);
 
             $targetPath = $artifactPath ? "$artifactPath/$relativePath" : $relativePath;
             $targetDir = dirname($targetPath);
@@ -298,7 +297,7 @@ class ArtifactApi extends BaseApi
                 "mlflow-artifacts/artifacts/{$runId}/{$filePath}"
             );
 
-            $fileHandle = fopen($localPath, 'w');
+            $fileHandle = fopen($localPath, 'wb');
             if (!$fileHandle) {
                 throw new MLflowException("Failed to create file: $localPath");
             }
