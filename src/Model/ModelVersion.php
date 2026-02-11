@@ -6,6 +6,7 @@ namespace MLflow\Model;
 
 use MLflow\Enum\ModelStage;
 use MLflow\Enum\ModelVersionStatus;
+use MLflow\Collection\TagCollection;
 
 /**
  * Represents a model version in MLflow Model Registry
@@ -22,8 +23,8 @@ readonly class ModelVersion
     public ?string $runId;
     public ?ModelVersionStatus $status;
     public ?string $statusMessage;
-    /** @var array<ModelTag>|null */
-    public ?array $tags;
+    /** @var TagCollection<ModelTag>|null */
+    public ?TagCollection $tags;
     public ?string $runLink;
     /** @var array<string>|null */
     public ?array $aliases;
@@ -39,7 +40,7 @@ readonly class ModelVersion
      * @param string|null $runId
      * @param ModelVersionStatus|null $status
      * @param string|null $statusMessage
-     * @param array<ModelTag>|null $tags
+     * @param TagCollection<ModelTag>|null $tags
      * @param string|null $runLink
      * @param array<string>|null $aliases
      */
@@ -54,7 +55,7 @@ readonly class ModelVersion
         ?string $runId = null,
         ?ModelVersionStatus $status = null,
         ?string $statusMessage = null,
-        ?array $tags = null,
+        ?TagCollection $tags = null,
         ?string $runLink = null,
         ?array $aliases = null
     ) {
@@ -81,13 +82,14 @@ readonly class ModelVersion
     {
         $tags = null;
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tags = [];
+            $tagCollection = new TagCollection();
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
-                    $tags[] = ModelTag::fromArray($tagData);
+                    $tagCollection->add(ModelTag::fromArray($tagData));
                 }
             }
+            $tags = $tagCollection;
         }
 
         $currentStageStr = $data['current_stage'] ?? null;
@@ -174,7 +176,7 @@ readonly class ModelVersion
         }
 
         if ($this->tags !== null) {
-            $data['tags'] = array_map(fn($t) => $t->toArray(), $this->tags);
+            $data['tags'] = $this->tags->toArray();
         }
 
         if ($this->runLink !== null) {

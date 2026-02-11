@@ -4,28 +4,33 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Collection\MetricCollection;
+use MLflow\Collection\ParameterCollection;
+use MLflow\Collection\TagCollection;
+
 /**
  * Represents data associated with an MLflow run (metrics, params, tags)
  */
 readonly class RunData
 {
-    /** @var array<Metric> */
-    public array $metrics;
-    /** @var array<Param> */
-    public array $params;
-    /** @var array<RunTag> */
-    public array $tags;
+    public MetricCollection $metrics;
+    public ParameterCollection $params;
+    /** @var TagCollection<RunTag> */
+    public TagCollection $tags;
 
     /**
-     * @param array<Metric> $metrics
-     * @param array<Param> $params
-     * @param array<RunTag> $tags
+     * @param MetricCollection $metrics
+     * @param ParameterCollection $params
+     * @param TagCollection<RunTag> $tags
      */
-    public function __construct(array $metrics = [], array $params = [], array $tags = [])
-    {
-        $this->metrics = $metrics;
-        $this->params = $params;
-        $this->tags = $tags;
+    public function __construct(
+        ?MetricCollection $metrics = null,
+        ?ParameterCollection $params = null,
+        ?TagCollection $tags = null
+    ) {
+        $this->metrics = $metrics ?? new MetricCollection();
+        $this->params = $params ?? new ParameterCollection();
+        $this->tags = $tags ?? new TagCollection();
     }
 
     /**
@@ -34,32 +39,32 @@ readonly class RunData
      */
     public static function fromArray(array $data): self
     {
-        $metrics = [];
+        $metrics = new MetricCollection();
         if (isset($data['metrics']) && is_array($data['metrics'])) {
             foreach ($data['metrics'] as $metricData) {
                 if (is_array($metricData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
-                    $metrics[] = Metric::fromArray($metricData);
+                    $metrics->add(Metric::fromArray($metricData));
                 }
             }
         }
 
-        $params = [];
+        $params = new ParameterCollection();
         if (isset($data['params']) && is_array($data['params'])) {
             foreach ($data['params'] as $paramData) {
                 if (is_array($paramData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
-                    $params[] = Param::fromArray($paramData);
+                    $params->add(Param::fromArray($paramData));
                 }
             }
         }
 
-        $tags = [];
+        $tags = new TagCollection();
         if (isset($data['tags']) && is_array($data['tags'])) {
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
-                    $tags[] = RunTag::fromArray($tagData);
+                    $tags->add(RunTag::fromArray($tagData));
                 }
             }
         }
@@ -73,9 +78,9 @@ readonly class RunData
     public function toArray(): array
     {
         return [
-            'metrics' => array_map(fn($m) => $m->toArray(), $this->metrics),
-            'params' => array_map(fn($p) => $p->toArray(), $this->params),
-            'tags' => array_map(fn($t) => $t->toArray(), $this->tags),
+            'metrics' => $this->metrics->toArray(),
+            'params' => $this->params->toArray(),
+            'tags' => $this->tags->toArray(),
         ];
     }
 
@@ -86,7 +91,7 @@ readonly class RunData
      */
     public function getMetrics(): array
     {
-        return $this->metrics;
+        return $this->metrics->all();
     }
 
     /**
@@ -96,7 +101,7 @@ readonly class RunData
      */
     public function getParams(): array
     {
-        return $this->params;
+        return array_values($this->params->all());
     }
 
     /**
@@ -106,36 +111,21 @@ readonly class RunData
      */
     public function getTags(): array
     {
-        return $this->tags;
+        return array_values($this->tags->all());
     }
 
     public function getMetric(string $key): ?Metric
     {
-        foreach ($this->metrics as $metric) {
-            if ($metric->key === $key) {
-                return $metric;
-            }
-        }
-        return null;
+        return $this->metrics->getByKey($key)->first();
     }
 
     public function getParam(string $key): ?Param
     {
-        foreach ($this->params as $param) {
-            if ($param->key === $key) {
-                return $param;
-            }
-        }
-        return null;
+        return $this->params->get($key);
     }
 
     public function getTag(string $key): ?RunTag
     {
-        foreach ($this->tags as $tag) {
-            if ($tag->key === $key) {
-                return $tag;
-            }
-        }
-        return null;
+        return $this->tags->get($key);
     }
 }

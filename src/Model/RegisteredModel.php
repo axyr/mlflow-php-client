@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MLflow\Model;
 
+use MLflow\Collection\TagCollection;
+
 /**
  * Represents a registered model in MLflow Model Registry
  */
@@ -15,8 +17,8 @@ readonly class RegisteredModel
     public ?int $lastUpdatedTimestamp;
     /** @var array<ModelVersion>|null */
     public ?array $latestVersions;
-    /** @var array<ModelTag>|null */
-    public ?array $tags;
+    /** @var TagCollection<ModelTag>|null */
+    public ?TagCollection $tags;
     /** @var array<ModelAlias>|null */
     public ?array $aliases;
 
@@ -26,7 +28,7 @@ readonly class RegisteredModel
      * @param int|null $creationTimestamp
      * @param int|null $lastUpdatedTimestamp
      * @param array<ModelVersion>|null $latestVersions
-     * @param array<ModelTag>|null $tags
+     * @param TagCollection<ModelTag>|null $tags
      * @param array<ModelAlias>|null $aliases
      */
     public function __construct(
@@ -35,7 +37,7 @@ readonly class RegisteredModel
         ?int $creationTimestamp = null,
         ?int $lastUpdatedTimestamp = null,
         ?array $latestVersions = null,
-        ?array $tags = null,
+        ?TagCollection $tags = null,
         ?array $aliases = null
     ) {
         $this->name = $name;
@@ -65,13 +67,14 @@ readonly class RegisteredModel
 
         $tags = null;
         if (isset($data['tags']) && is_array($data['tags'])) {
-            $tags = [];
+            $tagCollection = new TagCollection();
             foreach ($data['tags'] as $tagData) {
                 if (is_array($tagData)) {
                     /** @phpstan-ignore-next-line Array shape validated */
-                    $tags[] = ModelTag::fromArray($tagData);
+                    $tagCollection->add(ModelTag::fromArray($tagData));
                 }
             }
+            $tags = $tagCollection;
         }
 
         $aliases = null;
@@ -127,7 +130,7 @@ readonly class RegisteredModel
         }
 
         if ($this->tags !== null) {
-            $data['tags'] = array_map(fn($t) => $t->toArray(), $this->tags);
+            $data['tags'] = $this->tags->toArray();
         }
 
         if ($this->aliases !== null) {
@@ -177,7 +180,7 @@ readonly class RegisteredModel
      */
     public function getTags(): ?array
     {
-        return $this->tags;
+        return $this->tags?->all();
     }
 
     /**

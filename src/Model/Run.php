@@ -131,7 +131,7 @@ readonly class Run
      */
     public function getMetrics(): array
     {
-        return $this->data->metrics;
+        return $this->data->metrics->all();
     }
 
     /**
@@ -139,7 +139,7 @@ readonly class Run
      */
     public function getParams(): array
     {
-        return $this->data->params;
+        return array_values($this->data->params->all());
     }
 
     /**
@@ -147,7 +147,7 @@ readonly class Run
      */
     public function getTags(): array
     {
-        return $this->data->tags;
+        return array_values($this->data->tags->all());
     }
 
     public function isActive(): bool
