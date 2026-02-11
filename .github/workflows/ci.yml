@@ -110,18 +110,6 @@ jobs:
     name: Integration Tests
     runs-on: ubuntu-latest
 
-    services:
-      mlflow:
-        image: ghcr.io/mlflow/mlflow:v2.10.0
-        ports:
-          - 5000:5000
-        options: >-
-          --health-cmd "curl -f http://localhost:5000/health || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 15
-          --health-start-period 40s
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -131,6 +119,18 @@ jobs:
         with:
           php-version: '8.4'
           extensions: zip
+
+      - name: Start MLflow server
+        run: |
+          docker run -d \
+            --name mlflow \
+            -p 5000:5000 \
+            ghcr.io/mlflow/mlflow:v2.10.0 \
+            mlflow server \
+              --host 0.0.0.0 \
+              --port 5000 \
+              --backend-store-uri sqlite:///mlflow.db \
+              --default-artifact-root ./mlruns
 
       - name: Cache Composer dependencies
         uses: actions/cache@v3
@@ -159,3 +159,7 @@ jobs:
         env:
           MLFLOW_TRACKING_URI: http://localhost:5000
         run: vendor/bin/phpunit tests/Integration
+
+      - name: Stop MLflow server
+        if: always()
+        run: docker stop mlflow && docker rm mlflow
