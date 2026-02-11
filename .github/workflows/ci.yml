@@ -119,11 +119,8 @@ jobs:
           --health-cmd "curl -f http://localhost:5000/health || exit 1"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 10
-          --health-start-period 30s
-        env:
-          MLFLOW_BACKEND_STORE_URI: "sqlite:///mlflow.db"
-          MLFLOW_DEFAULT_ARTIFACT_ROOT: "./mlruns"
+          --health-retries 15
+          --health-start-period 40s
 
     steps:
       - name: Checkout code

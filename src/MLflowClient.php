@@ -59,9 +59,7 @@ class MLflowClient
         $this->logger = $logger ?? new NullLogger();
 
         // Convert array to MLflowConfig for backward compatibility
-        $mlflowConfig = $config instanceof MLflowConfig
-            ? $config
-            : MLflowConfig::fromArray($config);
+        $mlflowConfig = $config instanceof MLflowConfig ? $config : MLflowConfig::fromArray($config);
 
         $defaultConfig = [
             'base_uri' => $this->trackingUri . '/api/2.0/',

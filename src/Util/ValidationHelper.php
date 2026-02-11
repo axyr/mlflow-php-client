@@ -25,9 +25,7 @@ final class ValidationHelper
         $value = $data[$key] ?? ($fallbackKey ? $data[$fallbackKey] ?? null : null);
 
         if (!is_string($value) || $value === '') {
-            $message = $fallbackKey
-                ? "Required field missing or empty: '{$key}' or '{$fallbackKey}'"
-                : "Required field missing or empty: '{$key}'";
+            $message = $fallbackKey ? "Required field missing or empty: '{$key}' or '{$fallbackKey}'" : "Required field missing or empty: '{$key}'";
 
             throw new ValidationException($message);
         }

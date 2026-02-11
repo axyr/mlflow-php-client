@@ -52,9 +52,7 @@ readonly class RunInfo
     public static function fromArray(array $data): self
     {
         $statusValue = $data['status'] ?? 'RUNNING';
-        $status = is_string($statusValue) || is_int($statusValue)
-            ? RunStatus::from($statusValue)
-            : RunStatus::RUNNING;
+        $status = is_string($statusValue) || is_int($statusValue) ? RunStatus::from($statusValue) : RunStatus::RUNNING;
 
         $lifecycleStage = null;
         if (isset($data['lifecycle_stage'])) {

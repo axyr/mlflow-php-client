@@ -120,8 +120,7 @@ readonly class Metric implements SerializableModelInterface
 
     public function getDateTime(): \DateTimeImmutable
     {
-        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $this->timestamp / 1000))
-            ?: new \DateTimeImmutable();
+        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $this->timestamp / 1000)) ?: new \DateTimeImmutable();
     }
 
     public function isNewerThan(self $other): bool

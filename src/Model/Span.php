@@ -166,9 +166,7 @@ class Span
             startTimeNs: is_int($startTimeNs) ? $startTimeNs : (is_numeric($startTimeNs) ? (int) $startTimeNs : 0),
             endTimeNs: is_int($endTimeNs) ? $endTimeNs : (is_numeric($endTimeNs) ? (int) $endTimeNs : null),
             parentId: is_string($parentId) ? $parentId : null,
-            status: (is_string($statusValue) || is_int($statusValue))
-                ? SpanStatusCode::from($statusValue)
-                : SpanStatusCode::UNSET,
+            status: (is_string($statusValue) || is_int($statusValue)) ? SpanStatusCode::from($statusValue) : SpanStatusCode::UNSET,
             spanType: is_string($spanType) ? $spanType : '',
             inputs: $data['inputs'] ?? null,
             outputs: $data['outputs'] ?? null,

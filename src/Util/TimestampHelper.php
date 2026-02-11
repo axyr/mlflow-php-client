@@ -51,8 +51,7 @@ class TimestampHelper
     public static function nsToDateTime(int $ns): \DateTimeImmutable
     {
         $seconds = $ns / 1_000_000_000;
-        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.9f', $seconds))
-            ?: new \DateTimeImmutable();
+        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.9f', $seconds)) ?: new \DateTimeImmutable();
     }
 
     /**
@@ -61,8 +60,7 @@ class TimestampHelper
     public static function msToDateTime(int $ms): \DateTimeImmutable
     {
         $seconds = $ms / 1_000;
-        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $seconds))
-            ?: new \DateTimeImmutable();
+        return \DateTimeImmutable::createFromFormat('U.u', sprintf('%.3f', $seconds)) ?: new \DateTimeImmutable();
     }
 
     /**
