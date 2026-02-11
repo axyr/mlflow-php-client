@@ -168,6 +168,19 @@ class ParameterCollection implements \Countable, \IteratorAggregate, \JsonSerial
     }
 
     /**
+     * Reduce collection to a single value
+     *
+     * @template TResult
+     * @param callable(TResult, Param): TResult $callback
+     * @param TResult $initial
+     * @return TResult
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        return array_reduce($this->params, $callback, $initial);
+    }
+
+    /**
      * @return array<string>
      */
     public function keys(): array

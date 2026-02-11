@@ -177,6 +177,19 @@ class TagCollection implements \Countable, \IteratorAggregate, \JsonSerializable
         return $merged;
     }
 
+    /**
+     * Reduce collection to a single value
+     *
+     * @template TResult
+     * @param callable(TResult, T): TResult $callback
+     * @param TResult $initial
+     * @return TResult
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        return array_reduce($this->tags, $callback, $initial);
+    }
+
     public function count(): int
     {
         return count($this->tags);

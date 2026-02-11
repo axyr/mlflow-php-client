@@ -170,6 +170,83 @@ class MetricCollection implements \Countable, \IteratorAggregate, \JsonSerializa
     }
 
     /**
+     * Merge with another collection
+     *
+     * @return self
+     */
+    public function merge(self $other): self
+    {
+        return new self(array_merge($this->metrics, $other->metrics));
+    }
+
+    /**
+     * Filter metrics by key prefix
+     *
+     * @return self
+     */
+    public function filterByKeyPrefix(string $prefix): self
+    {
+        return $this->filter(fn(Metric $m) => str_starts_with($m->key, $prefix));
+    }
+
+    /**
+     * Filter metrics by step range
+     *
+     * @return self
+     */
+    public function filterByStepRange(int $minStep, int $maxStep): self
+    {
+        return $this->filter(
+            fn(Metric $m) => $m->step >= $minStep && $m->step <= $maxStep
+        );
+    }
+
+    /**
+     * Filter metrics by value range
+     *
+     * @return self
+     */
+    public function filterByValueRange(float $min, float $max): self
+    {
+        return $this->filter(
+            fn(Metric $m) => $m->value >= $min && $m->value <= $max
+        );
+    }
+
+    /**
+     * Get unique metrics by key (keeps first occurrence)
+     *
+     * @return self
+     */
+    public function uniqueByKey(): self
+    {
+        $seen = [];
+        $unique = [];
+
+        foreach ($this->metrics as $metric) {
+            if (!isset($seen[$metric->key])) {
+                $seen[$metric->key] = true;
+                $unique[] = $metric;
+            }
+        }
+
+        return new self($unique);
+    }
+
+    /**
+     * Reduce collection to a single value
+     *
+     * @template TResult
+     * @param callable(TResult, Metric): TResult $callback
+     * @param TResult $initial
+     * @return TResult
+     */
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        return array_reduce($this->metrics, $callback, $initial);
+    }
+
+    /**
      * Get min/max values for a specific key
      *
      * @return array{min: float, max: float}|null
