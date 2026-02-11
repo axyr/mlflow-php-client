@@ -35,7 +35,8 @@
             </property>
         </properties>
     </rule>
-    <rule ref="Generic.Strings.UnnecessaryStringConcat"/>
+    <!-- Disable string concat rule - too strict for multiline strings -->
+    <!-- <rule ref="Generic.Strings.UnnecessaryStringConcat"/> -->
     <rule ref="Generic.NamingConventions.UpperCaseConstantName"/>
 
     <!-- Squiz rules for better quality -->

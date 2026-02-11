@@ -28,8 +28,8 @@ abstract class IntegrationTestCase extends TestCase
 
         if ($trackingUri === false) {
             $this->markTestSkipped(
-                'Integration tests require MLFLOW_TRACKING_URI environment variable. ' .
-                'Run: docker-compose -f docker-compose.test.yml up'
+                'Integration tests require MLFLOW_TRACKING_URI environment variable. '
+                . 'Run: docker-compose -f docker-compose.test.yml up'
             );
         }
 

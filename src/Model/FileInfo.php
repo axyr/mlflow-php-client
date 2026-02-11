@@ -72,8 +72,9 @@ readonly class FileInfo implements \JsonSerializable, \Stringable
         $units = ['B', 'KB', 'MB', 'GB', 'TB'];
         $bytes = $this->fileSize;
         $unitIndex = 0;
+        $maxUnitIndex = count($units) - 1;
 
-        while ($bytes >= 1024 && $unitIndex < count($units) - 1) {
+        while ($bytes >= 1024 && $unitIndex < $maxUnitIndex) {
             $bytes /= 1024;
             $unitIndex++;
         }
