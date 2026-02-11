@@ -21,6 +21,7 @@ use MLflow\Builder\RunBuilder;
 use MLflow\Builder\TraceBuilder;
 use MLflow\Config\MLflowConfig;
 use MLflow\Exception\MLflowException;
+use MLflow\Exception\NetworkException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
@@ -273,5 +274,87 @@ class MLflowClient
             $this->datasetApi = new DatasetApi($this->httpClient, $this->logger);
         }
         return $this->datasetApi;
+    }
+
+    /**
+     * Validate connection to MLflow server
+     *
+     * Attempts a lightweight operation to verify server is reachable
+     *
+     * @return bool True if connection is successful
+     * @throws NetworkException If server is unreachable
+     * @throws MLflowException If server returns an error
+     *
+     * @example
+     * ```php
+     * try {
+     *     $client->validateConnection();
+     *     echo "Connected successfully!";
+     * } catch (NetworkException $e) {
+     *     echo "Cannot connect to MLflow server: " . $e->getMessage();
+     * }
+     * ```
+     */
+    public function validateConnection(): bool
+    {
+        try {
+            // Try to search experiments with limit 1 (lightweight operation)
+            $this->experiments()->search(maxResults: 1);
+
+            $this->logger->info('MLflow connection validated', [
+                'tracking_uri' => $this->trackingUri,
+            ]);
+
+            return true;
+        } catch (\GuzzleHttp\Exception\ConnectException $e) {
+            throw new NetworkException(
+                "Cannot connect to MLflow server at {$this->trackingUri}: {$e->getMessage()}",
+                0,
+                ['uri' => $this->trackingUri],
+                $e
+            );
+        }
+    }
+
+    /**
+     * Get MLflow server information
+     *
+     * @return array{version: string|null, reachable: bool, error: string|null}
+     *
+     * @example
+     * ```php
+     * $info = $client->getServerInfo();
+     * if ($info['reachable']) {
+     *     echo "MLflow version: " . $info['version'];
+     * } else {
+     *     echo "Error: " . $info['error'];
+     * }
+     * ```
+     */
+    public function getServerInfo(): array
+    {
+        try {
+            // MLflow doesn't have a dedicated version endpoint,
+            // so we validate connection and infer it's working
+            $this->validateConnection();
+
+            return [
+                'version' => 'unknown', // MLflow API doesn't expose version
+                'reachable' => true,
+                'error' => null,
+            ];
+        } catch (NetworkException $e) {
+            return [
+                'version' => null,
+                'reachable' => false,
+                'error' => $e->getMessage(),
+            ];
+        } catch (MLflowException $e) {
+            return [
+                'version' => null,
+                'reachable' => true, // Server is reachable but returned an error
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 }

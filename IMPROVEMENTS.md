@@ -2184,11 +2184,11 @@ protected function logRequest(string $method, string $uri, array $options): void
 ### Phase 3: Developer Experience ✅❌
 - [x] 3.1 Add builder classes
 - [x] 3.2 Complete collection APIs
-- [ ] 3.3 Add connection validation
+- [x] 3.3 Add connection validation
 - [ ] 3.4 Add usage examples in docblocks
 - [ ] 3.5 Create factory methods
 
-**Progress**: 2/5 (40%)
+**Progress**: 3/5 (60%)
 
 ### Phase 4: Polish ✅❌
 - [ ] 4.1 Add integration test suite
