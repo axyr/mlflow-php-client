@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace MLflow\Api;
 
+use MLflow\Exception\MLflowException;
 use MLflow\Model\Trace;
 use MLflow\Model\TraceInfo;
-use MLflow\Exception\MLflowException;
+use MLflow\Util\ResponseValidator;
 
 /**
  * API for managing MLflow traces
@@ -136,8 +137,7 @@ class TraceApi extends BaseApi
             'max_traces' => $maxTraces,
         ]);
 
-        $deleted = $response['traces_deleted'] ?? 0;
-        return is_int($deleted) ? $deleted : 0;
+        return ResponseValidator::requireInt($response, 'traces_deleted');
     }
 
     /**
