@@ -85,11 +85,15 @@ final class RunLifecycleTest extends IntegrationTestCase
         $run = $this->client->runs()->getById($runId);
 
         $this->assertCount(3, $run->data->params);
-        $this->assertGreaterThanOrEqual(5, $run->data->metrics->count());
+        // getById returns only latest metric values, not full history
+        $this->assertEquals(2, $run->data->metrics->count()); // 2 unique metric keys
 
-        // Verify metric history
-        $accuracyMetrics = $run->data->metrics->getByKey('accuracy');
-        $this->assertCount(3, $accuracyMetrics);
+        // Verify metric history via dedicated API
+        $accuracyHistory = $this->client->metrics()->getHistory($runId, 'accuracy');
+        $this->assertCount(3, $accuracyHistory); // All 3 accuracy values
+
+        $lossHistory = $this->client->metrics()->getHistory($runId, 'loss');
+        $this->assertCount(2, $lossHistory); // All 2 loss values
     }
 
     public function testRunBuilderIntegration(): void
