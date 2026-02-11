@@ -129,6 +129,14 @@ class TraceInfo
         $traceMetadata = $data['trace_metadata'] ?? [];
         $tags = $data['tags'] ?? [];
 
+        if (is_int($executionDuration)) {
+            $execDuration = $executionDuration;
+        } elseif (is_numeric($executionDuration)) {
+            $execDuration = (int) $executionDuration;
+        } else {
+            $execDuration = null;
+        }
+
         return new self(
             traceId: is_string($traceId) ? $traceId : '',
             traceLocation: $location,
@@ -137,7 +145,7 @@ class TraceInfo
             requestPreview: is_string($requestPreview) ? $requestPreview : null,
             responsePreview: is_string($responsePreview) ? $responsePreview : null,
             clientRequestId: is_string($clientRequestId) ? $clientRequestId : null,
-            executionDuration: is_int($executionDuration) ? $executionDuration : (is_numeric($executionDuration) ? (int) $executionDuration : null),
+            executionDuration: $execDuration,
             traceMetadata: is_array($traceMetadata) ? $traceMetadata : [],
             tags: is_array($tags) ? $tags : []
         );

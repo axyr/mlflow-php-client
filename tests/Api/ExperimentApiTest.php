@@ -173,7 +173,9 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/update',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['new_name']) && $json['new_name'] === 'new-name';
+                    return is_array($json) && isset($json['experiment_id'])
+                        && $json['experiment_id'] === '123'
+                        && isset($json['new_name']) && $json['new_name'] === 'new-name';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -232,8 +234,10 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/set-experiment-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['key']) && $json['key'] === 'tag_key'
-                        && isset($json['value']) && $json['value'] === 'tag_value';
+                    return is_array($json) && isset($json['experiment_id'])
+                        && $json['experiment_id'] === '123' && isset($json['key'])
+                        && $json['key'] === 'tag_key' && isset($json['value'])
+                        && $json['value'] === 'tag_value';
                 })
             )
             ->willReturn($this->createJsonResponse([]));
@@ -252,7 +256,9 @@ class ExperimentApiTest extends TestCase
                 'mlflow/experiments/delete-experiment-tag',
                 $this->callback(function (array $options): bool {
                     $json = json_decode($options['body'], true);
-                    return is_array($json) && isset($json['experiment_id']) && $json['experiment_id'] === '123' && isset($json['key']) && $json['key'] === 'tag_key';
+                    return is_array($json) && isset($json['experiment_id'])
+                        && $json['experiment_id'] === '123'
+                        && isset($json['key']) && $json['key'] === 'tag_key';
                 })
             )
             ->willReturn($this->createJsonResponse([]));

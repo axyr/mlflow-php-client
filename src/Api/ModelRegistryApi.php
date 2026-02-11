@@ -138,7 +138,7 @@ class ModelRegistryApi extends BaseApi
      * @param int|null $maxResults Maximum number of models to return
      * @param array<string>|null $orderBy List of columns to order by
      * @param string|null $pageToken Pagination token
-     * @return array{registered_models: array<RegisteredModel>, next_page_token: string|null} Array with models and next_page_token
+     * @return array{registered_models: array<RegisteredModel>, next_page_token: string|null}
      * @throws MLflowException
      */
     public function searchRegisteredModels(
@@ -437,7 +437,7 @@ class ModelRegistryApi extends BaseApi
      * @param int|null $maxResults Maximum number of versions to return
      * @param array<string>|null $orderBy List of columns to order by
      * @param string|null $pageToken Pagination token
-     * @return array{model_versions: array<ModelVersion>, next_page_token: string|null} Array with model_versions and next_page_token
+     * @return array{model_versions: array<ModelVersion>, next_page_token: string|null}
      * @throws MLflowException
      */
     public function searchModelVersions(

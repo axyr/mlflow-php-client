@@ -353,7 +353,10 @@ class RunApi extends BaseApi
      * Log inputs (datasets) for a run
      *
      * @param string $runId The run ID
-     * @param array<array{dataset: array<string, mixed>, tags?: array<array{key: string, value: string}>}> $datasets Array of dataset inputs
+     * @param array<array{
+     *     dataset: array<string, mixed>,
+     *     tags?: array<array{key: string, value: string}>
+     * }> $datasets Array of dataset inputs
      * @return void
      * @throws MLflowException
      */

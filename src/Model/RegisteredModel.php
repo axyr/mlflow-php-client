@@ -93,11 +93,27 @@ readonly class RegisteredModel
         $creationTimestamp = $data['creation_timestamp'] ?? null;
         $lastUpdatedTimestamp = $data['last_updated_timestamp'] ?? null;
 
+        if (is_int($creationTimestamp)) {
+            $creationTs = $creationTimestamp;
+        } elseif (is_numeric($creationTimestamp)) {
+            $creationTs = (int) $creationTimestamp;
+        } else {
+            $creationTs = null;
+        }
+
+        if (is_int($lastUpdatedTimestamp)) {
+            $lastUpdatedTs = $lastUpdatedTimestamp;
+        } elseif (is_numeric($lastUpdatedTimestamp)) {
+            $lastUpdatedTs = (int) $lastUpdatedTimestamp;
+        } else {
+            $lastUpdatedTs = null;
+        }
+
         return new self(
             is_string($name) ? $name : '',
             is_string($description) ? $description : null,
-            is_int($creationTimestamp) ? $creationTimestamp : (is_numeric($creationTimestamp) ? (int) $creationTimestamp : null),
-            is_int($lastUpdatedTimestamp) ? $lastUpdatedTimestamp : (is_numeric($lastUpdatedTimestamp) ? (int) $lastUpdatedTimestamp : null),
+            $creationTs,
+            $lastUpdatedTs,
             $latestVersions,
             $tags,
             $aliases

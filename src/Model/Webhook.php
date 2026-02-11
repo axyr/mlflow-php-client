@@ -52,6 +52,22 @@ readonly class Webhook implements SerializableModelInterface
         $creationTime = $data['creation_time'] ?? null;
         $lastUpdateTime = $data['last_update_time'] ?? null;
 
+        if (is_int($creationTime)) {
+            $creationTs = $creationTime;
+        } elseif (is_numeric($creationTime)) {
+            $creationTs = (int) $creationTime;
+        } else {
+            $creationTs = null;
+        }
+
+        if (is_int($lastUpdateTime)) {
+            $lastUpdateTs = $lastUpdateTime;
+        } elseif (is_numeric($lastUpdateTime)) {
+            $lastUpdateTs = (int) $lastUpdateTime;
+        } else {
+            $lastUpdateTs = null;
+        }
+
         return new self(
             id: is_string($id) ? $id : '',
             name: is_string($name) ? $name : '',
@@ -59,8 +75,8 @@ readonly class Webhook implements SerializableModelInterface
             events: is_array($events) ? $events : [],
             status: $status,
             description: is_string($description) ? $description : null,
-            creationTime: is_int($creationTime) ? $creationTime : (is_numeric($creationTime) ? (int) $creationTime : null),
-            lastUpdateTime: is_int($lastUpdateTime) ? $lastUpdateTime : (is_numeric($lastUpdateTime) ? (int) $lastUpdateTime : null),
+            creationTime: $creationTs,
+            lastUpdateTime: $lastUpdateTs,
         );
     }
 

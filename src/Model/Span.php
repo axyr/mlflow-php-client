@@ -159,6 +159,12 @@ class Span
         $endTimeNs = $data['end_time_ns'] ?? null;
         $attributes = $data['attributes'] ?? [];
 
+        if (is_string($statusValue) || is_int($statusValue)) {
+            $status = SpanStatusCode::from($statusValue);
+        } else {
+            $status = SpanStatusCode::UNSET;
+        }
+
         return new self(
             traceId: is_string($traceId) ? $traceId : '',
             spanId: is_string($spanId) ? $spanId : '',
@@ -166,7 +172,7 @@ class Span
             startTimeNs: is_int($startTimeNs) ? $startTimeNs : (is_numeric($startTimeNs) ? (int) $startTimeNs : 0),
             endTimeNs: is_int($endTimeNs) ? $endTimeNs : (is_numeric($endTimeNs) ? (int) $endTimeNs : null),
             parentId: is_string($parentId) ? $parentId : null,
-            status: (is_string($statusValue) || is_int($statusValue)) ? SpanStatusCode::from($statusValue) : SpanStatusCode::UNSET,
+            status: $status,
             spanType: is_string($spanType) ? $spanType : '',
             inputs: $data['inputs'] ?? null,
             outputs: $data['outputs'] ?? null,

@@ -117,7 +117,8 @@ final class SecurityHelper
     {
         if (!preg_match('/^[a-zA-Z0-9_\-\.\/\s]+$/', $key)) {
             throw new InvalidArgumentException(
-                "Invalid metric key '{$key}': must contain only alphanumeric, underscore, hyphen, period, forward slash, or space"
+                "Invalid metric key '{$key}': must contain only alphanumeric, underscore, " .
+                "hyphen, period, forward slash, or space"
             );
         }
 

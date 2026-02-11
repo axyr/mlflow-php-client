@@ -94,9 +94,9 @@ class ExperimentApi extends BaseApi
      * @param string|null $filterString Filter string (e.g., "attribute.name = 'my_experiment'")
      * @param int|null $maxResults Maximum number of experiments to return
      * @param string|null $pageToken Token for pagination
-     * @param array<string>|null $orderBy List of columns to order by (e.g., ["name DESC", "creation_time"])
+     * @param array<string>|null $orderBy List of columns to order by (e.g., ["name DESC"])
      * @param ViewType $viewType View type for filtering by lifecycle stage
-     * @return array{experiments: array<Experiment>, next_page_token: string|null} Array of experiments and pagination info
+     * @return array{experiments: array<Experiment>, next_page_token: string|null}
      * @throws MLflowException
      */
     public function search(
@@ -150,7 +150,7 @@ class ExperimentApi extends BaseApi
      * @param ViewType $viewType View type for filtering by lifecycle stage
      * @param int|null $maxResults Maximum number of experiments to return
      * @param string|null $pageToken Token for pagination
-     * @return array{experiments: array<Experiment>, next_page_token: string|null} Array of experiments and pagination info
+     * @return array{experiments: array<Experiment>, next_page_token: string|null}
      * @throws MLflowException
      */
     public function list(

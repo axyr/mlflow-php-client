@@ -32,7 +32,9 @@ class MetricApi extends BaseApi
         $metrics = [];
         if (isset($response['metrics']) && is_array($response['metrics'])) {
             foreach ($response['metrics'] as $metricData) {
-                if (is_array($metricData) && isset($metricData['key'], $metricData['value'], $metricData['timestamp'])) {
+                $hasRequiredFields = is_array($metricData)
+                    && isset($metricData['key'], $metricData['value'], $metricData['timestamp']);
+                if ($hasRequiredFields) {
                     /** @var array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $metricData */
                     $metrics[] = Metric::fromArray($metricData);
                 }
@@ -63,7 +65,9 @@ class MetricApi extends BaseApi
                 $metrics = [];
                 if (is_array($metricHistory)) {
                     foreach ($metricHistory as $metricData) {
-                        if (is_array($metricData) && isset($metricData['key'], $metricData['value'], $metricData['timestamp'])) {
+                        $hasRequiredFields = is_array($metricData)
+                            && isset($metricData['key'], $metricData['value'], $metricData['timestamp']);
+                        if ($hasRequiredFields) {
                             /** @var array{key: string, value: float|int|string, timestamp: int|string, step?: int|string} $metricData */
                             $metrics[] = Metric::fromArray($metricData);
                         }
