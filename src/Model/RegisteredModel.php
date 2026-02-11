@@ -7,18 +7,18 @@ namespace MLflow\Model;
 /**
  * Represents a registered model in MLflow Model Registry
  */
-class RegisteredModel
+readonly class RegisteredModel
 {
-    private string $name;
-    private ?string $description;
-    private ?int $creationTimestamp;
-    private ?int $lastUpdatedTimestamp;
+    public string $name;
+    public ?string $description;
+    public ?int $creationTimestamp;
+    public ?int $lastUpdatedTimestamp;
     /** @var array<ModelVersion>|null */
-    private ?array $latestVersions;
+    public ?array $latestVersions;
     /** @var array<ModelTag>|null */
-    private ?array $tags;
+    public ?array $tags;
     /** @var array<ModelAlias>|null */
-    private ?array $aliases;
+    public ?array $aliases;
 
     /**
      * @param string $name
@@ -138,21 +138,25 @@ class RegisteredModel
     }
 
     // Getters
+    /** @deprecated Access $name property directly */
     public function getName(): string
     {
         return $this->name;
     }
 
+    /** @deprecated Access $description property directly */
     public function getDescription(): ?string
     {
         return $this->description;
     }
 
+    /** @deprecated Access $creationTimestamp property directly */
     public function getCreationTimestamp(): ?int
     {
         return $this->creationTimestamp;
     }
 
+    /** @deprecated Access $lastUpdatedTimestamp property directly */
     public function getLastUpdatedTimestamp(): ?int
     {
         return $this->lastUpdatedTimestamp;
@@ -160,6 +164,7 @@ class RegisteredModel
 
     /**
      * @return ModelVersion[]|null
+     * @deprecated Access $latestVersions property directly
      */
     public function getLatestVersions(): ?array
     {
@@ -168,6 +173,7 @@ class RegisteredModel
 
     /**
      * @return ModelTag[]|null
+     * @deprecated Access $tags property directly
      */
     public function getTags(): ?array
     {
@@ -176,6 +182,7 @@ class RegisteredModel
 
     /**
      * @return array<ModelAlias>|null
+     * @deprecated Access $aliases property directly
      */
     public function getAliases(): ?array
     {
@@ -192,7 +199,7 @@ class RegisteredModel
         }
 
         foreach ($this->latestVersions as $version) {
-            if ($version->getCurrentStage() === $stage) {
+            if ($version->currentStage?->value === $stage) {
                 return $version;
             }
         }

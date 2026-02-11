@@ -7,14 +7,14 @@ namespace MLflow\Model;
 /**
  * Represents data associated with an MLflow run (metrics, params, tags)
  */
-class RunData
+readonly class RunData
 {
     /** @var array<Metric> */
-    private array $metrics;
+    public array $metrics;
     /** @var array<Param> */
-    private array $params;
+    public array $params;
     /** @var array<RunTag> */
-    private array $tags;
+    public array $tags;
 
     /**
      * @param array<Metric> $metrics
@@ -82,6 +82,7 @@ class RunData
     /**
      * Get metrics
      * @return Metric[]
+     * @deprecated Access $metrics property directly
      */
     public function getMetrics(): array
     {
@@ -91,6 +92,7 @@ class RunData
     /**
      * Get params
      * @return Param[]
+     * @deprecated Access $params property directly
      */
     public function getParams(): array
     {
@@ -100,6 +102,7 @@ class RunData
     /**
      * Get tags
      * @return RunTag[]
+     * @deprecated Access $tags property directly
      */
     public function getTags(): array
     {

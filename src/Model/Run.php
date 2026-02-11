@@ -10,12 +10,12 @@ use MLflow\Enum\LifecycleStage;
 /**
  * Represents an MLflow run
  */
-class Run
+readonly class Run
 {
-    private RunInfo $info;
-    private RunData $data;
+    public RunInfo $info;
+    public RunData $data;
     /** @var array<string, mixed>|null */
-    private ?array $inputs;
+    public ?array $inputs;
 
     /**
      * @param RunInfo $info
@@ -74,11 +74,13 @@ class Run
     }
 
     // Getters
+    /** @deprecated Access $info property directly */
     public function getInfo(): RunInfo
     {
         return $this->info;
     }
 
+    /** @deprecated Access $data property directly */
     public function getData(): RunData
     {
         return $this->data;
@@ -86,6 +88,7 @@ class Run
 
     /**
      * @return array<string, mixed>|null
+     * @deprecated Access $inputs property directly
      */
     public function getInputs(): ?array
     {
@@ -95,32 +98,32 @@ class Run
     // Convenience methods
     public function getRunId(): string
     {
-        return $this->info->getRunId();
+        return $this->info->runId;
     }
 
     public function getExperimentId(): string
     {
-        return $this->info->getExperimentId();
+        return $this->info->experimentId;
     }
 
     public function getStatus(): RunStatus
     {
-        return $this->info->getStatus();
+        return $this->info->status;
     }
 
     public function getStartTime(): int
     {
-        return $this->info->getStartTime();
+        return $this->info->startTime;
     }
 
     public function getEndTime(): ?int
     {
-        return $this->info->getEndTime();
+        return $this->info->endTime;
     }
 
     public function getArtifactUri(): ?string
     {
-        return $this->info->getArtifactUri();
+        return $this->info->artifactUri;
     }
 
     /**
@@ -128,7 +131,7 @@ class Run
      */
     public function getMetrics(): array
     {
-        return $this->data->getMetrics();
+        return $this->data->metrics;
     }
 
     /**
@@ -136,7 +139,7 @@ class Run
      */
     public function getParams(): array
     {
-        return $this->data->getParams();
+        return $this->data->params;
     }
 
     /**
@@ -144,16 +147,16 @@ class Run
      */
     public function getTags(): array
     {
-        return $this->data->getTags();
+        return $this->data->tags;
     }
 
     public function isActive(): bool
     {
-        return $this->info->getLifecycleStage() === LifecycleStage::ACTIVE;
+        return $this->info->lifecycleStage === LifecycleStage::ACTIVE;
     }
 
     public function isDeleted(): bool
     {
-        return $this->info->getLifecycleStage() === LifecycleStage::DELETED;
+        return $this->info->lifecycleStage === LifecycleStage::DELETED;
     }
 }
