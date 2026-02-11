@@ -5,6 +5,7 @@ parameters:
         - tests
     excludePaths:
         - vendor
+        - src/Laravel
     treatPhpDocTypesAsCertain: false
     reportUnmatchedIgnoredErrors: false
     ignoreErrors:

@@ -25,13 +25,34 @@ A complete, modern, fully-tested PHP client library for MLflow REST API with PHP
 composer require martijn/mlflow-php-client
 ```
 
+### Laravel Installation
+
+Laravel integration is **included**! The package will auto-register via package discovery.
+
+```bash
+# 1. Install package
+composer require martijn/mlflow-php-client
+
+# 2. Publish config (optional)
+php artisan vendor:publish --tag=mlflow-config
+
+# 3. Configure via .env
+MLFLOW_TRACKING_URI=http://localhost:5000
+MLFLOW_API_TOKEN=your-token-here
+```
+
+That's it! The ServiceProvider and Facade are auto-discovered.
+
 ## Requirements
 
 - PHP 8.4 or higher
 - MLflow server (2.0+)
 - Composer
+- Laravel 10+ or 11+ (optional, for Laravel integration)
 
 ## Quick Start
+
+### Standalone PHP
 
 ```php
 use MLflow\MLflowClient;
@@ -59,6 +80,45 @@ $run = $client->createRunBuilder($experiment->experimentId)
     ->start();
 
 echo "Run created: {$run->info->runId}\n";
+```
+
+### Laravel Quick Start
+
+```php
+use MLflow\Laravel\Facades\MLflow;
+
+// Use the Facade
+$experiment = MLflow::experiments()->create('my-experiment');
+
+$run = MLflow::createRunBuilder($experiment->experimentId)
+    ->withName('training-run-001')
+    ->withParam('learning_rate', '0.01')
+    ->withMetric('accuracy', 0.95)
+    ->start();
+
+// Or use dependency injection
+class MLTrainingController extends Controller
+{
+    public function __construct(
+        private \MLflow\MLflowClient $mlflow
+    ) {}
+
+    public function train(Request $request)
+    {
+        $run = $this->mlflow->createRunBuilder($request->experiment_id)
+            ->withName('laravel-training-' . now())
+            ->start();
+
+        // Training logic...
+
+        return response()->json(['run_id' => $run->info->runId]);
+    }
+}
+
+// Or use helper functions
+$client = mlflow();
+mlflow_log_metric($runId, 'accuracy', 0.95);
+mlflow_log_param($runId, 'learning_rate', '0.01');
 ```
 
 ## New Features in v2.0
