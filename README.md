@@ -1,6 +1,6 @@
 # MLflow PHP Client
 
-A modern, fully-typed Laravel package for MLflow REST API with PHP 8.4+, comprehensive testing utilities, and Laravel-native developer experience.
+Track, debug, and monitor your RAG applications and LLM integrations in PHP. Built for Laravel with comprehensive tracing utilities and Laravel-native developer experience.
 
 [![Tests](https://img.shields.io/badge/tests-73%20passing-brightgreen)]()
 [![PHPStan Level 9](https://img.shields.io/badge/PHPStan-level%209-brightgreen)]()
@@ -8,14 +8,24 @@ A modern, fully-typed Laravel package for MLflow REST API with PHP 8.4+, compreh
 [![Laravel 12](https://img.shields.io/badge/Laravel-12-red)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## Why MLflow for PHP?
+
+PHP powers applications that consume AI services, not train models. This package helps you:
+
+- 🔍 **Debug RAG pipelines** - Track retrieval quality, chunk relevance, and generation steps
+- 📊 **Monitor LLM costs** - Log OpenAI/Claude/Ollama API calls with tokens and latency
+- 🧪 **Test prompts** - Version, compare, and optimize prompt templates
+- 🐛 **Find issues fast** - Search traces for slow/failed LLM calls in production
+- 🎯 **Improve retrieval** - Analyze what documents are retrieved and why
+
 ## Features
 
-- ✅ **Complete MLflow API** - All REST endpoints (Experiments, Runs, Models, Traces, Artifacts, Datasets, Prompts, Webhooks)
+- ✅ **LLM Tracing** - Track OpenAI, Claude, Ollama, and custom LLM calls
+- ✅ **RAG Observability** - Monitor retrieval, reranking, and generation steps
+- ✅ **Prompt Management** - Version and compare prompt templates
 - ✅ **Laravel First** - Facades, Events, Commands, Testing fakes, Dependency Injection
-- ✅ **Fluent Builders** - Intuitive RunBuilder, ExperimentBuilder, ModelBuilder, TraceBuilder
-- ✅ **Testing Utilities** - `MLflow::fake()` with assertions for TDD
 - ✅ **Type Safety** - PHPStan Level 9, full type hints, contracts/interfaces
-- ✅ **Modern PHP 8.4** - Readonly classes, enums, named parameters
+- ✅ **Testing Utilities** - `MLflow::fake()` with assertions for TDD
 - ✅ **Production Ready** - Error handling, logging, caching, batch operations
 
 ## Installation
@@ -42,48 +52,186 @@ php artisan mlflow:test-connection
 ```env
 MLFLOW_TRACKING_URI=http://localhost:5000
 MLFLOW_API_TOKEN=your-token-here
-MLFLOW_DEFAULT_EXPERIMENT=
+MLFLOW_DEFAULT_EXPERIMENT=rag-application
 ```
 
 ## Quick Start
 
-### Basic Usage
+### Track an OpenAI API Call
+
+```php
+use MLflow\Laravel\Facades\MLflow;
+use OpenAI\Laravel\Facades\OpenAI;
+
+// Start a trace for this user query
+$trace = MLflow::createTraceBuilder()
+    ->withRequestMetadata('user_id', auth()->id())
+    ->withRequestMetadata('query', $userQuery)
+    ->start();
+
+// Make the LLM call
+$response = OpenAI::chat()->create([
+    'model' => 'gpt-4',
+    'messages' => [
+        ['role' => 'user', 'content' => $userQuery]
+    ],
+]);
+
+// Log the trace with costs and latency
+MLflow::traces()->logTrace([
+    'request_id' => $trace->requestId,
+    'timestamp_ms' => now()->timestamp * 1000,
+    'request' => ['messages' => [['role' => 'user', 'content' => $userQuery]]],
+    'response' => ['content' => $response->choices[0]->message->content],
+    'tags' => [
+        'model' => 'gpt-4',
+        'tokens_prompt' => $response->usage->promptTokens,
+        'tokens_completion' => $response->usage->completionTokens,
+        'cost_usd' => $this->calculateCost($response->usage),
+    ],
+]);
+```
+
+### Track a Complete RAG Pipeline
 
 ```php
 use MLflow\Laravel\Facades\MLflow;
 
-// Create experiment
-$experiment = MLflow::experiments()->create('my-experiment');
+class DocumentSearchService
+{
+    public function search(string $query): array
+    {
+        // Create experiment for RAG tracking
+        $experiment = MLflow::experiments()->create('document-rag');
 
-// Create run with builder
-$run = MLflow::createRunBuilder($experiment->experimentId)
-    ->withName('training-run-001')
-    ->withParam('learning_rate', '0.01')
-    ->withMetric('accuracy', 0.95)
-    ->withTag('model', 'transformer')
-    ->start();
+        // Start a run for this query
+        $run = MLflow::createRunBuilder($experiment->experimentId)
+            ->withName('rag-query-' . now()->format('Y-m-d-His'))
+            ->withParam('query', $query)
+            ->withParam('embedding_model', 'text-embedding-ada-002')
+            ->withParam('top_k', 5)
+            ->withTag('user_id', auth()->id())
+            ->start();
 
-// Log more metrics
-MLflow::runs()->logMetric($run->info->runId, 'loss', 0.05, step: 100);
+        // Step 1: Generate embedding
+        $embeddingStart = microtime(true);
+        $embedding = $this->generateEmbedding($query);
+        MLflow::runs()->logMetric($run->info->runId, 'embedding_latency_ms',
+            (microtime(true) - $embeddingStart) * 1000
+        );
+
+        // Step 2: Search vector database
+        $searchStart = microtime(true);
+        $documents = $this->vectorSearch($embedding, limit: 5);
+        MLflow::runs()->logMetric($run->info->runId, 'search_latency_ms',
+            (microtime(true) - $searchStart) * 1000
+        );
+        MLflow::runs()->logMetric($run->info->runId, 'documents_retrieved',
+            count($documents)
+        );
+
+        // Step 3: Rerank documents
+        $rerankedDocs = $this->rerank($query, $documents);
+        MLflow::runs()->logMetric($run->info->runId, 'avg_relevance_score',
+            collect($rerankedDocs)->avg('score')
+        );
+
+        // Step 4: Generate response with context
+        $llmStart = microtime(true);
+        $response = $this->generateResponse($query, $rerankedDocs);
+        MLflow::runs()->logMetric($run->info->runId, 'llm_latency_ms',
+            (microtime(true) - $llmStart) * 1000
+        );
+
+        // Log final results
+        MLflow::runs()->logParam($run->info->runId, 'response_length',
+            strlen($response)
+        );
+
+        return [
+            'response' => $response,
+            'documents' => $rerankedDocs,
+            'run_id' => $run->info->runId,
+        ];
+    }
+}
 ```
+
+### Prompt Versioning and Testing
+
+```php
+// Create a prompt template
+$prompt = MLflow::prompts()->createPrompt(
+    name: 'customer-support-v1',
+    template: 'You are a helpful customer support agent. Answer: {{question}}'
+);
+
+// Use the prompt
+$promptText = str_replace('{{question}}', $userQuestion, $prompt->template);
+$response = OpenAI::chat()->create([
+    'model' => 'gpt-4',
+    'messages' => [['role' => 'user', 'content' => $promptText]],
+]);
+
+// Track which prompt version was used
+MLflow::traces()->logTrace([
+    'request' => ['prompt_version' => 'customer-support-v1'],
+    'response' => ['content' => $response->choices[0]->message->content],
+]);
+
+// Later: compare v1 vs v2
+$results = MLflow::traces()->searchTraces(
+    experimentId: $experimentId,
+    filter: "tags.prompt_version = 'customer-support-v2'"
+);
+```
+
+### Debug Slow or Failed LLM Calls
+
+```php
+// Search for slow LLM calls
+$slowCalls = MLflow::runs()->search(
+    experimentIds: [$experimentId],
+    filter: "metrics.llm_latency_ms > 5000",
+    orderBy: ['metrics.llm_latency_ms DESC'],
+    maxResults: 10
+);
+
+foreach ($slowCalls['runs'] as $run) {
+    echo "Slow query: {$run->data->params->getByKey('query')->value}\n";
+    echo "Latency: {$run->data->metrics->getLatestByKey()['llm_latency_ms']->value}ms\n";
+}
+
+// Find failed API calls
+$failures = MLflow::traces()->searchTraces(
+    experimentId: $experimentId,
+    filter: "tags.status = 'error'"
+);
+```
+
+## Laravel Integration
 
 ### Dependency Injection
 
 ```php
 use MLflow\Contracts\MLflowClientContract;
-use MLflow\Contracts\RunApiContract;
+use MLflow\Contracts\TraceApiContract;
 
-class TrainingService
+class ChatService
 {
     public function __construct(
         private MLflowClientContract $mlflow,
-        private RunApiContract $runs
+        private TraceApiContract $traces
     ) {}
 
-    public function train(array $config): void
+    public function chat(string $message): string
     {
-        $run = $this->runs->create($this->experimentId);
-        // Training logic...
+        $trace = $this->traces->logTrace([
+            'request' => ['message' => $message],
+            'tags' => ['user_id' => auth()->id()],
+        ]);
+
+        // Chat logic...
     }
 }
 ```
@@ -93,32 +241,36 @@ class TrainingService
 ```php
 use MLflow\Laravel\Facades\MLflow;
 
-public function test_model_training()
+public function test_rag_search()
 {
     MLflow::fake();
 
-    // Your code that uses MLflow
-    $this->service->train(['lr' => 0.01]);
+    // Your RAG code
+    $result = $this->searchService->search('How do I reset my password?');
 
     // Assert MLflow interactions
-    MLflow::assertExperimentCreated('training');
-    MLflow::assertMetricLogged($runId, 'accuracy', 0.95);
-    MLflow::assertParamLogged($runId, 'learning_rate', '0.01');
+    MLflow::assertRunCreated();
+    MLflow::assertMetricLogged($result['run_id'], 'documents_retrieved', 5);
+    MLflow::assertParamLogged($result['run_id'], 'query', 'How do I reset my password?');
 }
 ```
 
 ### Events
 
 ```php
-use MLflow\Laravel\Events\{RunStarted, MetricLogged, ModelRegistered};
+use MLflow\Laravel\Events\{TraceLogged, RunStarted};
 
-Event::listen(RunStarted::class, function ($event) {
-    Log::info('Run started', ['run_id' => $event->run->info->runId]);
+Event::listen(TraceLogged::class, function ($event) {
+    // Send LLM usage to monitoring
+    if ($cost = $event->trace->tags['cost_usd'] ?? null) {
+        Metrics::increment('llm.cost', $cost);
+    }
 });
 
-Event::listen(MetricLogged::class, function ($event) {
-    Metrics::gauge('mlflow.metric', $event->value, [
-        'key' => $event->key,
+Event::listen(RunStarted::class, function ($event) {
+    Log::info('RAG query started', [
+        'run_id' => $event->run->info->runId,
+        'query' => $event->run->data->params['query'] ?? null,
     ]);
 });
 ```
@@ -129,14 +281,11 @@ Event::listen(MetricLogged::class, function ($event) {
 # List experiments
 php artisan mlflow:experiments:list
 
-# List with filter
-php artisan mlflow:experiments:list --filter="name LIKE '%prod%'" --max=20
+# View recent traces
+php artisan mlflow:traces:list --experiment=rag-application --max=20
 
 # Clear cache
 php artisan mlflow:clear-cache
-
-# Generate IDE helper
-php artisan mlflow:ide-helper
 ```
 
 ### Helper Functions
@@ -145,76 +294,48 @@ php artisan mlflow:ide-helper
 // Get client instance
 $client = mlflow();
 
-// Get experiment
-$experiment = mlflow_experiment('exp-123');
-
-// Get run
-$run = mlflow_run('run-456');
-
 // Quick logging
-mlflow_log_metric($runId, 'accuracy', 0.95);
-mlflow_log_param($runId, 'lr', '0.01');
-```
+mlflow_log_metric($runId, 'retrieval_score', 0.85);
+mlflow_log_param($runId, 'embedding_model', 'text-embedding-ada-002');
 
-### Custom Macros
-
-```php
-use MLflow\Builder\RunBuilder;
-
-// Define macro in AppServiceProvider
-RunBuilder::macro('withDefaults', function() {
-    return $this
-        ->withTag('environment', config('app.env'))
-        ->withTag('user', auth()->user()?->email ?? 'system');
-});
-
-// Use macro
-$run = MLflow::createRunBuilder($experimentId)
-    ->withDefaults()
-    ->start();
+// Get experiment/run
+$experiment = mlflow_experiment('exp-123');
+$run = mlflow_run('run-456');
 ```
 
 ## API Overview
 
 ```php
-// Experiments
-MLflow::experiments()->create('name')
-MLflow::experiments()->getById('exp-123')
-MLflow::experiments()->search($filter)
-
-// Runs
-MLflow::runs()->create($experimentId)
-MLflow::runs()->logMetric($runId, 'accuracy', 0.95)
-MLflow::runs()->logParameter($runId, 'lr', '0.01')
-MLflow::runs()->logBatch($runId, $metrics, $params)
-
-// Model Registry
-MLflow::modelRegistry()->createRegisteredModel('model-name')
-MLflow::modelRegistry()->createModelVersion('model', 's3://path')
-MLflow::modelRegistry()->transitionModelVersionStage('model', '1', 'Production')
-
-// Artifacts
-MLflow::artifacts()->listArtifacts($runId)
-MLflow::artifacts()->downloadArtifact($runId, 'model.pkl')
-
 // Traces (LLM tracking)
 MLflow::traces()->logTrace($traceData)
-MLflow::traces()->searchTraces($experimentId)
+MLflow::traces()->getById($requestId)
+MLflow::traces()->searchTraces($experimentId, $filter)
 
-// Datasets
-MLflow::datasets()->createDataset('training-data')
+// Prompts (Prompt management)
+MLflow::prompts()->createPrompt('name', 'template')
+MLflow::prompts()->getPrompt('name', $version)
+MLflow::prompts()->searchPrompts($filter)
+
+// Experiments & Runs (RAG pipeline tracking)
+MLflow::experiments()->create('rag-app')
+MLflow::runs()->create($experimentId)
+MLflow::runs()->logMetric($runId, 'relevance', 0.95)
+MLflow::runs()->logParameter($runId, 'top_k', '5')
+MLflow::runs()->search($experimentIds, $filter)
+
+// Datasets (Track training data)
+MLflow::datasets()->createDataset('faq-dataset')
 MLflow::datasets()->searchDatasets($experimentId)
-
-// Prompts (LLM)
-MLflow::prompts()->createPrompt('prompt-name', 'template')
-MLflow::prompts()->getPrompt('prompt-name')
 ```
 
 ## Documentation
 
-- [Testing Guide](docs/TESTING.md) - Comprehensive testing with fakes and assertions
-- [Integration Patterns](docs/INTEGRATION_PATTERNS.md) - Real-world Laravel integration examples
-- [Best Practices](docs/BEST_PRACTICES.md) - Performance, security, and optimization tips
+- [RAG Tracing Guide](docs/RAG_TRACING.md) - Complete RAG observability patterns
+- [LLM Integration](docs/LLM_INTEGRATION.md) - OpenAI, Claude, Ollama examples
+- [Testing Guide](docs/TESTING.md) - Test your LLM integrations
+- [Experiments & Training](docs/EXPERIMENTS_AND_TRAINING.md) - Model registry and experiment tracking
+- [Integration Patterns](docs/INTEGRATION_PATTERNS.md) - Real-world Laravel examples
+- [Best Practices](docs/BEST_PRACTICES.md) - Performance and optimization tips
 - [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
 
 ## Requirements
